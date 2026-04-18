@@ -112,3 +112,36 @@ Features: Homepage, Auth, Project Management, 12-stage Operational Chain, 11 doc
 - Demo video tags: added `flex-wrap` for proper wrapping
 - Verified via curl + screenshot: Bank of Georgia, IBAN GE29BG0000000541827200, SWIFT BAGAGE22, Citibank/JPMorgan intermediaries, PayPal ocean2joy@gmail.com — all render correctly
 - P2 (renderVideoPlayer Yandex/GDrive wrapper fix) skipped per user: "мы не будем использовать ссылки, только грузить физически видео"
+
+## Task #007: E2E 12-Stage Operational Chain with Role-Based Actions (Feb 18, 2026)
+**Context:** Prototype used Marcos case with hardcoded timestamps for demo. O2J2 implements the same flow but with REAL `datetime.now(timezone.utc)` timestamps captured at each action — for real new clients.
+
+### Backend (/app/backend/routes/project_actions.py — NEW)
+**11 role-specific action endpoints** replacing generic /advance:
+- Admin: activate-order (quote + details), send-invoice, start-production (notes), mark-delivered, confirm-payment (txn_id), complete
+- Client: sign-invoice, confirm-delivery, accept-work, mark-payment-sent (txn_id)
+
+**Deliverables subsystem:**
+- `POST /api/projects/{id}/deliverables` (admin, multipart) — chunked upload saves to `/app/backend/uploads/deliverables/{project_id}/`
+- `GET /api/projects/{id}/deliverables/{file_id}` — first client download auto-sets `files_accessed_at` (stage 7) + generates DWN doc
+- `DELETE /api/projects/{id}/deliverables/{file_id}` (admin, pre-delivery only)
+
+**Enforcement:** role checks (403), stage-gating (400 if previous stage missing), idempotency (400 if action already done).
+
+### Frontend
+- `StageActions.jsx` — contextual action buttons + modal dialogs based on (status, role). Handles numeric conversion for quote_amount.
+- `Deliverables.jsx` — upload button (admin), file list with download (blob download to preserve cookies) + delete (admin pre-delivery).
+- `ProjectDetails.jsx` — rewritten with quote block, paypal transaction ID badge, StageActions banner, Deliverables section, admin "Manual override" toggle (hidden generic /advance for QA).
+- `ClientDashboard.jsx` — status filter bar (13 chips), admin-variant heading ("All Projects" + awaiting-action counter), client name/email on cards for admin.
+
+### Documents (already worked, now auto-generated at each action)
+All 11 types (QUO/ORD/INV/PRD/DEL/DWN/ACC/INS/RCP/PAY/CRT) auto-generated with immutable numbers `{PROJECT_SHORT}-{DOC_CODE}-{SEQ:04d}-{YYMMDD}` — format preserved from prototype.
+
+### Testing
+- curl e2e: 16 steps from register → complete, all pass, PDF Invoice 13KB generated.
+- testing_agent_v3_fork iteration_3: backend 16/16, frontend all flows PASS, zero issues.
+
+### Next ideas
+- Email notifications on stage changes (SendGrid/Resend)
+- PayPal/Stripe checkout integration for stage 10 (now external)
+- Multi-deliverable ZIP bundle download
