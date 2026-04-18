@@ -68,3 +68,11 @@ Features: Homepage, Auth, Project Management, 12-stage Operational Chain, 11 doc
 2. Upload real demo videos
 3. Client-side signature/payment proof upload
 4. Export zip package for local hosting
+
+## Task #001: Design Fix (April 18, 2026)
+- Changed frontend from dark cinematic theme (#050A14 + #FF6B6B) to light ocean theme (#0ea5e9 + #f59e0b)
+- Files changed: index.css, Homepage.jsx, Navbar.jsx, Footer.jsx, Logo.jsx, App.css, tailwind.config.js
+- Deleted: design_guidelines.json
+- Backend: NOT touched (remains perfect)
+- Hero: Ocean gradient + SVG waves + "Dive Into an Ocean of Video Possibilities"
+- Note: Login, Register, Dashboard, ProjectDetails pages still have dark styles (separate task needed)

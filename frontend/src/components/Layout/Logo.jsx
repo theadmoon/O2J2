@@ -9,9 +9,9 @@ export default function Logo({ size = 'default' }) {
     large: 'text-2xl',
   };
   return (
-    <Link to="/" className={`flex items-center gap-2 font-serif tracking-tight ${sizes[size]}`} data-testid="logo-link">
-      <Waves className="w-6 h-6 text-[#FF6B6B]" />
-      <span className="text-[#F8FAFC] font-light">Ocean<span className="text-[#FF6B6B] font-semibold">2</span>Joy</span>
+    <Link to="/" className={`flex items-center gap-2 tracking-tight ${sizes[size]}`} data-testid="logo-link">
+      <Waves className="w-6 h-6 text-sky-500" />
+      <span className="text-gray-900 font-semibold">Ocean<span className="text-sky-500 font-bold">2</span>Joy</span>
     </Link>
   );
 }
