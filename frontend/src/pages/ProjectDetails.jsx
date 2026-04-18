@@ -2,13 +2,17 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
-import { formatDate } from '../utils/formatters';
+import { formatDate, formatCurrency } from '../utils/formatters';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
 import ChainTimeline from '../components/OperationalChain/ChainTimeline';
+import StageActions from '../components/OperationalChain/StageActions';
+import Deliverables from '../components/OperationalChain/Deliverables';
 import ChatContainer from '../components/Chat/ChatContainer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
-import { ArrowLeft, FileText, Hash, User, Mail, Briefcase } from 'lucide-react';
+import {
+  ArrowLeft, FileText, Hash, User, Mail, Briefcase, DollarSign, ShieldCheck,
+} from 'lucide-react';
 
 export default function ProjectDetails() {
   const { id } = useParams();
@@ -17,6 +21,7 @@ export default function ProjectDetails() {
   const [loading, setLoading] = useState(true);
   const [docPreview, setDocPreview] = useState(null);
   const [previewText, setPreviewText] = useState('');
+  const [showAdvanceFallback, setShowAdvanceFallback] = useState(false);
 
   useEffect(() => {
     loadProject();
@@ -69,6 +74,9 @@ export default function ProjectDetails() {
     );
   }
 
+  const isAdmin = user?.role === 'admin';
+  const quoteVisible = project.quote_amount > 0;
+
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
@@ -79,25 +87,19 @@ export default function ProjectDetails() {
 
         {/* Project Header */}
         <div className="border border-gray-200 bg-white rounded-lg p-6 mb-6 shadow-sm">
-          <div className="flex items-start justify-between mb-4">
-            <div>
+          <div className="flex items-start justify-between mb-4 gap-4 flex-wrap">
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-wider font-semibold text-sky-600 mb-1">Project</p>
-              <h1 className="text-2xl font-bold text-gray-900">{project.project_title}</h1>
+              <h1 className="text-2xl font-bold text-gray-900 break-words">{project.project_title}</h1>
             </div>
-            {user?.role === 'admin' && project.status !== 'completed' && (
-              <button
-                onClick={handleAdvance}
-                className="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white px-4 py-2 rounded-lg text-xs uppercase tracking-wider font-semibold transition-colors"
-                data-testid="advance-stage-button"
-              >
-                Advance Stage
-              </button>
-            )}
+            <span className="text-xs px-3 py-1.5 rounded-full font-medium bg-sky-100 text-sky-700 capitalize" data-testid="project-status-badge">
+              {project.status?.replace(/_/g, ' ')}
+            </span>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
             <div className="flex items-center gap-2 text-gray-600">
               <Hash className="w-4 h-4 text-sky-500" />
-              <span className="font-mono text-xs">{project.project_number}</span>
+              <span className="font-mono text-xs" data-testid="project-number">{project.project_number}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <User className="w-4 h-4 text-sky-500" />
@@ -105,27 +107,69 @@ export default function ProjectDetails() {
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <Mail className="w-4 h-4 text-sky-500" />
-              <span>{project.user_email}</span>
+              <span className="truncate">{project.user_email}</span>
             </div>
             <div className="flex items-center gap-2 text-gray-600">
               <Briefcase className="w-4 h-4 text-sky-500" />
-              <span>{project.service_type?.replace(/_/g, ' ')}</span>
+              <span className="capitalize">{project.service_type?.replace(/_/g, ' ')}</span>
             </div>
           </div>
           {project.brief && (
-            <p className="mt-4 text-sm text-gray-500 border-t border-gray-100 pt-4">{project.brief}</p>
+            <p className="mt-4 text-sm text-gray-500 border-t border-gray-100 pt-4" data-testid="project-brief">{project.brief}</p>
+          )}
+
+          {/* Quote & payment info (visible once order activated) */}
+          {quoteVisible && (
+            <div className="mt-4 border-t border-gray-100 pt-4 grid sm:grid-cols-3 gap-4 text-sm" data-testid="project-quote-block">
+              <div>
+                <p className="text-xs uppercase tracking-wider text-gray-500">Quote</p>
+                <p className="text-lg font-bold text-sky-600 mt-0.5 flex items-center gap-1"><DollarSign className="w-4 h-4" />{formatCurrency(project.quote_amount)}</p>
+              </div>
+              {project.quote_details && (
+                <div className="sm:col-span-2">
+                  <p className="text-xs uppercase tracking-wider text-gray-500">Details</p>
+                  <p className="text-gray-700 text-sm mt-0.5">{project.quote_details}</p>
+                </div>
+              )}
+              {project.paypal_transaction_id && (
+                <div className="sm:col-span-3 flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded px-3 py-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
+                  <span className="font-mono">Transaction ID: {project.paypal_transaction_id}</span>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
-        {/* Main Content: Timeline + Chat */}
+        {/* Stage actions banner */}
+        <div className="mb-6" data-testid="stage-actions-wrapper">
+          <StageActions project={project} user={user} onUpdated={(p) => setProject(p)} />
+        </div>
+
+        {/* Main Content: Timeline + Deliverables + Chat */}
         <div className="grid lg:grid-cols-5 gap-6">
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 space-y-6">
             <div className="border border-gray-200 bg-white rounded-lg p-6 shadow-sm">
               <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-sky-500" /> Operational Chain
               </h2>
               <ChainTimeline project={project} onViewDoc={handleViewDoc} />
+              {isAdmin && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">
+                    <input type="checkbox" checked={showAdvanceFallback} onChange={(e) => setShowAdvanceFallback(e.target.checked)} data-testid="admin-fallback-toggle" />
+                    <span>Show manual override (advance any stage)</span>
+                  </label>
+                  {showAdvanceFallback && project.status !== 'completed' && (
+                    <button onClick={handleAdvance} className="mt-2 text-xs px-3 py-1.5 rounded border border-gray-300 text-gray-600 hover:bg-gray-50" data-testid="advance-stage-button">
+                      Advance Stage (admin override)
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
+
+            <Deliverables project={project} user={user} onUpdated={(p) => setProject(p)} />
           </div>
           <div className="lg:col-span-2">
             <ChatContainer projectId={project.id} />
