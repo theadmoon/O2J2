@@ -42,37 +42,45 @@ export default function Homepage() {
   };
 
   const renderVideoPlayer = (video) => {
-    if (video.url && video.url.includes('yadi.sk')) {
-      return (
-        <a href={video.url} target="_blank" rel="noopener noreferrer" className="block relative group">
-          <img src={video.thumbnail || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'} alt={video.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition">
-            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center"><FaPlay className="text-sky-600 text-xl ml-1" /></div>
+    const getThumbnailUrl = (thumbnailUrl) => {
+      if (!thumbnailUrl) return null;
+      if (thumbnailUrl.startsWith('/uploads/')) return `${BACKEND_URL}${thumbnailUrl}`;
+      return thumbnailUrl;
+    };
+    const fullThumbnailUrl = getThumbnailUrl(video.thumbnail_url);
+
+    if (video.video_type === 'url') {
+      if (video.video_url.includes('disk.yandex') || video.video_url.includes('drive.google')) {
+        const platform = video.video_url.includes('disk.yandex') ? 'Яндекс.Диск' : 'Google Drive';
+        return (
+          <div className="relative cursor-pointer group aspect-video bg-gray-900 rounded-lg overflow-hidden" onClick={() => window.open(video.video_url, '_blank')}>
+            {fullThumbnailUrl && <img src={fullThumbnailUrl} alt={video.title} className="w-full h-full object-cover" />}
+            {!fullThumbnailUrl && <div className="w-full h-full bg-gradient-to-br from-sky-900 to-teal-900" />}
+            <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center group-hover:bg-black/50 transition">
+              <span className="text-4xl mb-2">🎥</span>
+              <p className="text-white font-semibold">Watch on {platform}</p>
+              <p className="text-sky-300 text-sm mt-1">Open Video→</p>
+            </div>
           </div>
-          <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Open Video</div>
-        </a>
-      );
-    }
-    if (video.url && video.url.includes('drive.google.com')) {
+        );
+      }
       return (
-        <a href={video.url} target="_blank" rel="noopener noreferrer" className="block relative group">
-          <img src={video.thumbnail || 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=600&q=80'} alt={video.title} className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition">
-            <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center"><FaPlay className="text-sky-600 text-xl ml-1" /></div>
-          </div>
-          <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Open Video</div>
-        </a>
+        <video controls className="w-full aspect-video rounded-lg bg-black" poster={fullThumbnailUrl}>
+          <source src={video.video_url} type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
       );
     }
     return (
-      <video controls className="w-full h-full object-cover" poster={video.thumbnail}>
-        <source src={video.url} type="video/mp4" />
+      <video controls className="w-full aspect-video rounded-lg bg-black" poster={fullThumbnailUrl}>
+        <source src={`${BACKEND_URL}${video.video_url}`} type="video/mp4" />
+        Your browser does not support the video tag.
       </video>
     );
   };
 
   return (
-    <div className="min-h-screen bg-white" data-testid="homepage">
+    <div className="min-h-screen bg-white">
 
       {/* Hero Section */}
       <section
@@ -114,7 +122,7 @@ export default function Homepage() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Our <span className="text-ocean">Video Services</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -125,7 +133,7 @@ export default function Homepage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {services.map((service, index) => (
               <div
-                key={service.id}
+                key={service.id || index}
                 className="card-ocean group hover:scale-105 transition-transform duration-300"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
@@ -162,56 +170,73 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* ====== 3. WHY CHOOSE US ====== */}
-      <section className="py-20 px-4 ocean-gradient-light" id="how-it-works" data-testid="why-choose-section">
+      {/* Why Choose Us */}
+      <section className="py-20 px-4 ocean-gradient-light">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-              Why Ride the <span className="text-ocean">Ocean2Joy Wave?</span>
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+              Why Ride the <span className="text-ocean">Ocean2joy Wave?</span>
             </h2>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              { icon: FaVideo, title: 'Professional Quality', desc: 'High-end equipment and experienced team for stunning results' },
-              { icon: FaMagic, title: 'Custom Made', desc: 'Every video tailored to your brand, message, and audience' },
-              { icon: FaRocket, title: 'Digital Delivery', desc: 'Fast electronic delivery with no physical shipping hassles' },
-              { icon: FaCheckCircle, title: 'Revisions Included', desc: 'We work with you until the final product is perfect' },
-            ].map((item, i) => (
-              <div key={i} className="text-center" data-testid={`why-card-${i}`}>
-                <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                  <item.icon className="text-3xl text-white" />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-600">{item.desc}</p>
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <FaVideo className="text-3xl text-white" />
               </div>
-            ))}
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Professional Quality</h3>
+              <p className="text-gray-600">High-end equipment and experienced team for stunning results</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <FaMagic className="text-3xl text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Custom Made</h3>
+              <p className="text-gray-600">Every project tailored to your specific vision and needs</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <FaRocket className="text-3xl text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Digital Delivery</h3>
+              <p className="text-gray-600">Fast electronic delivery through secure client portal</p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                <FaCheckCircle className="text-3xl text-white" />
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Revisions Included</h3>
+              <p className="text-gray-600">Multiple revision rounds to ensure your satisfaction</p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ====== 4. DEMO VIDEOS ====== */}
-      <section className="py-20 px-4" id="demo-videos" data-testid="demo-videos-section">
+      {/* Demo Videos Section */}
+      <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               See Our <span className="text-ocean">Work in Action</span>
             </h2>
             <p className="text-xl text-gray-600">Sample projects that showcase our capabilities</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {demoVideos.length > 0 ? (
-              demoVideos.map((video, idx) => (
-                <div key={idx} className="card-ocean" data-testid={`demo-video-${idx}`}>
+              demoVideos.map((video) => (
+                <div key={video.id || video.title} className="card-ocean">
                   <div className="aspect-video bg-gray-900 relative overflow-hidden">
                     {renderVideoPlayer(video)}
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{video.title}</h3>
                     <p className="text-gray-600">{video.description}</p>
-                    {video.tags && (
+                    {video.tags && video.tags.length > 0 && (
                       <div className="mt-3 flex items-center gap-2">
-                        {video.tags.map((tag, j) => (
-                          <span key={j} className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">{tag}</span>
+                        {video.tags.map((tag, idx) => (
+                          <span key={idx} className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">{tag}</span>
                         ))}
                       </div>
                     )}
@@ -220,10 +245,11 @@ export default function Homepage() {
               ))
             ) : (
               <>
-                <div className="card-ocean" data-testid="demo-vimeo-1">
+                {/* Demo Video 1 - Custom Production */}
+                <div className="card-ocean">
                   <div className="aspect-video bg-gray-900 relative overflow-hidden">
                     <iframe
-                      src="https://player.vimeo.com/video/824804225?background=1&autoplay=0&loop=0&byline=0&title=0"
+                      src="https://player.vimeo.com/video/115098447?background=1&autoplay=0&loop=0&byline=0&title=0"
                       className="w-full h-full"
                       frameBorder="0"
                       allow="autoplay; fullscreen; picture-in-picture"
@@ -241,7 +267,8 @@ export default function Homepage() {
                     </div>
                   </div>
                 </div>
-                <div className="card-ocean" data-testid="demo-vimeo-2">
+                {/* Demo Video 2 - AI Generated / Tech Demo */}
+                <div className="card-ocean">
                   <div className="aspect-video bg-gray-900 relative overflow-hidden">
                     <iframe
                       src="https://player.vimeo.com/video/342333493?background=1&autoplay=0&loop=0&byline=0&title=0"
@@ -265,6 +292,8 @@ export default function Homepage() {
               </>
             )}
           </div>
+
+          {/* Note about demo videos */}
           <div className="text-center mt-8">
             <p className="text-sm text-gray-500 italic">
               * Demo videos are representative examples. Your custom project will be created specifically for your needs.
@@ -273,11 +302,11 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* ====== 5. PAYMENTS SECTION ====== */}
-      <section className="py-20 px-4 bg-gray-50" data-testid="payments-section">
+      {/* Payments Section */}
+      <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
               Payments
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -288,7 +317,7 @@ export default function Homepage() {
           {paymentSettings ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Bank Transfer Card */}
-              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-sky-100" data-testid="payment-bank">
+              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-sky-100">
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center">
                     <span className="text-3xl">🏦</span>
@@ -331,14 +360,14 @@ export default function Homepage() {
                 {paymentSettings.qr_code_url && (
                   <div className="text-center">
                     <a href={`${BACKEND_URL}${paymentSettings.qr_code_url}`} target="_blank" rel="noopener noreferrer" className="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition text-sm font-semibold">
-                      View QR Code
+                      📱 View QR Code
                     </a>
                   </div>
                 )}
               </div>
 
               {/* PayPal Card */}
-              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-100" data-testid="payment-paypal">
+              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-100">
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
                     <span className="text-3xl">💳</span>
@@ -355,15 +384,15 @@ export default function Homepage() {
                   <div className="border-t border-blue-200 pt-3">
                     <p className="font-semibold text-gray-700 mb-2">Instructions:</p>
                     <ul className="space-y-1 text-gray-700 text-xs">
-                      <li>&#10003; Include your project reference number</li>
-                      <li>&#10003; Add invoice number in payment notes</li>
-                      <li>&#10003; Mark payment as completed in your portal</li>
-                      <li>&#10003; Production starts after confirmation</li>
+                      <li>✓ Include your project reference number</li>
+                      <li>✓ Add invoice number in payment notes</li>
+                      <li>✓ Mark payment as completed in your portal</li>
+                      <li>✓ Production starts after confirmation</li>
                     </ul>
                   </div>
                 </div>
                 <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 text-xs text-blue-900">
-                  <p className="font-semibold mb-1">Quick & Easy</p>
+                  <p className="font-semibold mb-1">💡 Quick & Easy</p>
                   <p>PayPal payments are typically confirmed faster than bank transfers.</p>
                 </div>
               </div>
@@ -376,9 +405,9 @@ export default function Homepage() {
           )}
 
           {/* How Payment Works */}
-          <div className="mt-8 bg-white rounded-xl shadow-md p-6 border-l-4 border-sky-500" data-testid="payment-info">
+          <div className="mt-8 bg-white rounded-xl shadow-md p-6 border-l-4 border-sky-500">
             <div className="flex items-start gap-4">
-              <div className="text-3xl">&#8505;&#65039;</div>
+              <div className="text-3xl">ℹ️</div>
               <div>
                 <h4 className="font-bold text-gray-900 mb-2">How Payment Works</h4>
                 <p className="text-gray-700 text-sm leading-relaxed">
@@ -392,24 +421,23 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* ====== 6. CTA SECTION ====== */}
-      <section className="py-20 px-4 ocean-gradient text-white" data-testid="cta-section">
+      {/* CTA Section */}
+      <section className="py-20 px-4 ocean-gradient text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+          <h2 className="text-3xl md:text-5xl font-bold mb-6">
             Ready to Make Waves?
           </h2>
           <p className="text-xl mb-8 text-sky-50">
             Start your video project today. Quick request form takes less than 2 minutes.
           </p>
           <Link
-            to={user && user.id ? "/projects/new" : "/register"}
+            to="/request"
             className="inline-block bg-yellow-400 text-gray-900 px-10 py-4 rounded-lg font-bold text-xl hover:bg-yellow-300 transition shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105"
-            data-testid="cta-button"
           >
             Get Started Now
           </Link>
           <p className="mt-6 text-sky-100 text-sm">
-            Or <Link to="/login" className="underline hover:text-white">contact us</Link> to discuss your project
+            Or <Link to="/contact" className="underline hover:text-white">contact us</Link> to discuss your project
           </p>
         </div>
       </section>
