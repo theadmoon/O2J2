@@ -73,7 +73,7 @@ export default function Navbar() {
             ) : (
               <>
                 <Link to="/login" className="text-gray-700 hover:text-sky-600 transition" data-testid="nav-login">Login</Link>
-                <Link to="/register" className="bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:from-sky-600 hover:to-teal-600 transition shadow-md" data-testid="nav-register">Start Project</Link>
+                <Link to="/register" className="bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:from-sky-600 hover:to-teal-600 transition shadow-lg" data-testid="nav-register">Start Project</Link>
               </>
             )}
           </nav>

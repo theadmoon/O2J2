@@ -160,7 +160,7 @@ export default function Homepage() {
                   </div>
                   <Link
                     to={`/services/${service.id}`}
-                    className="inline-flex items-center justify-center gap-2 w-full text-center bg-sky-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sky-700 transition-all duration-200 shadow-sm hover:shadow-md group"
+                    className="inline-flex items-center justify-center gap-2 w-full text-center bg-sky-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sky-700 transition-all duration-200 shadow-md hover:shadow-lg group"
                   >
                     Learn More
                     <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
