@@ -285,7 +285,7 @@ export default function Homepage() {
       {/* ====== 5. PAYMENTS SECTION ====== */}
       <section className="py-20 px-4 bg-gray-50" data-testid="payments-section">
         <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-12">
+          <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Payments
             </h2>
