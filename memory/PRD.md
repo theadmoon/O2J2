@@ -97,6 +97,12 @@ Features: Homepage, Auth, Project Management, 12-stage Operational Chain, 11 doc
 - Backend: added bank_location, beneficiary, qr_code_url to /api/payment-settings
 
 
+## Task #006: PayPal Email Correction (Feb 18, 2026)
+- The REAL "серьёзная ошибка": Homepage Payments блок показывал PayPal account `ocean2joy@gmail.com` (это contact email), а правильный PayPal аккаунт бизнеса — `302335809@postbox.ge` (подтверждено в прототипе `LegalInformation.js` строка 238)
+- Added `PAYPAL_EMAIL = "302335809@postbox.ge"` в `backend/utils/constants.py`
+- Updated `routes/public.py` `/api/payment-settings` → `"paypal_email": PAYPAL_EMAIL`
+- Verified via curl: `PayPal: 302335809@postbox.ge`
+
 ## Task #005: Deep Text Audit Homepage vs Prototype (Feb 18, 2026)
 - Found and fixed "серьёзная ошибка в тексте": /api/payment-settings returned FLAT schema while Homepage prototype expected NESTED `bank_transfer` object
 - Backend public.py: flat payment-settings → nested `bank_transfer.{beneficiary_bank_name, beneficiary_bank_location, beneficiary_bank_swift, beneficiary_iban, beneficiary_name, intermediary_bank_1.{name,swift}, intermediary_bank_2.{name,swift}, qr_code_url}`

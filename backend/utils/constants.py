@@ -5,6 +5,7 @@ TAX_ID = "302335809"
 COUNTRY_OF_REGISTRATION = "Georgia"
 BRAND_NAME = "Ocean2Joy Digital Video Production"
 CONTACT_EMAIL = "ocean2joy@gmail.com"
+PAYPAL_EMAIL = "302335809@postbox.ge"
 CONTACT_PHONE = "+995 555 375 032"
 LOCATION = "Tbilisi, Georgia"
 

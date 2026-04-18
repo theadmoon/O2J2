@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from utils.constants import (
     LEGAL_ENTITY_NAME, TAX_ID, COUNTRY_OF_REGISTRATION,
-    CONTACT_EMAIL, CONTACT_PHONE, LOCATION,
+    CONTACT_EMAIL, CONTACT_PHONE, LOCATION, PAYPAL_EMAIL,
 )
 
 router = APIRouter(prefix="/api", tags=["public"])
@@ -97,7 +97,7 @@ async def get_payment_settings():
             },
             "qr_code_url": None,
         },
-        "paypal_email": CONTACT_EMAIL,
+        "paypal_email": PAYPAL_EMAIL,
         "currency": "USD",
         "note": f"Tax ID: {TAX_ID}, {COUNTRY_OF_REGISTRATION}",
     }
