@@ -110,8 +110,8 @@ export default function Homepage() {
         </div>
       </section>
 
-      {/* ====== 2. SERVICES OVERVIEW ====== */}
-      <section className="py-20 px-4" id="services" data-testid="services-section">
+      {/* Services Overview */}
+      <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -121,13 +121,13 @@ export default function Homepage() {
               Three waves of creativity to bring your vision to life
             </p>
           </div>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {services.map((service) => (
+            {services.map((service, index) => (
               <div
                 key={service.id}
                 className="card-ocean group hover:scale-105 transition-transform duration-300"
-                style={{ animationDelay: `${services.indexOf(service) * 100}ms` }}
-                data-testid={`service-card-${service.id}`}
+                style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="aspect-video overflow-hidden">
                   <img
@@ -145,22 +145,15 @@ export default function Homepage() {
                   </p>
                   <div className="mb-4">
                     <span className="text-2xl font-bold text-sky-600">
-                      {service.pricing_model === 'per_minute'
-                        ? `$${service.base_price}/min`
-                        : `From $${service.base_price}`}
+                      {service.pricing_model === 'per_minute' ? `$${service.base_price}/min` : `From $${service.base_price}`}
                     </span>
-                    {service.price_description && (
-                      <p className="text-sm text-gray-500 mt-1">{service.price_description}</p>
-                    )}
+                    <p className="text-sm text-gray-500 mt-1">{service.price_description}</p>
                   </div>
                   <Link
                     to={`/services/${service.id}`}
-                    className="inline-flex items-center justify-center gap-2 w-full text-center bg-sky-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-sky-700 transition-all duration-200 shadow-md hover:shadow-lg group"
+                    className="inline-block w-full text-center bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-sky-600 hover:to-teal-600 transition"
                   >
                     Learn More
-                    <svg className="w-4 h-4 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
                   </Link>
                 </div>
               </div>
