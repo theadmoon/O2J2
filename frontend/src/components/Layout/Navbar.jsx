@@ -40,10 +40,10 @@ export default function Navbar() {
   return (
     <header className="bg-white shadow-md sticky top-0 z-50" data-testid="navbar">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
+        <div className="flex justify-between items-center h-24">
           <Logo />
 
-          <nav className="hidden md:flex items-center space-x-8 text-sm font-medium">
+          <nav className="hidden md:flex items-center space-x-8 text-base font-medium">
             {/* Public nav links */}
             {NAV_LINKS.map((link) => (
               <button
@@ -73,7 +73,7 @@ export default function Navbar() {
             ) : (
               <>
                 <Link to="/login" className="text-gray-700 hover:text-sky-600 transition" data-testid="nav-login">Login</Link>
-                <Link to="/register" className="bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-2.5 rounded-lg font-semibold hover:from-sky-600 hover:to-teal-600 transition" data-testid="nav-register">Start Project</Link>
+                <Link to="/register" className="bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:from-sky-600 hover:to-teal-600 transition shadow-md" data-testid="nav-register">Start Project</Link>
               </>
             )}
           </nav>

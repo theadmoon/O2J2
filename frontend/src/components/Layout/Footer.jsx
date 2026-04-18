@@ -34,21 +34,21 @@ const SOCIAL_LINKS = [
 
 export default function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-gray-300 pt-16 pb-8 px-6" data-testid="footer" id="contact">
+    <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-gray-300 py-12 px-4 sm:px-6 lg:px-8" data-testid="footer" id="contact">
       <div className="max-w-7xl mx-auto">
         {/* Main grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
           {/* Brand column */}
           <div className="lg:col-span-2">
             <Logo size="small" variant="dark" />
-            <p className="mt-4 text-sm text-gray-400 leading-relaxed max-w-xs">
+            <p className="mt-6 text-base text-gray-400 leading-relaxed max-w-xs mb-6">
               Professional Digital Video Production Services. Custom videos delivered electronically. No physical shipping.
             </p>
             {/* Social icons */}
-            <div className="flex items-center gap-4 mt-6">
+            <div className="flex space-x-4">
               {SOCIAL_LINKS.map((social) => (
                 <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-700 hover:bg-sky-600 rounded-full flex items-center justify-center transition-colors"
+                  className="w-10 h-10 bg-gray-700 hover:bg-sky-600 rounded-full flex items-center justify-center transition"
                   aria-label={social.label} data-testid={`social-${social.label.toLowerCase()}`}>
                   <social.icon className="text-sm text-white" />
                 </a>
@@ -64,8 +64,8 @@ export default function Footer() {
 
           {/* Services column */}
           <div>
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-white mb-4">Services</h4>
-            <ul className="space-y-2">
+            <h4 className="text-xl font-semibold text-white mb-4">Services</h4>
+            <ul className="space-y-2 text-base">
               {FOOTER_SERVICES.map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm text-gray-400 hover:text-sky-400 transition">{link.label}</a>
@@ -76,8 +76,8 @@ export default function Footer() {
 
           {/* Company column */}
           <div>
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-white mb-4">Company</h4>
-            <ul className="space-y-2">
+            <h4 className="text-xl font-semibold text-white mb-4">Company</h4>
+            <ul className="space-y-2 text-base">
               {FOOTER_COMPANY.map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm text-gray-400 hover:text-sky-400 transition">{link.label}</a>
@@ -88,8 +88,8 @@ export default function Footer() {
 
           {/* Policies column */}
           <div>
-            <h4 className="text-xs uppercase tracking-wider font-semibold text-white mb-4">Policies</h4>
-            <ul className="space-y-2">
+            <h4 className="text-xl font-semibold text-white mb-4">Policies</h4>
+            <ul className="space-y-2 text-base">
               {FOOTER_POLICIES.map((link) => (
                 <li key={link.label}>
                   <a href={link.href} className="text-sm text-gray-400 hover:text-sky-400 transition">{link.label}</a>
