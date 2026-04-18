@@ -61,39 +61,56 @@ body {
 }
 
 .card-ocean {
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 6px rgba(14, 165, 233, 0.1);
-  transition: all 0.3s ease;
-  overflow: hidden;
-  border: 1px solid rgba(14, 165, 233, 0.1);
+  @apply bg-white rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border border-sky-100;
 }
 
-.card-ocean:hover {
-  box-shadow: 0 10px 25px rgba(14, 165, 233, 0.2);
-  transform: translateY(-4px);
-}
-
-.card-ocean p:not(.text-center) {
-  text-align: left !important;
+.text-ocean {
+  background: linear-gradient(to right, #0284c7, #0d9488);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 @keyframes wave {
-  0%, 100% { transform: translateX(0); }
-  50% { transform: translateX(-25px); }
+  0% {
+    transform: translateX(0) translateY(0);
+  }
+  50% {
+    transform: translateX(-25%) translateY(-10px);
+  }
+  100% {
+    transform: translateX(0) translateY(0);
+  }
 }
 
 .animate-wave {
-  animation: wave 6s ease-in-out infinite;
+  animation: wave 10s ease-in-out infinite;
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-10px); }
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
 }
 
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+.card-ocean p:not(.text-center),
+.project-description,
+.info-field {
+  text-align: left !important;
+}
+
+.page-header,
+.section-title,
+.cta-section,
+.empty-state {
+  text-align: center;
 }
 
 .line-clamp-3 {
