@@ -4,10 +4,11 @@
 
 ## Директивы выполнены
 
-### Директива #1: ЛОГОТИП → SVG-ФАЙЛ
-- [x] Создан `/frontend/public/ocean2joy-logo.svg` (SVG с волной + текст Ocean2Joy)
-- [x] Компонент `Logo.jsx` переписан: `<img src="/ocean2joy-logo.svg">` вместо текста
-- [x] В Navbar: `<Link to="/" className="flex items-center relative -ml-16 -mt-3"><Logo variant="horizontal" className="h-36 w-auto" /></Link>`
+### Директива #1: ЛОГОТИП → SVG-ФАЙЛ ИЗ ПРОТОТИПА
+- [x] Скачаны ВСЕ 8 оригинальных файлов логотипа из прототипа GitHub (logo-horizontal.svg, logo-vertical.svg, + 6 PNG вариантов)
+- [x] Удалён мой нарисованный `ocean2joy-logo.svg`
+- [x] Logo.jsx использует оригинальные файлы: `/logo-horizontal.svg` (horizontal) / `/logo-vertical.svg` (vertical)
+- [x] В Navbar: `<Logo variant="horizontal" className="h-36 w-auto" />`
 
 ### Директива #2: ПУБЛИЧНЫЕ ССЫЛКИ → ПРЯМЫЕ МАРШРУТЫ
 - [x] Удалена константа `NAV_LINKS`
