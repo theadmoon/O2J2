@@ -1,107 +1,229 @@
-import React, { useState } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { HiMenu, HiX } from 'react-icons/hi';
+import { useState } from 'react';
 import Logo from './Logo';
-import { Menu, X, LogOut, LayoutDashboard, Plus } from 'lucide-react';
-
-const NAV_LINKS = [
-  { label: 'Services', href: '/#services' },
-  { label: 'How It Works', href: '/#how-it-works' },
-  { label: 'Our Work', href: '/#demo-videos' },
-  { label: 'Contact', href: '/#contact' },
-];
 
 export default function Navbar() {
-  const { user, logout } = useAuth();
+  const { user, logout, quickSwitch } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-  const [open, setOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
   };
 
-  const handleNavClick = (href) => {
-    setOpen(false);
-    if (href.startsWith('/#')) {
-      const id = href.substring(2);
-      if (location.pathname === '/') {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-      } else {
-        navigate('/');
-        setTimeout(() => {
-          document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
-        }, 300);
-      }
-    }
+  const handleQuickSwitch = async (role) => {
+    await quickSwitch(role);
+    navigate('/');
+    window.location.reload();
   };
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50" data-testid="navbar">
+    <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-24">
-          <Logo />
 
-          <nav className="hidden md:flex items-center space-x-8 text-base font-medium">
-            {/* Public nav links */}
-            {NAV_LINKS.map((link) => (
-              <button
-                key={link.label}
-                onClick={() => handleNavClick(link.href)}
-                className="text-gray-600 hover:text-sky-600 transition"
-                data-testid={`nav-${link.label.toLowerCase().replace(/\s+/g, '-')}`}
-              >
-                {link.label}
-              </button>
-            ))}
+          {/* Logo */}
+          <Link to="/" className="flex items-center relative -ml-16 -mt-3">
+            <Logo variant="horizontal" className="h-36 w-auto" style={{ objectFit: 'contain', display: 'block' }} />
+          </Link>
 
-            {/* Auth links */}
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-8 text-base font-medium">
+            <Link to="/services" className="text-gray-700 hover:text-sky-600 transition">
+              Services
+            </Link>
+            <Link to="/how-it-works" className="text-gray-700 hover:text-sky-600 transition">
+              How It Works
+            </Link>
+            <Link to="/contact" className="text-gray-700 hover:text-sky-600 transition">
+              Contact
+            </Link>
+
             {user && user.id ? (
               <>
-                <Link to="/dashboard" className="text-gray-700 hover:text-sky-600 transition flex items-center gap-1.5" data-testid="nav-dashboard">
-                  <LayoutDashboard className="w-4 h-4" /> Dashboard
+                <Link to="/dashboard" className="text-gray-700 hover:text-sky-600 font-medium transition">
+                  Dashboard
                 </Link>
-                <Link to="/projects/new" className="text-gray-700 hover:text-sky-600 transition flex items-center gap-1.5" data-testid="nav-new-project">
-                  <Plus className="w-4 h-4" /> New Project
-                </Link>
-                <button onClick={handleLogout} className="text-gray-700 hover:text-sky-600 transition flex items-center gap-1.5" data-testid="nav-logout">
-                  <LogOut className="w-4 h-4" /> Logout
+                {user?.role === 'admin' || user?.role === 'manager' ? (
+                  <Link to="/admin" className="text-gray-700 hover:text-sky-600 font-medium transition">
+                    Admin
+                  </Link>
+                ) : null}
+
+                {/* Quick Switch Buttons (TEMPORARY - for testing) */}
+                <div className="flex items-center gap-2 px-4 border-l border-r border-gray-300">
+                  <span className="text-xs text-gray-500">Quick Switch:</span>
+                  <button
+                    onClick={() => handleQuickSwitch('admin')}
+                    className={`text-xs px-3 py-1 rounded ${
+                      user?.role === 'admin'
+                        ? 'bg-sky-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                    title="Switch to Admin"
+                  >
+                    👤 Admin
+                  </button>
+                  <button
+                    onClick={() => handleQuickSwitch('client')}
+                    className={`text-xs px-3 py-1 rounded ${
+                      user?.email === 'mek110@yahoo.com'
+                        ? 'bg-teal-600 text-white'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                    title="Switch to Client (Marcos Knight)"
+                  >
+                    👥 Client
+                  </button>
+                </div>
+
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:text-sky-600 font-medium transition"
+                >
+                  Logout
                 </button>
-                <span className="text-xs text-gray-400 font-normal">{user.name}</span>
+                <div className="flex items-center space-x-2 pl-4 border-l border-gray-300">
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-r from-sky-500 to-teal-500 flex items-center justify-center text-white font-semibold">
+                    {user?.name?.[0]?.toUpperCase()}
+                  </div>
+                  <span className="text-sm text-gray-600">{user?.name}</span>
+                </div>
               </>
             ) : (
               <>
-                <Link to="/login" className="text-gray-700 hover:text-sky-600 transition" data-testid="nav-login">Login</Link>
-                <Link to="/register" className="bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-2.5 rounded-lg font-semibold text-sm hover:from-sky-600 hover:to-teal-600 transition shadow-lg" data-testid="nav-register">Start Project</Link>
+                <Link to="/login" className="text-gray-700 hover:text-sky-600 font-medium transition">
+                  Login
+                </Link>
+                <Link to="/request" className="btn-ocean text-sm">
+                  Start Project
+                </Link>
               </>
             )}
-          </nav>
+          </div>
 
-          <button className="md:hidden text-gray-700" onClick={() => setOpen(!open)} data-testid="nav-mobile-toggle">
-            {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {/* Mobile menu button */}
+          <div className="md:hidden">
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="text-gray-700 hover:text-sky-600"
+            >
+              {mobileMenuOpen ? <HiX className="text-2xl" /> : <HiMenu className="text-2xl" />}
+            </button>
+          </div>
         </div>
       </div>
-      {open && (
-        <div className="md:hidden bg-white border-t border-gray-100 px-6 py-4 space-y-3 shadow-lg">
-          {NAV_LINKS.map((link) => (
-            <button key={link.label} onClick={() => handleNavClick(link.href)} className="block text-gray-700 text-sm py-2 hover:text-sky-600 w-full text-left">{link.label}</button>
-          ))}
+
+      {/* Mobile Navigation */}
+      {mobileMenuOpen && (
+        <div className="md:hidden pb-4 space-y-2">
+          <Link
+            to="/services"
+            className="block px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Services
+          </Link>
+          <Link
+            to="/how-it-works"
+            className="block px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            How It Works
+          </Link>
+          <Link
+            to="/contact"
+            className="block px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+            onClick={() => setMobileMenuOpen(false)}
+          >
+            Contact
+          </Link>
+
           {user && user.id ? (
             <>
-              <Link to="/dashboard" onClick={() => setOpen(false)} className="block text-gray-700 text-sm py-2 hover:text-sky-600">Dashboard</Link>
-              <Link to="/projects/new" onClick={() => setOpen(false)} className="block text-gray-700 text-sm py-2 hover:text-sky-600">New Project</Link>
-              <button onClick={() => { handleLogout(); setOpen(false); }} className="block text-gray-700 text-sm py-2 hover:text-sky-600">Logout</button>
+              <Link
+                to="/dashboard"
+                className="block px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Dashboard
+              </Link>
+              {user?.role === 'admin' || user?.role === 'manager' ? (
+                <Link
+                  to="/admin"
+                  className="block px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  Admin
+                </Link>
+              ) : null}
+
+              {/* Quick Switch for Mobile */}
+              <div className="px-4 py-2 border-t border-b border-gray-200 my-2">
+                <p className="text-xs text-gray-500 mb-2">Quick Switch:</p>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      handleQuickSwitch('admin');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex-1 text-xs px-3 py-2 rounded ${
+                      user?.role === 'admin'
+                        ? 'bg-sky-600 text-white'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    👤 Admin
+                  </button>
+                  <button
+                    onClick={() => {
+                      handleQuickSwitch('client');
+                      setMobileMenuOpen(false);
+                    }}
+                    className={`flex-1 text-xs px-3 py-2 rounded ${
+                      user?.email === 'mek110@yahoo.com'
+                        ? 'bg-teal-600 text-white'
+                        : 'bg-gray-200 text-gray-700'
+                    }`}
+                  >
+                    👥 Client
+                  </button>
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  handleLogout();
+                  setMobileMenuOpen(false);
+                }}
+                className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+              >
+                Logout
+              </button>
             </>
           ) : (
             <>
-              <Link to="/login" onClick={() => setOpen(false)} className="block text-gray-700 text-sm py-2 hover:text-sky-600">Login</Link>
-              <Link to="/register" onClick={() => setOpen(false)} className="block text-sky-600 text-sm py-2 font-semibold">Start Project</Link>
+              <Link
+                to="/login"
+                className="block px-4 py-2 text-gray-700 hover:bg-sky-50 rounded"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Login
+              </Link>
+              <Link
+                to="/request"
+                className="block px-4 py-2 bg-gradient-to-r from-sky-500 to-teal-500 text-white rounded font-semibold text-center"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Start Project
+              </Link>
             </>
           )}
         </div>
       )}
-    </header>
+    </nav>
   );
 }

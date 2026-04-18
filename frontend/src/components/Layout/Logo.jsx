@@ -1,18 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Waves } from 'lucide-react';
 
-export default function Logo({ size = 'default', variant = 'light' }) {
-  const sizes = {
-    small: 'text-lg',
-    default: 'text-xl',
-    large: 'text-2xl',
-  };
-  const textColor = variant === 'dark' ? 'text-white' : 'text-gray-900';
+function Logo({ variant = 'vertical', className = '' }) {
+  const defaultClass = variant === 'horizontal' ? 'h-24' : 'h-32';
   return (
-    <Link to="/" className={`flex items-center gap-2 tracking-tight ${sizes[size]}`} data-testid="logo-link">
-      <Waves className="w-6 h-6 text-sky-500" />
-      <span className={`${textColor} font-semibold`}>Ocean<span className="text-sky-500 font-bold">2</span>Joy</span>
-    </Link>
+    <img
+      src="/ocean2joy-logo.svg"
+      alt="Ocean2Joy"
+      className={className || defaultClass}
+    />
   );
 }
+
+export default Logo;
