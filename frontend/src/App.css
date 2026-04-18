@@ -32,15 +32,6 @@ body {
    OCEAN2JOY THEME CLASSES
    ============================================ */
 
-:root {
-  --ocean-blue: #0ea5e9;
-  --ocean-dark: #0369a1;
-  --ocean-light: #7dd3fc;
-  --wave-teal: #14b8a6;
-  --joy-yellow: #fbbf24;
-  --coral: #f97316;
-}
-
 .ocean-gradient {
   background: linear-gradient(135deg, #0ea5e9 0%, #14b8a6 100%);
 }
