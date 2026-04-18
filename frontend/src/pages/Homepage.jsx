@@ -91,7 +91,7 @@ export default function Homepage() {
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-float" data-testid="hero-title">
-            Dive Into an <span className="text-yellow-300">Ocean</span> of Video Possibilities
+            Dive Into an <span className="text-ocean-gradient">Ocean</span> of Video Possibilities
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-sky-50">
             Professional video production services delivered digitally. From custom filming to AI-powered content.
@@ -300,7 +300,7 @@ export default function Homepage() {
               <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-sky-100" data-testid="payment-bank">
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center">
-                    <span className="text-3xl" role="img" aria-label="bank">&#127974;</span>
+                    <span className="text-3xl">🏦</span>
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
@@ -344,7 +344,7 @@ export default function Homepage() {
               <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-100" data-testid="payment-paypal">
                 <div className="flex items-center justify-center mb-4">
                   <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                    <span className="text-3xl" role="img" aria-label="card">&#128179;</span>
+                    <span className="text-3xl">💳</span>
                   </div>
                 </div>
                 <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">PayPal</h3>

@@ -15,14 +15,14 @@ async def get_services():
             "title": "Custom Video Production",
             "description": "Full-service video production from concept to final cut. Our team handles scripting, filming, and post-production.",
             "base_price": 1050,
-            "image_url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80",
+            "image_url": "https://images.unsplash.com/photo-1492619375914-88005aa9e8fb?auto=format&fit=crop&w=600&q=80",
         },
         {
             "id": "video-editing",
             "title": "Video Editing",
             "description": "Professional post-production services including color grading, sound design, motion graphics, and visual effects.",
             "base_price": 500,
-            "image_url": "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80",
+            "image_url": "https://images.unsplash.com/photo-1551818255-e6e10975bc17?auto=format&fit=crop&w=600&q=80",
         },
         {
             "id": "ai-video",

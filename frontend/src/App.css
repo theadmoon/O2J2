@@ -53,6 +53,13 @@ body {
   color: #0ea5e9;
 }
 
+.text-ocean-gradient {
+  background: linear-gradient(to right, #7dd3fc, #ffffff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 .card-ocean {
   background: white;
   border-radius: 12px;
