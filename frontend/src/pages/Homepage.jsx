@@ -91,7 +91,7 @@ export default function Homepage() {
         </div>
         <div className="relative z-10 max-w-4xl mx-auto px-4 text-center text-white">
           <h1 className="text-5xl md:text-7xl font-bold mb-6 animate-float" data-testid="hero-title">
-            Dive Into an <span className="text-ocean-gradient">Ocean</span> of Video Possibilities
+            Dive Into an <span className="text-yellow-400">Ocean</span> of Video Possibilities
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-sky-50">
             Professional video production services delivered digitally. From custom filming to AI-powered content.
@@ -172,7 +172,7 @@ export default function Homepage() {
       </section>
 
       {/* ====== 3. WHY CHOOSE US ====== */}
-      <section className="py-20 px-4 ocean-gradient-light" data-testid="why-choose-section">
+      <section className="py-20 px-4 ocean-gradient-light" id="how-it-works" data-testid="why-choose-section">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -199,7 +199,7 @@ export default function Homepage() {
       </section>
 
       {/* ====== 4. DEMO VIDEOS ====== */}
-      <section className="py-20 px-4" data-testid="demo-videos-section">
+      <section className="py-20 px-4" id="demo-videos" data-testid="demo-videos-section">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
@@ -327,6 +327,12 @@ export default function Homepage() {
                       <div className="text-xs text-gray-600 space-y-1">
                         <p>1. {paymentSettings.intermediary_bank}</p>
                         <p className="ml-3">SWIFT: {paymentSettings.intermediary_swift}</p>
+                        {paymentSettings.intermediary_bank_2 && (
+                          <>
+                            <p>2. {paymentSettings.intermediary_bank_2}</p>
+                            <p className="ml-3">SWIFT: {paymentSettings.intermediary_swift_2}</p>
+                          </>
+                        )}
                       </div>
                     </div>
                   )}
