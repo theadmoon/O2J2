@@ -85,3 +85,13 @@ Features: Homepage, Auth, Project Management, 12-stage Operational Chain, 11 doc
 - Zero dark theme references remaining (verified via grep)
 - Testing: 22/22 backend + all frontend flows = 100%
 - Backend: NOT touched (all APIs working)
+
+## Task #004: Visual Calibration to 99% (April 18, 2026)
+- Applied 30+ visual calibrations to Homepage.jsx (388 -> 423 lines)
+- All headings: text-4xl md:text-5xl (was text-3xl md:text-4xl)
+- All containers: max-w-7xl (was max-w-6xl), Payments max-w-5xl, CTA max-w-4xl
+- Services: aspect-video hover zoom, text-2xl prices, gradient "Learn More" buttons
+- Payments: emoji icons (🏦💳), bg-sky-50 structured blocks, Intermediary Banks, QR code conditional
+- Demo Videos: tags (Drama, Professional, HD Quality etc.), italic footnote
+- CTA: text-xl button, "Quick request form takes less than 2 minutes"
+- Backend: added bank_location, beneficiary, qr_code_url to /api/payment-settings

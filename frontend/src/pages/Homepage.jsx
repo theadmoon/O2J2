@@ -24,46 +24,48 @@ export default function Homepage() {
     try {
       const response = await axios.get(`${API}/services`);
       setServices(response.data);
-    } catch (e) { /* fallback: empty array */ }
+    } catch (e) { /* fallback */ }
   };
 
   const fetchDemoVideos = async () => {
     try {
       const response = await axios.get(`${API}/demo-videos`);
       setDemoVideos(response.data);
-    } catch (e) { /* fallback: empty array */ }
+    } catch (e) { /* fallback */ }
   };
 
   const fetchPaymentSettings = async () => {
     try {
       const response = await axios.get(`${API}/payment-settings`);
       setPaymentSettings(response.data);
-    } catch (e) { /* fallback: null */ }
+    } catch (e) { /* fallback */ }
   };
 
   const renderVideoPlayer = (video) => {
     if (video.url && video.url.includes('yadi.sk')) {
       return (
         <a href={video.url} target="_blank" rel="noopener noreferrer" className="block relative group">
-          <img src={video.thumbnail || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'} alt={video.title} className="w-full h-64 object-cover rounded-lg" />
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg group-hover:bg-black/40 transition">
+          <img src={video.thumbnail || 'https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=600&q=80'} alt={video.title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition">
             <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center"><FaPlay className="text-sky-600 text-xl ml-1" /></div>
           </div>
+          <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Open Video</div>
         </a>
       );
     }
     if (video.url && video.url.includes('drive.google.com')) {
       return (
         <a href={video.url} target="_blank" rel="noopener noreferrer" className="block relative group">
-          <img src={video.thumbnail || 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=600&q=80'} alt={video.title} className="w-full h-64 object-cover rounded-lg" />
-          <div className="absolute inset-0 bg-black/30 flex items-center justify-center rounded-lg group-hover:bg-black/40 transition">
+          <img src={video.thumbnail || 'https://images.unsplash.com/photo-1536240478700-b869070f9279?auto=format&fit=crop&w=600&q=80'} alt={video.title} className="w-full h-full object-cover" />
+          <div className="absolute inset-0 bg-black/30 flex items-center justify-center group-hover:bg-black/40 transition">
             <div className="w-16 h-16 bg-white/90 rounded-full flex items-center justify-center"><FaPlay className="text-sky-600 text-xl ml-1" /></div>
           </div>
+          <div className="absolute bottom-3 left-3 bg-black/60 text-white text-xs px-3 py-1 rounded-full">Open Video</div>
         </a>
       );
     }
     return (
-      <video controls className="w-full h-64 rounded-lg bg-black" poster={video.thumbnail}>
+      <video controls className="w-full h-full object-cover" poster={video.thumbnail}>
         <source src={video.url} type="video/mp4" />
       </video>
     );
@@ -115,33 +117,53 @@ export default function Homepage() {
 
       {/* ====== 2. SERVICES OVERVIEW ====== */}
       <section className="py-20 px-4" id="services" data-testid="services-section">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            Our <span className="text-ocean">Video Services</span>
-          </h2>
-          <p className="text-gray-500 text-center mb-12 max-w-2xl mx-auto">
-            Three waves of creativity to bring your vision to life
-          </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Our <span className="text-ocean">Video Services</span>
+            </h2>
+            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+              Three waves of creativity to bring your vision to life
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {services.map((service) => (
-              <div key={service.id} className="card-ocean group hover:scale-105 transition-transform" data-testid={`service-card-${service.id}`}>
-                <img
-                  src={service.image_url}
-                  alt={service.title}
-                  className="w-full h-48 object-cover"
-                />
+              <div
+                key={service.id}
+                className="card-ocean group hover:scale-105 transition-transform duration-300"
+                style={{ animationDelay: `${services.indexOf(service) * 100}ms` }}
+                data-testid={`service-card-${service.id}`}
+              >
+                <div className="aspect-video overflow-hidden">
+                  <img
+                    src={service.image_url}
+                    alt={service.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
                 <div className="p-6">
-                  <h3 className="text-xl font-bold text-gray-900 mb-2">{service.title}</h3>
-                  <p className="text-gray-500 text-sm mb-4 line-clamp-3">{service.description}</p>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sky-600 font-bold text-lg">From ${service.base_price}</span>
-                    <Link
-                      to={`/projects/new`}
-                      className="text-sky-600 hover:text-sky-800 font-semibold text-sm transition"
-                    >
-                      Learn More &rarr;
-                    </Link>
+                  <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-sky-600 transition">
+                    {service.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4 line-clamp-3">
+                    {service.description}
+                  </p>
+                  <div className="mb-4">
+                    <span className="text-2xl font-bold text-sky-600">
+                      {service.pricing_model === 'per_minute'
+                        ? `$${service.base_price}/min`
+                        : `From $${service.base_price}`}
+                    </span>
+                    {service.price_description && (
+                      <p className="text-sm text-gray-500 mt-1">{service.price_description}</p>
+                    )}
                   </div>
+                  <Link
+                    to={`/services/${service.id}`}
+                    className="inline-block w-full text-center bg-gradient-to-r from-sky-500 to-teal-500 text-white px-6 py-3 rounded-lg font-semibold hover:from-sky-600 hover:to-teal-600 transition"
+                  >
+                    Learn More
+                  </Link>
                 </div>
               </div>
             ))}
@@ -151,26 +173,25 @@ export default function Homepage() {
 
       {/* ====== 3. WHY CHOOSE US ====== */}
       <section className="py-20 px-4 ocean-gradient-light" data-testid="why-choose-section">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            Why Ride the <span className="text-ocean">Ocean2Joy Wave?</span>
-          </h2>
-          <p className="text-gray-500 text-center mb-12 max-w-2xl mx-auto">
-            We bring expertise, creativity, and reliability to every project
-          </p>
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Why Ride the <span className="text-ocean">Ocean2Joy Wave?</span>
+            </h2>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {[
-              { icon: FaVideo, title: 'Professional Quality', desc: 'High-end equipment and experienced team for cinematic results' },
+              { icon: FaVideo, title: 'Professional Quality', desc: 'High-end equipment and experienced team for stunning results' },
               { icon: FaMagic, title: 'Custom Made', desc: 'Every video tailored to your brand, message, and audience' },
               { icon: FaRocket, title: 'Digital Delivery', desc: 'Fast electronic delivery with no physical shipping hassles' },
               { icon: FaCheckCircle, title: 'Revisions Included', desc: 'We work with you until the final product is perfect' },
             ].map((item, i) => (
               <div key={i} className="text-center" data-testid={`why-card-${i}`}>
-                <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <div className="w-20 h-20 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                   <item.icon className="text-3xl text-white" />
                 </div>
-                <h3 className="text-lg font-bold text-gray-900 mb-2">{item.title}</h3>
-                <p className="text-gray-500 text-sm">{item.desc}</p>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">{item.title}</h3>
+                <p className="text-gray-600">{item.desc}</p>
               </div>
             ))}
           </div>
@@ -178,25 +199,28 @@ export default function Homepage() {
       </section>
 
       {/* ====== 4. DEMO VIDEOS ====== */}
-      <section className="py-20 px-4 bg-gray-50" data-testid="demo-videos-section">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            See Our <span className="text-ocean">Work in Action</span>
-          </h2>
-          <p className="text-gray-500 text-center mb-12 max-w-2xl mx-auto">
-            Watch samples of our recent video productions
-          </p>
+      <section className="py-20 px-4" data-testid="demo-videos-section">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              See Our <span className="text-ocean">Work in Action</span>
+            </h2>
+            <p className="text-xl text-gray-600">Sample projects that showcase our capabilities</p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             {demoVideos.length > 0 ? (
               demoVideos.map((video, idx) => (
                 <div key={idx} className="card-ocean" data-testid={`demo-video-${idx}`}>
-                  {renderVideoPlayer(video)}
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900">{video.title}</h3>
+                  <div className="aspect-video bg-gray-900 relative overflow-hidden">
+                    {renderVideoPlayer(video)}
+                  </div>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">{video.title}</h3>
+                    <p className="text-gray-600">{video.description}</p>
                     {video.tags && (
-                      <div className="flex flex-wrap gap-2 mt-2">
+                      <div className="mt-3 flex items-center gap-2">
                         {video.tags.map((tag, j) => (
-                          <span key={j} className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full">{tag}</span>
+                          <span key={j} className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">{tag}</span>
                         ))}
                       </div>
                     )}
@@ -205,122 +229,145 @@ export default function Homepage() {
               ))
             ) : (
               <>
-                <div className="card-ocean overflow-hidden" data-testid="demo-vimeo-1">
-                  <div className="relative" style={{ padding: '56.25% 0 0 0' }}>
+                <div className="card-ocean" data-testid="demo-vimeo-1">
+                  <div className="aspect-video bg-gray-900 relative overflow-hidden">
                     <iframe
-                      src="https://player.vimeo.com/video/115098447?h=0&title=0&byline=0&portrait=0"
-                      className="absolute inset-0 w-full h-full"
+                      src="https://player.vimeo.com/video/824804225?background=1&autoplay=0&loop=0&byline=0&title=0"
+                      className="w-full h-full"
                       frameBorder="0"
                       allow="autoplay; fullscreen; picture-in-picture"
                       allowFullScreen
-                      title="Demo Video 1"
-                    />
+                      title="Custom Video Production Demo"
+                    ></iframe>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900">Corporate Production</h3>
-                    <div className="flex gap-2 mt-2">
-                      <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full">Corporate</span>
-                      <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full">Professional</span>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">Professional Custom Video</h3>
+                    <p className="text-gray-600">Example of our custom video production with professional actors and crew</p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">Drama</span>
+                      <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded">Professional</span>
+                      <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">HD Quality</span>
                     </div>
                   </div>
                 </div>
-                <div className="card-ocean overflow-hidden" data-testid="demo-vimeo-2">
-                  <div className="relative" style={{ padding: '56.25% 0 0 0' }}>
+                <div className="card-ocean" data-testid="demo-vimeo-2">
+                  <div className="aspect-video bg-gray-900 relative overflow-hidden">
                     <iframe
-                      src="https://player.vimeo.com/video/342333493?h=0&title=0&byline=0&portrait=0"
-                      className="absolute inset-0 w-full h-full"
+                      src="https://player.vimeo.com/video/342333493?background=1&autoplay=0&loop=0&byline=0&title=0"
+                      className="w-full h-full"
                       frameBorder="0"
                       allow="autoplay; fullscreen; picture-in-picture"
                       allowFullScreen
-                      title="Demo Video 2"
-                    />
+                      title="AI-Generated Video Demo"
+                    ></iframe>
                   </div>
-                  <div className="p-4">
-                    <h3 className="font-bold text-gray-900">Creative Showcase</h3>
-                    <div className="flex gap-2 mt-2">
-                      <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full">Creative</span>
-                      <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded-full">Showcase</span>
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">AI-Powered Creation</h3>
+                    <p className="text-gray-600">Example of our cutting-edge AI-generated video content with digital effects</p>
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">AI Tech</span>
+                      <span className="bg-teal-100 text-teal-800 text-xs px-2 py-1 rounded">Innovative</span>
+                      <span className="bg-purple-100 text-purple-800 text-xs px-2 py-1 rounded">Digital</span>
                     </div>
                   </div>
                 </div>
               </>
             )}
           </div>
-          <p className="text-center text-gray-400 text-xs mt-8">
-            * Demo videos are representative examples of our production capabilities
-          </p>
+          <div className="text-center mt-8">
+            <p className="text-sm text-gray-500 italic">
+              * Demo videos are representative examples. Your custom project will be created specifically for your needs.
+            </p>
+          </div>
         </div>
       </section>
 
       {/* ====== 5. PAYMENTS SECTION ====== */}
-      <section className="py-20 px-4 bg-white" data-testid="payments-section">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            Secure <span className="text-ocean">Payment Options</span>
-          </h2>
-          <p className="text-gray-500 text-center mb-12 max-w-2xl mx-auto">
-            We accept multiple payment methods for your convenience
-          </p>
+      <section className="py-20 px-4 bg-gray-50" data-testid="payments-section">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+              Payments
+            </h2>
+            <p className="text-lg text-gray-600 max-w-3xl mx-auto">
+              Payment systems are currently not integrated. Payments are processed in semi-manual mode.
+              Once you confirm your order, you'll receive payment details directly in your project portal.
+            </p>
+          </div>
           {paymentSettings ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
               {/* Bank Transfer Card */}
-              <div className="card-ocean p-8" data-testid="payment-bank">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-sky-100 rounded-full flex items-center justify-center">
-                    <span className="text-sky-600 font-bold text-lg">$</span>
+              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-sky-100" data-testid="payment-bank">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-sky-400 to-teal-400 rounded-full flex items-center justify-center">
+                    <span className="text-3xl" role="img" aria-label="bank">&#127974;</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">Bank Transfer</h3>
                 </div>
-                <div className="space-y-3 text-sm">
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-500">Bank</span>
-                    <span className="font-medium text-gray-900">{paymentSettings.bank_name}</span>
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">
+                  Bank Transfer (SWIFT)
+                </h3>
+                <div className="bg-sky-50 rounded-lg p-4 mb-4 text-sm space-y-3">
+                  <div>
+                    <p className="font-semibold text-gray-700">Beneficiary Bank:</p>
+                    <p className="text-gray-900">{paymentSettings.bank_name}</p>
+                    <p className="text-gray-600 text-xs">{paymentSettings.bank_location}</p>
+                    <p className="text-gray-600 text-xs">SWIFT: {paymentSettings.swift}</p>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-500">Beneficiary</span>
-                    <span className="font-medium text-gray-900">{paymentSettings.account_holder}</span>
+                  <div className="border-t border-sky-200 pt-2">
+                    <p className="font-semibold text-gray-700">IBAN:</p>
+                    <p className="text-gray-900 font-mono text-base break-all">{paymentSettings.iban}</p>
                   </div>
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-500">IBAN</span>
-                    <span className="font-mono font-medium text-gray-900 text-xs">{paymentSettings.iban}</span>
-                  </div>
-                  <div className="flex justify-between py-2 border-b border-gray-100">
-                    <span className="text-gray-500">SWIFT</span>
-                    <span className="font-mono font-medium text-gray-900">{paymentSettings.swift}</span>
+                  <div className="border-t border-sky-200 pt-2">
+                    <p className="font-semibold text-gray-700">Beneficiary:</p>
+                    <p className="text-gray-900">{paymentSettings.beneficiary}</p>
                   </div>
                   {paymentSettings.intermediary_bank && (
-                    <>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-gray-500">Intermediary Bank</span>
-                        <span className="font-medium text-gray-900 text-right text-xs">{paymentSettings.intermediary_bank}</span>
+                    <div className="border-t border-sky-200 pt-2">
+                      <p className="font-semibold text-gray-700 mb-1">Intermediary Banks:</p>
+                      <div className="text-xs text-gray-600 space-y-1">
+                        <p>1. {paymentSettings.intermediary_bank}</p>
+                        <p className="ml-3">SWIFT: {paymentSettings.intermediary_swift}</p>
                       </div>
-                      <div className="flex justify-between py-2 border-b border-gray-100">
-                        <span className="text-gray-500">Intermediary SWIFT</span>
-                        <span className="font-mono font-medium text-gray-900">{paymentSettings.intermediary_swift}</span>
-                      </div>
-                    </>
+                    </div>
                   )}
                 </div>
+                {paymentSettings.qr_code_url && (
+                  <div className="text-center">
+                    <a href={`${BACKEND_URL}${paymentSettings.qr_code_url}`} target="_blank" rel="noopener noreferrer" className="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition text-sm font-semibold">
+                      View QR Code
+                    </a>
+                  </div>
+                )}
               </div>
 
               {/* PayPal Card */}
-              <div className="card-ocean p-8" data-testid="payment-paypal">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                    <span className="text-blue-600 font-bold text-lg">P</span>
+              <div className="bg-white rounded-xl shadow-lg p-6 border-2 border-blue-100" data-testid="payment-paypal">
+                <div className="flex items-center justify-center mb-4">
+                  <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                    <span className="text-3xl" role="img" aria-label="card">&#128179;</span>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900">PayPal</h3>
                 </div>
-                <p className="text-gray-500 text-sm mb-4">Send payment to:</p>
-                <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                  <p className="font-mono text-sky-600 font-medium">{paymentSettings.paypal_email}</p>
+                <h3 className="text-2xl font-bold text-center text-gray-900 mb-4">PayPal</h3>
+                <div className="bg-blue-50 rounded-lg p-4 mb-4 text-sm space-y-3">
+                  <div>
+                    <p className="font-semibold text-gray-700 mb-2">Send payment to:</p>
+                    <p className="text-gray-900 font-mono text-base break-all bg-white px-3 py-2 rounded border border-blue-200">
+                      {paymentSettings.paypal_email}
+                    </p>
+                  </div>
+                  <div className="border-t border-blue-200 pt-3">
+                    <p className="font-semibold text-gray-700 mb-2">Instructions:</p>
+                    <ul className="space-y-1 text-gray-700 text-xs">
+                      <li>&#10003; Include your project reference number</li>
+                      <li>&#10003; Add invoice number in payment notes</li>
+                      <li>&#10003; Mark payment as completed in your portal</li>
+                      <li>&#10003; Production starts after confirmation</li>
+                    </ul>
+                  </div>
                 </div>
-                <div className="space-y-2 text-sm text-gray-500">
-                  <p>1. Log in to your PayPal account</p>
-                  <p>2. Select "Send Money"</p>
-                  <p>3. Enter the email address above</p>
-                  <p>4. Specify the invoice amount in USD</p>
-                  <p>5. Add your project number in the note</p>
+                <div className="bg-blue-100 border border-blue-300 rounded-lg p-3 text-xs text-blue-900">
+                  <p className="font-semibold mb-1">Quick & Easy</p>
+                  <p>PayPal payments are typically confirmed faster than bank transfers.</p>
                 </div>
               </div>
             </div>
@@ -332,29 +379,16 @@ export default function Homepage() {
           )}
 
           {/* How Payment Works */}
-          <div className="bg-gray-50 rounded-xl p-8 max-w-3xl mx-auto" data-testid="payment-info">
-            <h3 className="text-lg font-bold text-gray-900 text-center mb-6">How Payment Works</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center text-sm">
+          <div className="mt-8 bg-white rounded-xl shadow-md p-6 border-l-4 border-sky-500" data-testid="payment-info">
+            <div className="flex items-start gap-4">
+              <div className="text-3xl">&#8505;&#65039;</div>
               <div>
-                <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-sky-600 font-bold">1</span>
-                </div>
-                <p className="text-gray-700 font-medium">Receive Invoice</p>
-                <p className="text-gray-400 text-xs mt-1">We send you a detailed invoice</p>
-              </div>
-              <div>
-                <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-sky-600 font-bold">2</span>
-                </div>
-                <p className="text-gray-700 font-medium">Make Payment</p>
-                <p className="text-gray-400 text-xs mt-1">Choose bank transfer or PayPal</p>
-              </div>
-              <div>
-                <div className="w-10 h-10 bg-sky-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-sky-600 font-bold">3</span>
-                </div>
-                <p className="text-gray-700 font-medium">Confirmation</p>
-                <p className="text-gray-400 text-xs mt-1">We confirm and begin production</p>
+                <h4 className="font-bold text-gray-900 mb-2">How Payment Works</h4>
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  After you accept our quote, you'll receive complete payment details in your client dashboard.
+                  Simply copy the payment information, make the transfer using your preferred method, and mark it as paid in your portal.
+                  We'll verify the payment and immediately start production. You'll receive transaction documents (Invoice, Receipt, Certificate) at each stage.
+                </p>
               </div>
             </div>
           </div>
@@ -363,20 +397,22 @@ export default function Homepage() {
 
       {/* ====== 6. CTA SECTION ====== */}
       <section className="py-20 px-4 ocean-gradient text-white" data-testid="cta-section">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">Ready to Make Waves?</h2>
-          <p className="text-xl text-sky-100 mb-8">
-            Start your video project today and let us bring your vision to life
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
+            Ready to Make Waves?
+          </h2>
+          <p className="text-xl mb-8 text-sky-50">
+            Start your video project today. Quick request form takes less than 2 minutes.
           </p>
           <Link
             to={user && user.id ? "/projects/new" : "/register"}
-            className="bg-yellow-400 text-gray-900 px-10 py-4 rounded-lg font-bold text-lg hover:bg-yellow-300 transition shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 inline-flex items-center justify-center"
+            className="inline-block bg-yellow-400 text-gray-900 px-10 py-4 rounded-lg font-bold text-xl hover:bg-yellow-300 transition shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105"
             data-testid="cta-button"
           >
-            <FaRocket className="mr-2" /> Get Started Now
+            Get Started Now
           </Link>
-          <p className="mt-6 text-sky-200 text-sm">
-            Or <Link to="/login" className="underline hover:text-white">contact us</Link> to discuss your project first
+          <p className="mt-6 text-sky-100 text-sm">
+            Or <Link to="/login" className="underline hover:text-white">contact us</Link> to discuss your project
           </p>
         </div>
       </section>

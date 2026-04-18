@@ -43,12 +43,15 @@ async def get_demo_videos():
 async def get_payment_settings():
     return {
         "bank_name": "Bank of Georgia",
+        "bank_location": "Tbilisi, Georgia",
         "account_holder": LEGAL_ENTITY_NAME,
+        "beneficiary": LEGAL_ENTITY_NAME,
         "iban": "GE29BG0000000541827200",
         "swift": "BAGAGE22",
         "intermediary_bank": "Deutsche Bank AG, Frankfurt",
         "intermediary_swift": "DEUTDEFF",
         "paypal_email": CONTACT_EMAIL,
         "currency": "USD",
+        "qr_code_url": None,
         "note": f"Tax ID: {TAX_ID}, {COUNTRY_OF_REGISTRATION}",
     }
