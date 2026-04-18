@@ -42,30 +42,30 @@ export default function NewProject() {
   };
 
   return (
-    <div className="min-h-screen bg-[#050A14]">
+    <div className="min-h-screen bg-gray-50">
       <Navbar />
-      <main className="pt-24 pb-16 px-6 max-w-2xl mx-auto" data-testid="new-project-page">
-        <p className="text-xs uppercase tracking-[0.2em] font-mono text-[#FF6B6B] mb-2">New Project</p>
-        <h1 className="font-serif text-3xl text-[#F8FAFC] mb-8 tracking-tight">Submit Your Project</h1>
+      <main className="pt-8 pb-16 px-6 max-w-2xl mx-auto" data-testid="new-project-page">
+        <p className="text-xs uppercase tracking-wider font-semibold text-sky-600 mb-2">New Project</p>
+        <h1 className="text-3xl font-bold text-gray-900 mb-8">Submit Your Project</h1>
 
-        {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 text-sm px-4 py-3 mb-6" data-testid="new-project-error">{error}</div>}
+        {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-6" data-testid="new-project-error">{error}</div>}
 
-        <form onSubmit={handleSubmit} className="space-y-6" data-testid="new-project-form">
+        <form onSubmit={handleSubmit} className="space-y-6 bg-white p-8 rounded-lg border border-gray-200 shadow-sm" data-testid="new-project-form">
           <div className="grid sm:grid-cols-2 gap-4">
             <div>
-              <Label className="text-slate-400 text-xs uppercase tracking-wider">Your Name</Label>
-              <Input disabled value={user?.name || ''} className="mt-1.5 bg-white/5 border-white/10 text-slate-400" data-testid="new-project-name" />
+              <Label className="text-gray-600 text-xs uppercase tracking-wider">Your Name</Label>
+              <Input disabled value={user?.name || ''} className="mt-1.5 bg-gray-50" data-testid="new-project-name" />
             </div>
             <div>
-              <Label className="text-slate-400 text-xs uppercase tracking-wider">Email</Label>
-              <Input disabled value={user?.email || ''} className="mt-1.5 bg-white/5 border-white/10 text-slate-400" data-testid="new-project-email" />
+              <Label className="text-gray-600 text-xs uppercase tracking-wider">Email</Label>
+              <Input disabled value={user?.email || ''} className="mt-1.5 bg-gray-50" data-testid="new-project-email" />
             </div>
           </div>
 
           <div>
-            <Label className="text-slate-400 text-xs uppercase tracking-wider">Service Type</Label>
+            <Label className="text-gray-600 text-xs uppercase tracking-wider">Service Type</Label>
             <Select value={serviceType} onValueChange={setServiceType}>
-              <SelectTrigger className="mt-1.5 bg-white/5 border-white/10 text-white" data-testid="new-project-service-type">
+              <SelectTrigger className="mt-1.5" data-testid="new-project-service-type">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -77,21 +77,21 @@ export default function NewProject() {
           </div>
 
           <div>
-            <Label className="text-slate-400 text-xs uppercase tracking-wider">Project Brief</Label>
+            <Label className="text-gray-600 text-xs uppercase tracking-wider">Project Brief</Label>
             <Textarea
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
               required
               rows={5}
-              className="mt-1.5 bg-white/5 border-white/10 text-white placeholder:text-slate-500 focus:border-[#FF6B6B] resize-none"
+              className="mt-1.5 resize-none"
               placeholder="Describe your project requirements, goals, timeline..."
               data-testid="new-project-brief"
             />
           </div>
 
           <div>
-            <Label className="text-slate-400 text-xs uppercase tracking-wider">Script / Reference File (optional)</Label>
-            <div className="mt-1.5 border border-dashed border-white/10 bg-white/5 p-6 text-center hover:border-[#FF6B6B]/30 transition-colors">
+            <Label className="text-gray-600 text-xs uppercase tracking-wider">Script / Reference File (optional)</Label>
+            <div className="mt-1.5 border-2 border-dashed border-gray-200 bg-gray-50 rounded-lg p-6 text-center hover:border-sky-300 transition-colors">
               <input
                 type="file"
                 accept=".pdf,.doc,.docx"
@@ -101,13 +101,13 @@ export default function NewProject() {
                 data-testid="new-project-script-input"
               />
               <label htmlFor="script-upload" className="cursor-pointer">
-                <Upload className="w-6 h-6 text-slate-500 mx-auto mb-2" />
-                <p className="text-sm text-slate-400">{script ? script.name : 'Click to upload PDF, DOC, DOCX'}</p>
+                <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                <p className="text-sm text-gray-500">{script ? script.name : 'Click to upload PDF, DOC, DOCX'}</p>
               </label>
             </div>
           </div>
 
-          <Button type="submit" disabled={loading} className="w-full bg-[#FF6B6B] hover:bg-[#ff5252] text-white h-11 flex items-center justify-center gap-2" data-testid="new-project-submit">
+          <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white h-11 rounded-lg flex items-center justify-center gap-2" data-testid="new-project-submit">
             {loading ? 'Submitting...' : <>Submit Project Request <ArrowRight className="w-4 h-4" /></>}
           </Button>
         </form>

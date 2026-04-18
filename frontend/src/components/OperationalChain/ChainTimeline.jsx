@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle2, Circle, FileText, Download, Eye } from 'lucide-react';
+import { CheckCircle2, Circle, Download, Eye } from 'lucide-react';
 import { formatDate } from '../../utils/formatters';
 
 const STAGES = [
@@ -44,20 +44,20 @@ export default function ChainTimeline({ project, onViewDoc }) {
           <div
             key={stage.n}
             className={`relative border-l-2 pl-6 pb-6 ${
-              completed ? 'border-[#FF6B6B]' : 'border-white/10'
+              completed ? 'border-sky-500' : 'border-gray-200'
             }`}
             data-testid={`timeline-stage-${stage.n}`}
           >
-            <div className={`absolute -left-[9px] top-0 ${completed ? 'text-[#FF6B6B]' : 'text-slate-600'}`}>
+            <div className={`absolute -left-[9px] top-0 ${completed ? 'text-sky-500' : 'text-gray-300'}`}>
               {completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
             </div>
 
-            <div className={`${isActive ? 'bg-[#FF6B6B]/5 border border-[#FF6B6B]/20' : ''} p-3 -mt-1`}>
+            <div className={`${isActive ? 'bg-sky-50 border border-sky-200 rounded-lg' : ''} p-3 -mt-1`}>
               <div className="flex items-center gap-3 mb-1">
-                <span className="font-mono text-xs text-slate-500">{String(stage.n).padStart(2, '0')}</span>
-                <span className={`text-sm ${completed ? 'text-[#F8FAFC]' : 'text-slate-500'}`}>{stage.name}</span>
+                <span className="font-mono text-xs text-gray-400">{String(stage.n).padStart(2, '0')}</span>
+                <span className={`text-sm ${completed ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>{stage.name}</span>
                 {completed && (
-                  <span className="text-xs text-slate-500 font-mono ml-auto">{formatDate(project[stage.field])}</span>
+                  <span className="text-xs text-gray-400 font-mono ml-auto">{formatDate(project[stage.field])}</span>
                 )}
               </div>
 
@@ -67,7 +67,7 @@ export default function ChainTimeline({ project, onViewDoc }) {
                     <div key={doc} className="flex items-center gap-1">
                       <button
                         onClick={() => onViewDoc(doc)}
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#FF6B6B] transition-colors px-2 py-1 bg-white/5 border border-white/10 hover:border-[#FF6B6B]/30"
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-sky-600 transition-colors px-2 py-1 bg-gray-50 border border-gray-200 rounded hover:border-sky-300"
                         data-testid={`doc-view-${doc}`}
                       >
                         <Eye className="w-3 h-3" /> {DOC_NAMES[doc] || doc}
@@ -76,7 +76,7 @@ export default function ChainTimeline({ project, onViewDoc }) {
                         href={`${API_URL}/api/projects/${project.id}/documents/${doc}/pdf`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#FF6B6B] transition-colors px-2 py-1 bg-white/5 border border-white/10 hover:border-[#FF6B6B]/30"
+                        className="flex items-center gap-1 text-xs text-gray-500 hover:text-sky-600 transition-colors px-2 py-1 bg-gray-50 border border-gray-200 rounded hover:border-sky-300"
                         data-testid={`doc-download-${doc}`}
                       >
                         <Download className="w-3 h-3" /> PDF
