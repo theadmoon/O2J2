@@ -9,6 +9,13 @@ import Register from "./pages/Register";
 import ClientDashboard from "./pages/ClientDashboard";
 import NewProject from "./pages/NewProject";
 import ProjectDetails from "./pages/ProjectDetails";
+import Services from "./pages/Services";
+import ServiceDetails from "./pages/ServiceDetails";
+import HowItWorks from "./pages/HowItWorks";
+import Contact from "./pages/Contact";
+import QuickRequest from "./pages/QuickRequest";
+import LegalInformation from "./pages/LegalInformation";
+import Policies from "./pages/Policies";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -40,6 +47,13 @@ function AppRoutes() {
   return (
     <Routes>
       <Route path="/" element={<><Navbar /><Homepage /></>} />
+      <Route path="/services" element={<><Navbar /><Services /></>} />
+      <Route path="/services/:serviceId" element={<><Navbar /><ServiceDetails /></>} />
+      <Route path="/how-it-works" element={<><Navbar /><HowItWorks /></>} />
+      <Route path="/contact" element={<><Navbar /><Contact /></>} />
+      <Route path="/request" element={<><Navbar /><QuickRequest /></>} />
+      <Route path="/legal" element={<><Navbar /><LegalInformation /></>} />
+      <Route path="/policies/:type" element={<><Navbar /><Policies /></>} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
       <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
