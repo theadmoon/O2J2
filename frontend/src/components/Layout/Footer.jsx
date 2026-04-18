@@ -1,115 +1,136 @@
-import React from 'react';
 import { Link } from 'react-router-dom';
+import { FaEnvelope, FaPhone, FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
 import Logo from './Logo';
-import { Mail, Phone, MapPin } from 'lucide-react';
-import { FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
 
-const FOOTER_SERVICES = [
-  { label: 'All Services', href: '/#services' },
-  { label: 'Custom Video', href: '/#services' },
-  { label: 'Video Editing', href: '/#services' },
-  { label: 'AI-Generated', href: '/#services' },
-];
-
-const FOOTER_COMPANY = [
-  { label: 'How It Works', href: '/#how-it-works' },
-  { label: 'Contact', href: '/#contact' },
-  { label: 'Terms of Service', href: '#' },
-  { label: 'Privacy Policy', href: '#' },
-  { label: 'Legal Info', href: '#' },
-];
-
-const FOOTER_POLICIES = [
-  { label: 'Digital Delivery Policy', href: '#' },
-  { label: 'Refund Policy', href: '#' },
-  { label: 'Revision Policy', href: '#' },
-];
-
-const SOCIAL_LINKS = [
-  { icon: FaFacebook, href: '#', label: 'Facebook' },
-  { icon: FaTwitter, href: '#', label: 'Twitter' },
-  { icon: FaInstagram, href: '#', label: 'Instagram' },
-  { icon: FaYoutube, href: '#', label: 'YouTube' },
-];
-
-export default function Footer() {
+function Footer() {
   return (
-    <footer className="bg-gradient-to-b from-gray-900 to-gray-800 text-gray-300 py-12 px-4 sm:px-6 lg:px-8" data-testid="footer" id="contact">
-      <div className="max-w-7xl mx-auto">
-        {/* Main grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12 mb-12">
-          {/* Brand column */}
-          <div className="lg:col-span-2">
-            <Logo size="small" variant="dark" />
-            <p className="mt-6 text-base text-gray-400 leading-relaxed max-w-xs mb-6">
-              Professional Digital Video Production Services. Custom videos delivered electronically. No physical shipping.
+    <footer className="bg-gradient-to-r from-gray-900 to-gray-800 text-white mt-20">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
+          {/* Brand */}
+          <div className="col-span-1 md:col-span-1">
+            <div className="relative -mt-10 -ml-12 -mb-8">
+              <Logo variant="vertical" className="max-h-64 w-auto" style={{ objectFit: 'contain', display: 'block' }} />
+            </div>
+            <p className="text-gray-400 text-base mb-6 max-w-xs leading-relaxed mt-6">
+              Where video dreams come true. Professional video production services delivered digitally.
             </p>
-            {/* Social icons */}
             <div className="flex space-x-4">
-              {SOCIAL_LINKS.map((social) => (
-                <a key={social.label} href={social.href} target="_blank" rel="noopener noreferrer"
-                  className="w-10 h-10 bg-gray-700 hover:bg-sky-600 rounded-full flex items-center justify-center transition"
-                  aria-label={social.label} data-testid={`social-${social.label.toLowerCase()}`}>
-                  <social.icon className="text-sm text-white" />
-                </a>
-              ))}
-            </div>
-            {/* Contact */}
-            <div className="mt-6 space-y-2 text-sm text-gray-400">
-              <div className="flex items-center gap-2"><Mail className="w-4 h-4 text-sky-400" /> ocean2joy@gmail.com</div>
-              <div className="flex items-center gap-2"><Phone className="w-4 h-4 text-sky-400" /> +995 555 375 032</div>
-              <div className="flex items-center gap-2"><MapPin className="w-4 h-4 text-sky-400" /> Tbilisi, Georgia</div>
+              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
+                <FaFacebook className="text-2xl" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
+                <FaTwitter className="text-2xl" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
+                <FaInstagram className="text-2xl" />
+              </a>
+              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
+                <FaYoutube className="text-2xl" />
+              </a>
             </div>
           </div>
 
-          {/* Services column */}
+          {/* Services */}
           <div>
-            <h4 className="text-xl font-semibold text-white mb-4">Services</h4>
+            <h3 className="text-xl font-semibold mb-4">Services</h3>
             <ul className="space-y-2 text-base">
-              {FOOTER_SERVICES.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-sm text-gray-400 hover:text-sky-400 transition">{link.label}</a>
-                </li>
-              ))}
+              <li>
+                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                  All Services
+                </Link>
+              </li>
+              <li>
+                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                  Custom Video Production
+                </Link>
+              </li>
+              <li>
+                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                  Video Editing
+                </Link>
+              </li>
+              <li>
+                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                  AI-Generated Videos
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Company column */}
+          {/* Company */}
           <div>
-            <h4 className="text-xl font-semibold text-white mb-4">Company</h4>
+            <h3 className="text-xl font-semibold mb-4">Company</h3>
             <ul className="space-y-2 text-base">
-              {FOOTER_COMPANY.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-sm text-gray-400 hover:text-sky-400 transition">{link.label}</a>
-                </li>
-              ))}
+              <li>
+                <Link to="/how-it-works" className="text-gray-400 hover:text-sky-400 transition">
+                  How It Works
+                </Link>
+              </li>
+              <li>
+                <Link to="/contact" className="text-gray-400 hover:text-sky-400 transition">
+                  Contact Us
+                </Link>
+              </li>
+              <li>
+                <Link to="/policies/terms" className="text-gray-400 hover:text-sky-400 transition">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link to="/policies/privacy" className="text-gray-400 hover:text-sky-400 transition">
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/legal" className="text-gray-400 hover:text-sky-400 transition">
+                  Legal Information
+                </Link>
+              </li>
             </ul>
           </div>
 
-          {/* Policies column */}
+          {/* Policies */}
           <div>
-            <h4 className="text-xl font-semibold text-white mb-4">Policies</h4>
+            <h3 className="text-xl font-semibold mb-4">Policies</h3>
             <ul className="space-y-2 text-base">
-              {FOOTER_POLICIES.map((link) => (
-                <li key={link.label}>
-                  <a href={link.href} className="text-sm text-gray-400 hover:text-sky-400 transition">{link.label}</a>
-                </li>
-              ))}
+              <li>
+                <Link to="/policies/digital_delivery" className="text-gray-400 hover:text-sky-400 transition">
+                  Digital Delivery
+                </Link>
+              </li>
+              <li>
+                <Link to="/policies/refund" className="text-gray-400 hover:text-sky-400 transition">
+                  Refund Policy
+                </Link>
+              </li>
+              <li>
+                <Link to="/policies/revision" className="text-gray-400 hover:text-sky-400 transition">
+                  Revision Policy
+                </Link>
+              </li>
             </ul>
-            {/* Legal */}
-            <div className="mt-6 text-xs text-gray-500 space-y-1">
-              <p>Individual Entrepreneur Vera Iambaeva</p>
-              <p>Tax ID: 302335809</p>
-              <p>Country of Registration: Georgia</p>
-            </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-gray-700 pt-6 text-center text-xs text-gray-500">
-          &copy; 2025-{new Date().getFullYear()} Ocean2Joy Digital Video Production. All rights reserved.
+        <div className="border-t border-gray-700 mt-8 pt-8 text-center text-sm text-gray-400">
+          <p className="mb-3">&copy; 2025-2026 Ocean2Joy Digital Video Production</p>
+          <p className="text-xs mb-2">
+            Individual Entrepreneur Vera Iambaeva | Tax ID: 302335809 | Georgia
+          </p>
+          <p className="text-xs mb-3">
+            <FaEnvelope className="inline mr-1" />
+            ocean2joy@gmail.com | 
+            <FaPhone className="inline mx-2" />
+            +995 555 375 032
+          </p>
+          <p className="text-xs text-gray-500">
+            Digital video production services delivered electronically. No physical products shipped.
+          </p>
         </div>
       </div>
     </footer>
   );
 }
+
+export default Footer;
