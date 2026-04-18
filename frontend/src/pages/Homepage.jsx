@@ -122,7 +122,7 @@ export default function Homepage() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Our <span className="text-ocean">Video Services</span>
             </h2>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
@@ -174,7 +174,7 @@ export default function Homepage() {
       <section className="py-20 px-4 ocean-gradient-light">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Why Ride the <span className="text-ocean">Ocean2joy Wave?</span>
             </h2>
           </div>
@@ -218,12 +218,12 @@ export default function Homepage() {
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               See Our <span className="text-ocean">Work in Action</span>
             </h2>
             <p className="text-xl text-gray-600">Sample projects that showcase our capabilities</p>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto">
             {demoVideos.length > 0 ? (
               demoVideos.map((video) => (
                 <div key={video.id || video.title} className="card-ocean">
@@ -234,7 +234,7 @@ export default function Homepage() {
                     <h3 className="text-xl font-bold text-gray-900 mb-2">{video.title}</h3>
                     <p className="text-gray-600">{video.description}</p>
                     {video.tags && video.tags.length > 0 && (
-                      <div className="mt-3 flex items-center gap-2">
+                      <div className="mt-3 flex items-center gap-2 flex-wrap">
                         {video.tags.map((tag, idx) => (
                           <span key={idx} className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">{tag}</span>
                         ))}
@@ -306,7 +306,7 @@ export default function Homepage() {
       <section className="py-20 px-4 bg-gray-50">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+            <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
               Payments
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
@@ -329,37 +329,31 @@ export default function Homepage() {
                 <div className="bg-sky-50 rounded-lg p-4 mb-4 text-sm space-y-3">
                   <div>
                     <p className="font-semibold text-gray-700">Beneficiary Bank:</p>
-                    <p className="text-gray-900">{paymentSettings.bank_name}</p>
-                    <p className="text-gray-600 text-xs">{paymentSettings.bank_location}</p>
-                    <p className="text-gray-600 text-xs">SWIFT: {paymentSettings.swift}</p>
+                    <p className="text-gray-900">{paymentSettings.bank_transfer.beneficiary_bank_name}</p>
+                    <p className="text-gray-600 text-xs">{paymentSettings.bank_transfer.beneficiary_bank_location}</p>
+                    <p className="text-gray-600 text-xs">SWIFT: {paymentSettings.bank_transfer.beneficiary_bank_swift}</p>
                   </div>
                   <div className="border-t border-sky-200 pt-2">
                     <p className="font-semibold text-gray-700">IBAN:</p>
-                    <p className="text-gray-900 font-mono text-base break-all">{paymentSettings.iban}</p>
+                    <p className="text-gray-900 font-mono text-base break-all">{paymentSettings.bank_transfer.beneficiary_iban}</p>
                   </div>
                   <div className="border-t border-sky-200 pt-2">
                     <p className="font-semibold text-gray-700">Beneficiary:</p>
-                    <p className="text-gray-900">{paymentSettings.beneficiary}</p>
+                    <p className="text-gray-900">{paymentSettings.bank_transfer.beneficiary_name}</p>
                   </div>
-                  {paymentSettings.intermediary_bank && (
-                    <div className="border-t border-sky-200 pt-2">
-                      <p className="font-semibold text-gray-700 mb-1">Intermediary Banks:</p>
-                      <div className="text-xs text-gray-600 space-y-1">
-                        <p>1. {paymentSettings.intermediary_bank}</p>
-                        <p className="ml-3">SWIFT: {paymentSettings.intermediary_swift}</p>
-                        {paymentSettings.intermediary_bank_2 && (
-                          <>
-                            <p>2. {paymentSettings.intermediary_bank_2}</p>
-                            <p className="ml-3">SWIFT: {paymentSettings.intermediary_swift_2}</p>
-                          </>
-                        )}
-                      </div>
+                  <div className="border-t border-sky-200 pt-2">
+                    <p className="font-semibold text-gray-700 mb-1">Intermediary Banks:</p>
+                    <div className="text-xs text-gray-600 space-y-1">
+                      <p>1. {paymentSettings.bank_transfer.intermediary_bank_1.name}</p>
+                      <p className="ml-3">SWIFT: {paymentSettings.bank_transfer.intermediary_bank_1.swift}</p>
+                      <p>2. {paymentSettings.bank_transfer.intermediary_bank_2.name}</p>
+                      <p className="ml-3">SWIFT: {paymentSettings.bank_transfer.intermediary_bank_2.swift}</p>
                     </div>
-                  )}
+                  </div>
                 </div>
-                {paymentSettings.qr_code_url && (
+                {paymentSettings.bank_transfer.qr_code_url && (
                   <div className="text-center">
-                    <a href={`${BACKEND_URL}${paymentSettings.qr_code_url}`} target="_blank" rel="noopener noreferrer" className="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition text-sm font-semibold">
+                    <a href={`${BACKEND_URL}${paymentSettings.bank_transfer.qr_code_url}`} target="_blank" rel="noopener noreferrer" className="inline-block bg-sky-600 text-white px-4 py-2 rounded-lg hover:bg-sky-700 transition text-sm font-semibold">
                       📱 View QR Code
                     </a>
                   </div>
@@ -424,7 +418,7 @@ export default function Homepage() {
       {/* CTA Section */}
       <section className="py-20 px-4 ocean-gradient text-white">
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className="text-3xl md:text-5xl font-bold mb-6">
+          <h2 className="text-4xl md:text-5xl font-bold mb-6">
             Ready to Make Waves?
           </h2>
           <p className="text-xl mb-8 text-sky-50">

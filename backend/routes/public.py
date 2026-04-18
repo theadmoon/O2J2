@@ -81,19 +81,24 @@ async def get_demo_videos():
 @router.get("/payment-settings")
 async def get_payment_settings():
     return {
-        "bank_name": "Bank of Georgia",
-        "bank_location": "Tbilisi, Georgia",
-        "account_holder": LEGAL_ENTITY_NAME,
-        "beneficiary": LEGAL_ENTITY_NAME,
-        "iban": "GE29BG0000000541827200",
-        "swift": "BAGAGE22",
-        "intermediary_bank": "Citibank N.A., New York",
-        "intermediary_swift": "CITIUS33",
-        "intermediary_bank_2": "JPMorgan Chase Bank National Association, New York",
-        "intermediary_swift_2": "CHASUS33",
+        "bank_transfer": {
+            "beneficiary_bank_name": "Bank of Georgia",
+            "beneficiary_bank_location": "Tbilisi, Georgia",
+            "beneficiary_bank_swift": "BAGAGE22",
+            "beneficiary_iban": "GE29BG0000000541827200",
+            "beneficiary_name": LEGAL_ENTITY_NAME,
+            "intermediary_bank_1": {
+                "name": "Citibank N.A., New York",
+                "swift": "CITIUS33",
+            },
+            "intermediary_bank_2": {
+                "name": "JPMorgan Chase Bank National Association, New York",
+                "swift": "CHASUS33",
+            },
+            "qr_code_url": None,
+        },
         "paypal_email": CONTACT_EMAIL,
         "currency": "USD",
-        "qr_code_url": None,
         "note": f"Tax ID: {TAX_ID}, {COUNTRY_OF_REGISTRATION}",
     }
 

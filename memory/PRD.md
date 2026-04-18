@@ -95,3 +95,14 @@ Features: Homepage, Auth, Project Management, 12-stage Operational Chain, 11 doc
 - Demo Videos: tags (Drama, Professional, HD Quality etc.), italic footnote
 - CTA: text-xl button, "Quick request form takes less than 2 minutes"
 - Backend: added bank_location, beneficiary, qr_code_url to /api/payment-settings
+
+
+## Task #005: Deep Text Audit Homepage vs Prototype (Feb 18, 2026)
+- Found and fixed "серьёзная ошибка в тексте": /api/payment-settings returned FLAT schema while Homepage prototype expected NESTED `bank_transfer` object
+- Backend public.py: flat payment-settings → nested `bank_transfer.{beneficiary_bank_name, beneficiary_bank_location, beneficiary_bank_swift, beneficiary_iban, beneficiary_name, intermediary_bank_1.{name,swift}, intermediary_bank_2.{name,swift}, qr_code_url}`
+- Frontend Homepage.jsx Payments block rewritten to use nested schema (prototype-identical)
+- All 5 H2 headings normalized to `text-4xl md:text-5xl` (Services, Why Choose Us, Demo Videos, Payments, CTA)
+- Demo Videos grid: added `max-w-5xl mx-auto` 
+- Demo video tags: added `flex-wrap` for proper wrapping
+- Verified via curl + screenshot: Bank of Georgia, IBAN GE29BG0000000541827200, SWIFT BAGAGE22, Citibank/JPMorgan intermediaries, PayPal ocean2joy@gmail.com — all render correctly
+- P2 (renderVideoPlayer Yandex/GDrive wrapper fix) skipped per user: "мы не будем использовать ссылки, только грузить физически видео"
