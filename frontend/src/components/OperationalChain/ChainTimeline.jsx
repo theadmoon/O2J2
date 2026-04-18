@@ -1,0 +1,94 @@
+import React from 'react';
+import { CheckCircle2, Circle, FileText, Download, Eye } from 'lucide-react';
+import { formatDate } from '../../utils/formatters';
+
+const STAGES = [
+  { n: 1, key: "submitted", name: "Submitted", field: "created_at", docs: ["quote_request"] },
+  { n: 2, key: "order_activated", name: "Order Activated", field: "order_activated_at", docs: ["order_confirmation"] },
+  { n: 3, key: "invoice_sent", name: "Invoice Sent", field: "invoice_sent_at", docs: ["invoice"] },
+  { n: 4, key: "invoice_signed", name: "Invoice Signed", field: "invoice_signed_at", docs: [] },
+  { n: 5, key: "production_started", name: "Production Started", field: "production_started_at", docs: ["production_notes"] },
+  { n: 6, key: "delivered", name: "Delivered", field: "delivered_at", docs: ["certificate_delivery"] },
+  { n: 7, key: "files_accessed", name: "Files Accessed", field: "files_accessed_at", docs: ["download_confirmation"] },
+  { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: [] },
+  { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["acceptance_act"] },
+  { n: 10, key: "payment_sent", name: "Payment Sent", field: "payment_marked_by_client_at", docs: ["payment_instructions", "receipt"] },
+  { n: 11, key: "payment_received", name: "Payment Received", field: "payment_confirmed_by_manager_at", docs: ["payment_confirmation"] },
+  { n: 12, key: "completed", name: "Completed", field: "completed_at", docs: ["certificate_completion"] },
+];
+
+const DOC_NAMES = {
+  quote_request: "Quote Request",
+  order_confirmation: "Order Confirmation",
+  invoice: "Invoice",
+  production_notes: "Production Notes",
+  certificate_delivery: "Certificate of Delivery",
+  download_confirmation: "Download Confirmation",
+  acceptance_act: "Acceptance Act",
+  payment_instructions: "Payment Instructions",
+  receipt: "Receipt",
+  payment_confirmation: "Payment Confirmation",
+  certificate_completion: "Certificate of Completion",
+};
+
+export default function ChainTimeline({ project, onViewDoc }) {
+  const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+  return (
+    <div className="space-y-1" data-testid="chain-timeline">
+      {STAGES.map((stage, idx) => {
+        const completed = !!project[stage.field];
+        const isActive = completed && (idx === STAGES.length - 1 || !project[STAGES[idx + 1]?.field]);
+
+        return (
+          <div
+            key={stage.n}
+            className={`relative border-l-2 pl-6 pb-6 ${
+              completed ? 'border-[#FF6B6B]' : 'border-white/10'
+            }`}
+            data-testid={`timeline-stage-${stage.n}`}
+          >
+            <div className={`absolute -left-[9px] top-0 ${completed ? 'text-[#FF6B6B]' : 'text-slate-600'}`}>
+              {completed ? <CheckCircle2 className="w-4 h-4" /> : <Circle className="w-4 h-4" />}
+            </div>
+
+            <div className={`${isActive ? 'bg-[#FF6B6B]/5 border border-[#FF6B6B]/20' : ''} p-3 -mt-1`}>
+              <div className="flex items-center gap-3 mb-1">
+                <span className="font-mono text-xs text-slate-500">{String(stage.n).padStart(2, '0')}</span>
+                <span className={`text-sm ${completed ? 'text-[#F8FAFC]' : 'text-slate-500'}`}>{stage.name}</span>
+                {completed && (
+                  <span className="text-xs text-slate-500 font-mono ml-auto">{formatDate(project[stage.field])}</span>
+                )}
+              </div>
+
+              {completed && stage.docs.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {stage.docs.map((doc) => (
+                    <div key={doc} className="flex items-center gap-1">
+                      <button
+                        onClick={() => onViewDoc(doc)}
+                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#FF6B6B] transition-colors px-2 py-1 bg-white/5 border border-white/10 hover:border-[#FF6B6B]/30"
+                        data-testid={`doc-view-${doc}`}
+                      >
+                        <Eye className="w-3 h-3" /> {DOC_NAMES[doc] || doc}
+                      </button>
+                      <a
+                        href={`${API_URL}/api/projects/${project.id}/documents/${doc}/pdf`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-1 text-xs text-slate-400 hover:text-[#FF6B6B] transition-colors px-2 py-1 bg-white/5 border border-white/10 hover:border-[#FF6B6B]/30"
+                        data-testid={`doc-download-${doc}`}
+                      >
+                        <Download className="w-3 h-3" /> PDF
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
