@@ -757,6 +757,236 @@ def _build_payment_instructions_txt(p: dict, doc_number: str) -> str:
     return "\n".join(lines)
 
 
+def _build_receipt_html(
+    p: dict, doc_number: str, base_css: str,
+    name: str, email: str, pn: str, title: str, amount: str, service_type_label: str,
+) -> str:
+    method_label = {
+        "paypal": "PayPal",
+        "bank_transfer": "Bank Transfer (SWIFT)",
+        "crypto": f"{CRYPTO_ASSET} on {CRYPTO_NETWORK}",
+    }.get(p.get("payment_method") or "paypal", "PayPal")
+
+    issued_dt = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else format_date_utc(p.get("payment_marked_by_client_at"))
+    payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
+    payment_confirmed_date = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else "(pending)"
+    tx_id = (p.get("paypal_transaction_id") or "").strip() or "(not provided)"
+
+    delivered_date = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "(pending)"
+    files_accessed_date = format_date_utc(p.get("files_accessed_at")) if p.get("files_accessed_at") else "(pending)"
+
+    dels = p.get("deliverables") or []
+    files_list = (
+        "<ul style='padding-left:20px;font-size:12px;line-height:1.7;margin:6px 0;'>"
+        + "".join(f"<li>{d.get('original_filename','(unnamed)')}</li>" for d in dels)
+        + "</ul>"
+    ) if dels else "<p style='font-size:12px;color:#888;font-style:italic;'>(no deliverables recorded)</p>"
+
+    payment_receiver_block = ""
+    method = p.get("payment_method") or "paypal"
+    if method == "paypal":
+        payment_receiver_block = (
+            "<tr><th>PayPal Account</th><td><code>" + PAYPAL_EMAIL + "</code></td></tr>"
+        )
+    elif method == "bank_transfer":
+        payment_receiver_block = (
+            f"<tr><th>Beneficiary Bank</th><td>{BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}</td></tr>"
+            f"<tr><th>SWIFT / IBAN</th><td><code>{BANK_BENEFICIARY_BANK_SWIFT}</code> / <code>{BANK_BENEFICIARY_IBAN}</code></td></tr>"
+        )
+    elif method == "crypto":
+        payment_receiver_block = (
+            f"<tr><th>Wallet ({CRYPTO_NETWORK})</th><td><code style='word-break:break-all;font-size:10px;'>{CRYPTO_WALLET_ADDRESS}</code></td></tr>"
+        )
+
+    return f"""<html><head>{base_css}</head><body>
+    <div class="header"><span class="doc-number">{doc_number}</span><h1>PAYMENT RECEIPT</h1>
+    <p style="font-size:11px;color:#666;margin:2px 0 0 0;">Official Payment Confirmation</p>
+    </div>
+
+    <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Receipt Number</th><td><code>{doc_number}</code></td></tr>
+    <tr><th>Date Issued</th><td>{issued_dt}</td></tr>
+    </table></div>
+
+    <div class="section"><h2>Payment Received From</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Client</th><td>{name}</td></tr>
+    <tr><th>Email</th><td>{email}</td></tr>
+    <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+    </table></div>
+
+    <div class="section"><h2>Payment Received By</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Recipient</th><td>{LEGAL_ENTITY_NAME}</td></tr>
+    <tr><th>Tax ID</th><td>{TAX_ID}</td></tr>
+    {payment_receiver_block}
+    <tr><th>Country</th><td>{COUNTRY_OF_REGISTRATION}</td></tr>
+    </table></div>
+
+    <div class="section"><h2>Payment Details</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Amount Received</th><td><strong>{amount}</strong></td></tr>
+    <tr><th>Payment Method</th><td>{method_label}</td></tr>
+    <tr><th>Payment Date</th><td>{payment_time}</td></tr>
+    <tr><th>Payment Confirmed</th><td>{payment_confirmed_date}</td></tr>
+    <tr><th>Transaction ID</th><td><code>{tx_id}</code></td></tr>
+    <tr><th>Payment Status</th><td><strong style="color:#047857;">COMPLETED</strong></td></tr>
+    </table></div>
+
+    <div class="section"><h2>Services Rendered</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Project Title</th><td>{title}</td></tr>
+    <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+    </table>
+    <p style="font-weight:600;margin-top:14px;margin-bottom:4px;font-size:12px;">Deliverables:</p>
+    {files_list}
+    </div>
+
+    <div class="section"><h2>Paid in Full</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Total Amount</th><td>{amount}</td></tr>
+    <tr><th>Amount Paid</th><td>{amount}</td></tr>
+    <tr><th>Balance Due</th><td><strong style="color:#047857;">$0.00 USD</strong></td></tr>
+    </table></div>
+
+    <div class="section"><h2>Delivery Confirmation</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Delivered On</th><td>{delivered_date}</td></tr>
+    <tr><th>Delivery Method</th><td>Secure client portal</td></tr>
+    <tr><th>Files Accessed</th><td>{files_accessed_date}</td></tr>
+    </table></div>
+
+    <div class="section">
+    <p style="font-size:12px;color:#047857;font-weight:600;">This receipt confirms full payment for digital video production services. No further payment is required.</p>
+    </div>
+
+    <div class="footer">
+    <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+    <p><strong>Brand:</strong> {BRAND_NAME}</p>
+    <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+    </div>
+    </body></html>"""
+
+
+def _build_receipt_txt(p: dict, doc_number: str) -> str:
+    name = p.get("user_name", "Client")
+    email = p.get("user_email", "")
+    pn = p.get("project_number", "")
+    title = p.get("project_title", "")
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    amount = format_currency(p.get("quote_amount", 0))
+    method_label = {
+        "paypal": "PAYPAL",
+        "bank_transfer": "BANK TRANSFER (SWIFT)",
+        "crypto": f"{CRYPTO_ASSET.upper()} ON {CRYPTO_NETWORK.upper()}",
+    }.get(p.get("payment_method") or "paypal", "PAYPAL")
+    issued_dt = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else format_date_utc(p.get("payment_marked_by_client_at"))
+    payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
+    payment_confirmed_date = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else "(pending)"
+    tx_id = (p.get("paypal_transaction_id") or "").strip() or "(not provided)"
+    delivered_date = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "(pending)"
+    files_accessed_date = format_date_utc(p.get("files_accessed_at")) if p.get("files_accessed_at") else "(pending)"
+    sep = "═" * 60
+
+    lines = [
+        "PAYMENT RECEIPT",
+        sep,
+        "",
+        "Official Payment Confirmation",
+        "",
+        f"Receipt Number: {doc_number}",
+        f"Date Issued: {issued_dt}",
+        "",
+        sep,
+        "",
+        "PAYMENT RECEIVED FROM:",
+        "",
+        f"Client: {name}",
+        f"Email: {email}",
+        f"Project Reference: {pn}",
+        "",
+        sep,
+        "",
+        "PAYMENT RECEIVED BY:",
+        "",
+        f"Recipient: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID}",
+    ]
+    method = p.get("payment_method") or "paypal"
+    if method == "paypal":
+        lines.append(f"PayPal Account: {PAYPAL_EMAIL}")
+    elif method == "bank_transfer":
+        lines.append(f"Beneficiary Bank: {BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}")
+        lines.append(f"SWIFT: {BANK_BENEFICIARY_BANK_SWIFT}")
+        lines.append(f"IBAN: {BANK_BENEFICIARY_IBAN}")
+    elif method == "crypto":
+        lines.append(f"Wallet ({CRYPTO_NETWORK}): {CRYPTO_WALLET_ADDRESS}")
+    lines.extend([
+        f"Country: {COUNTRY_OF_REGISTRATION}",
+        "",
+        sep,
+        "",
+        "PAYMENT DETAILS",
+        "",
+        f"Amount Received: {amount}",
+        f"Payment Method: {method_label}",
+        f"Payment Date: {payment_time}",
+        f"Payment Confirmed: {payment_confirmed_date}",
+        f"Transaction ID: {tx_id}",
+        "Payment Status: COMPLETED",
+        "",
+        sep,
+        "",
+        "SERVICES RENDERED:",
+        "",
+        f"Project Title: {title}",
+        f"Service Type: {service_type_label}",
+        "",
+        "Deliverables:",
+    ])
+    dels = p.get("deliverables") or []
+    if dels:
+        for d in dels:
+            lines.append(f"• {d.get('original_filename','(unnamed)')}")
+    else:
+        lines.append("(no deliverables recorded)")
+    lines.extend([
+        "",
+        sep,
+        "",
+        "PAID IN FULL",
+        "",
+        f"Total Amount: {amount}",
+        f"Amount Paid: {amount}",
+        "Balance Due: $0.00 USD",
+        "",
+        sep,
+        "",
+        "DELIVERY CONFIRMATION:",
+        "",
+        f"Delivered On: {delivered_date}",
+        "Delivery Method: Secure client portal",
+        f"Files Accessed: {files_accessed_date}",
+        "",
+        sep,
+        "",
+        "This receipt confirms full payment for digital video production services.",
+        "No further payment is required.",
+        "",
+        sep,
+        "",
+        f"Legal Entity: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID} | {COUNTRY_OF_REGISTRATION}",
+        f"Brand: {BRAND_NAME}",
+        "",
+        f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
+        LOCATION,
+        "",
+        sep,
+    ])
+    return "\n".join(lines)
+
+
 def _build_delivery_notes_html(
     p: dict, doc_number: str, base_css: str,
     name: str, email: str, pn: str, title: str,
@@ -1432,12 +1662,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
         "download_confirmation": _build_delivery_notes_html(p, doc_number, base_css, name, email, pn, title, service_type_label),
 
-        "receipt": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>RECEIPT</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>Receipt for payment on project <strong>{pn}</strong>.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Amount</th><td>{amount}</td></tr><tr><th>Project</th><td>{title}</td></tr><tr><th>Date</th><td>{date_created}</td></tr></table></div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "receipt": _build_receipt_html(p, doc_number, base_css, name, email, pn, title, amount, service_type_label),
     }
     return templates.get(doc_type, f"<html><body><h1>{doc_type}</h1><p>Document not found</p></body></html>")
 
@@ -1590,6 +1815,10 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
     # Payment Instructions — stage 9 after Accept Work
     if doc_type == "payment_instructions":
         return _build_payment_instructions_txt(p, doc_number)
+
+    # Receipt — stage 10 after client marks payment sent
+    if doc_type == "receipt":
+        return _build_receipt_txt(p, doc_number)
 
     # Special rich template for invoice (matches Marcos's format)
     if doc_type == "invoice":
