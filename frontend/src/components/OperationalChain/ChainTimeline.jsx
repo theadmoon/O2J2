@@ -11,8 +11,8 @@ const STAGES = [
   { n: 5, key: "production_started", name: "Production Started", field: "production_started_at", docs: ["production_notes"] },
   { n: 6, key: "delivered", name: "Delivered", field: "delivered_at", docs: ["download_confirmation"] },
   { n: 7, key: "files_accessed", name: "Files Accessed", field: "files_accessed_at", docs: ["certificate_delivery"] },
-  { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: ["acceptance_act"] },
-  { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["payment_instructions"] },
+  { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: [] },
+  { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["acceptance_act", "payment_instructions"] },
   { n: 10, key: "payment_sent", name: "Payment Sent", field: "payment_marked_by_client_at", docs: ["receipt"] },
   { n: 11, key: "payment_received", name: "Payment Received", field: "payment_confirmed_by_manager_at", docs: ["payment_confirmation"] },
   { n: 12, key: "completed", name: "Completed", field: "completed_at", docs: ["certificate_completion"] },
@@ -113,9 +113,9 @@ export default function ChainTimeline({ project, onViewDoc }) {
                 )}
               </div>
 
-              {completed && stage.docs.length > 0 && (
+              {stage.docs.filter((doc) => completed || project.document_numbers?.[doc]).length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {stage.docs.map((doc) => (
+                  {stage.docs.filter((doc) => completed || project.document_numbers?.[doc]).map((doc) => (
                     <div key={doc} className="flex items-center gap-1">
                       <button
                         onClick={() => onViewDoc(doc)}

@@ -339,8 +339,9 @@ async def client_confirm_delivery(
             "signed_delivery_cert_size": size,
         },
     )
-    # Pre-generate the acceptance_act document number so client can download & sign it
+    # Pre-generate doc numbers for stage 9 so client can download & sign them
     await get_or_generate_document_number(db, updated, "acceptance_act")
+    await get_or_generate_document_number(db, updated, "payment_instructions")
     return await _set_timestamp_and_return(db, project_id, {})
 
 

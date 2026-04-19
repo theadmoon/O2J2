@@ -77,7 +77,7 @@ export default function StageActions({ project, user, onUpdated }) {
   const openAcceptWork = () => setDialog({
     key: 'accept-work',
     title: 'Accept Work & Upload Signed Acceptance Act',
-    description: 'Download the Acceptance Act from the Delivery Confirmed stage, sign it, and upload the signed copy (PDF, JPG or PNG). This legally confirms the work is accepted as complete. After submission you will receive Payment Instructions.',
+    description: 'Download the Acceptance Act from the Work Accepted stage below, sign it, and upload the signed copy (PDF, JPG or PNG). This legally confirms the work is accepted as complete. Payment Instructions will appear on the same stage once submitted.',
     submit: 'Accept Work',
     icon: ThumbsUp,
     fields: [
