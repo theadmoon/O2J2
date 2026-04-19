@@ -300,7 +300,6 @@ def _build_certificate_delivery_html(
     prod_start = format_date_utc(p.get("production_started_at")) if p.get("production_started_at") else "—"
     prod_end = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "—"
     production_period = f"{prod_start} → {prod_end}"
-    brief_text = (p.get("brief") or "").strip() or "(not provided)"
 
     dels = p.get("deliverables") or []
     if dels:
@@ -339,8 +338,6 @@ def _build_certificate_delivery_html(
     <tr><th>Project Title</th><td>{title}</td></tr>
     <tr><th>Production Period</th><td>{production_period}</td></tr>
     </table>
-    <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Brief:</p>
-    <div style="font-size:12px;border:1px solid #e5e7eb;padding:12px;background:#fafafa;border-radius:4px;white-space:pre-wrap;">{brief_text}</div>
     </div>
 
     <div class="section"><h2>Digital Deliverables Transferred</h2>
@@ -425,7 +422,6 @@ def _build_certificate_delivery_txt(p: dict, doc_number: str) -> str:
     confirmed_dt = _fmt_datetime_utc(p.get("delivery_confirmed_at")) or "(pending)"
     prod_start = format_date_utc(p.get("production_started_at")) if p.get("production_started_at") else "—"
     prod_end = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "—"
-    brief_text = (p.get("brief") or "").strip() or "(not provided)"
     sep = "═" * 60
 
     lines = [
@@ -449,9 +445,6 @@ def _build_certificate_delivery_txt(p: dict, doc_number: str) -> str:
         f"Service Type: {service_type_label}",
         f"Project Title: {title}",
         f"Production Period: {prod_start} → {prod_end}",
-        "",
-        "Brief:",
-        brief_text,
         "",
         sep,
         "",

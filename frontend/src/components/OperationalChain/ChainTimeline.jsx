@@ -1,5 +1,6 @@
 import React from 'react';
-import { CheckCircle2, Circle, Download, Eye } from 'lucide-react';
+import api from '../../utils/api';
+import { CheckCircle2, Circle, Download, Eye, FileCheck2, ExternalLink, FileVideo } from 'lucide-react';
 import { formatDateTime } from '../../utils/formatters';
 
 const STAGES = [
@@ -33,6 +34,32 @@ const DOC_NAMES = {
 
 export default function ChainTimeline({ project, onViewDoc }) {
   const API_URL = process.env.REACT_APP_BACKEND_URL;
+
+  const handleSignedInvoiceDownload = async () => {
+    try {
+      const res = await api.get(`/projects/${project.id}/signed-invoice`, { responseType: 'blob' });
+      const blob = new Blob([res.data]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = project?.signed_invoice_filename || 'signed-invoice';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      /* noop */
+    }
+  };
+
+  const handleDeliverableOpen = async (d) => {
+    window.open(d.cloud_url, '_blank', 'noopener,noreferrer');
+    try {
+      await api.post(`/projects/${project.id}/deliverables/${d.id}/access`);
+    } catch {
+      /* noop */
+    }
+  };
 
   return (
     <div className="space-y-1" data-testid="chain-timeline">
@@ -82,6 +109,39 @@ export default function ChainTimeline({ project, onViewDoc }) {
                         <Download className="w-3 h-3" /> PDF
                       </a>
                     </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Signed invoice artifact on stage 4 (Invoice Signed) */}
+              {completed && stage.key === 'invoice_signed' && project.signed_invoice_file && (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={handleSignedInvoiceDownload}
+                    className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
+                    data-testid="timeline-signed-invoice-download"
+                  >
+                    <FileCheck2 className="w-3 h-3" /> {project.signed_invoice_filename || 'Signed Invoice'}
+                    <Download className="w-3 h-3 ml-1" />
+                  </button>
+                </div>
+              )}
+
+              {/* Deliverable cloud links on stage 6 (Delivered) */}
+              {completed && stage.key === 'delivered' && (project.deliverables || []).length > 0 && (
+                <div className="mt-2 flex flex-col gap-1.5">
+                  {project.deliverables.map((d) => (
+                    <button
+                      key={d.id}
+                      type="button"
+                      onClick={() => handleDeliverableOpen(d)}
+                      className="flex items-center gap-1.5 text-xs text-sky-700 bg-sky-50 border border-sky-200 rounded px-2 py-1 hover:bg-sky-100 w-fit"
+                      data-testid={`timeline-deliverable-${d.id}`}
+                    >
+                      <FileVideo className="w-3 h-3" /> {d.original_filename}
+                      <ExternalLink className="w-3 h-3 ml-1" />
+                    </button>
                   ))}
                 </div>
               )}
