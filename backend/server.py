@@ -17,6 +17,7 @@ from routes.project_actions import router as project_actions_router
 from routes.messages import router as messages_router
 from routes.documents import router as documents_router
 from routes.public import router as public_router
+from routes.admin import router as admin_router
 
 app = FastAPI(title="Ocean2Joy v2.0 API")
 
@@ -34,6 +35,7 @@ app.include_router(project_actions_router)
 app.include_router(messages_router)
 app.include_router(documents_router)
 app.include_router(public_router)
+app.include_router(admin_router)
 
 
 @app.get("/api")
