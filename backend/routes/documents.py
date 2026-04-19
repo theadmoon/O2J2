@@ -61,7 +61,14 @@ def _attachments_html_block(project: dict) -> str:
         return "<p><em>No attachments.</em></p>"
 
     return (
-        "<table><thead><tr>"
+        "<table class='attachments-table'>"
+        "<colgroup>"
+        "<col style='width:18%' />"
+        "<col style='width:42%' />"
+        "<col style='width:22%' />"
+        "<col style='width:18%' />"
+        "</colgroup>"
+        "<thead><tr>"
         "<th>Type</th><th>File name</th><th>Uploaded (UTC)</th><th>Uploaded by</th>"
         "</tr></thead><tbody>"
         + "".join(rows)
@@ -82,15 +89,20 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
     base_css = """
     <style>
-        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 40px; color: #1a1a2e; line-height: 1.6; }
+        @page { size: A4; margin: 18mm 15mm; }
+        body { font-family: 'Helvetica Neue', Arial, sans-serif; margin: 0; color: #1a1a2e; line-height: 1.6; }
         .header { border-bottom: 3px solid #0a1628; padding-bottom: 20px; margin-bottom: 30px; }
         .header h1 { font-size: 24px; color: #0a1628; margin: 0; }
         .header .brand { font-size: 14px; color: #666; }
         .doc-number { font-size: 12px; color: #888; float: right; }
         .section { margin-bottom: 20px; }
         .section h2 { font-size: 16px; color: #0a1628; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; }
-        table th, table td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; table-layout: fixed; }
+        table th, table td {
+          border: 1px solid #ddd; padding: 8px 10px; text-align: left;
+          vertical-align: top; font-size: 12px;
+          word-wrap: break-word; overflow-wrap: anywhere; word-break: break-word;
+        }
         table th { background: #f5f5f5; font-weight: 600; }
         .footer { margin-top: 40px; padding-top: 20px; border-top: 2px solid #0a1628; font-size: 11px; color: #666; }
         .signature-line { margin-top: 50px; border-top: 1px solid #333; width: 250px; padding-top: 5px; font-size: 12px; }
@@ -147,7 +159,14 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
         "quote_request": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>QUOTE REQUEST</h1><div class="brand">{BRAND_NAME}</div></div>
             <div class="section"><p>Quote request received from <strong>{name}</strong> for project <strong>{pn}</strong>.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Email</th><td>{email}</td></tr><tr><th>Submitted</th><td>{date_created} UTC</td></tr><tr><th>Brief</th><td>{p.get('brief','')}</td></tr></table></div>
+            <table><colgroup><col style='width:22%' /><col style='width:78%' /></colgroup>
+            <tr><th>Client</th><td>{name}</td></tr>
+            <tr><th>Email</th><td>{email}</td></tr>
+            <tr><th>Submitted</th><td>{date_created} UTC</td></tr>
+            </table></div>
+            <div class="section"><h2>Brief</h2>
+            <div style="white-space: pre-wrap; font-size: 12px; border: 1px solid #e5e7eb; padding: 12px; background: #fafafa; border-radius: 4px;">{p.get('brief','')}</div>
+            </div>
             <div class="section"><h2>Attachments</h2>
             <p style="font-size:11px;color:#888;margin-top:-8px;">Snapshot generated at {rendered_at} UTC. The initial submission is immutable; additional reference files are append-only.</p>
             {attachments_block}</div>
@@ -236,6 +255,9 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
     ]
 
     if doc_type == "quote_request":
+        brief_text = p.get("brief", "").strip()
+        if brief_text:
+            lines.extend(["", "-" * 60, "BRIEF", "", brief_text])
         lines.extend(_attachments_txt_block(p))
 
     lines.extend([
