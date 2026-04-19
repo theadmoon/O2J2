@@ -93,7 +93,8 @@ def _payment_method_details_html(project: dict) -> str:
         "crypto": "USDT (TRC-20) transfer",
     }.get(method, "the selected payment method")
     memo_block = (
-        "<div style='margin-top:12px;padding:12px 14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;font-size:12px;line-height:1.65;'>"
+        "<p style='margin:12px 0 6px 0;font-size:12px;color:#0a1628;'><strong>Please include the following note in the &ldquo;Note&rdquo; section when making your payment:</strong></p>"
+        "<div style='padding:12px 14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;font-size:12px;line-height:1.65;'>"
         f"<p style='margin:0 0 6px 0;font-weight:700;color:#0a1628;'>{service_label} production according to client's script</p>"
         f"<p style='margin:0 0 6px 0;'>• Project Reference: <strong>{pn}</strong></p>"
         "<p style='margin:0 0 6px 0;'>Payment terms: 100% post-payment (invoice is issued after delivery).</p>"
@@ -192,6 +193,8 @@ def _payment_method_details_txt(project: dict) -> list[str]:
         "crypto": "USDT (TRC-20) transfer",
     }.get(method, "the selected payment method")
     memo_block = [
+        "",
+        "  Please include the following note in the \"Note\" section when making your payment:",
         "",
         f"  {service_label} production according to client's script",
         f"  • Project Reference: {pn}",
@@ -315,11 +318,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
     templates = {
         "invoice": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>INVOICE</h1>
-            <div class="brand">{LEGAL_ENTITY_NAME}</div>
-            <p style="font-size:11px;color:#666;margin:2px 0;">Tax ID: {TAX_ID} · Country of Registration: {COUNTRY_OF_REGISTRATION}</p>
-            <p style="font-size:11px;color:#666;margin:2px 0 10px 0;">Custom Digital Video Services</p>
-            </div>
+            <div class="header"><span class="doc-number">{doc_number}</span><h1>INVOICE</h1></div>
 
             <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
             <tr><th>Invoice</th><td><code>{doc_number}</code></td></tr>
@@ -742,12 +741,6 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         lines = [
             "INVOICE",
             sep,
-            "",
-            LEGAL_ENTITY_NAME,
-            f"Tax ID: {TAX_ID}",
-            f"Country of Registration: {COUNTRY_OF_REGISTRATION}",
-            "",
-            "Custom Digital Video Services",
             "",
             f"Invoice: {doc_number}",
             f"Date Issued: {inv_dates['issued']}",
