@@ -9,6 +9,7 @@ from utils.constants import (
 )
 from utils.formatters import format_date_utc, format_currency
 from services.document_service import get_or_generate_document_number
+from datetime import datetime, timezone
 
 router = APIRouter(prefix="/api/projects/{project_id}/documents", tags=["documents"])
 
@@ -31,6 +32,43 @@ async def _get_project_and_validate(project_id: str, request: Request):
     return db, project
 
 
+def _attachments_html_block(project: dict) -> str:
+    """Build an HTML block listing the project's attachments at the moment of rendering.
+    Includes the initial submission (immutable) and all additional reference files,
+    each with original filename + upload date/time in UTC."""
+    rows = []
+
+    # 1. Initial submission
+    if project.get("script_file"):
+        name = project.get("script_filename") or "(original filename not captured)"
+        submitted_at = format_date_utc(project.get("created_at"))
+        rows.append(
+            f"<tr><td>Initial submission</td><td>{name}</td><td>{submitted_at} UTC</td><td>{project.get('user_name', 'Client')}</td></tr>"
+        )
+
+    # 2. Additional reference files — sorted by upload time ascending
+    refs = sorted(project.get("reference_files") or [], key=lambda r: r.get("uploaded_at", ""))
+    for r in refs:
+        uploader = r.get("uploaded_by_name") or "Unknown"
+        if r.get("uploaded_by_role") == "admin":
+            uploader = "Ocean2Joy Team"
+        rows.append(
+            f"<tr><td>Reference file</td><td>{r.get('original_filename', '')}</td>"
+            f"<td>{format_date_utc(r.get('uploaded_at'))} UTC</td><td>{uploader}</td></tr>"
+        )
+
+    if not rows:
+        return "<p><em>No attachments.</em></p>"
+
+    return (
+        "<table><thead><tr>"
+        "<th>Type</th><th>File name</th><th>Uploaded (UTC)</th><th>Uploaded by</th>"
+        "</tr></thead><tbody>"
+        + "".join(rows)
+        + "</tbody></table>"
+    )
+
+
 def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> str:
     p = project
     name = p.get("user_name", "Client")
@@ -39,6 +77,8 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
     title = p.get("project_title", "")
     amount = format_currency(p.get("quote_amount", 0))
     date_created = format_date_utc(p.get("created_at"))
+    attachments_block = _attachments_html_block(p)
+    rendered_at = format_date_utc(datetime.now(timezone.utc).isoformat())
 
     base_css = """
     <style>
@@ -107,7 +147,10 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
         "quote_request": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>QUOTE REQUEST</h1><div class="brand">{BRAND_NAME}</div></div>
             <div class="section"><p>Quote request received from <strong>{name}</strong> for project <strong>{pn}</strong>.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Email</th><td>{email}</td></tr><tr><th>Brief</th><td>{p.get('brief','')}</td></tr></table></div>
+            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Email</th><td>{email}</td></tr><tr><th>Submitted</th><td>{date_created} UTC</td></tr><tr><th>Brief</th><td>{p.get('brief','')}</td></tr></table></div>
+            <div class="section"><h2>Attachments</h2>
+            <p style="font-size:11px;color:#888;margin-top:-8px;">Snapshot generated at {rendered_at} UTC. The initial submission is immutable; additional reference files are append-only.</p>
+            {attachments_block}</div>
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
 
@@ -144,6 +187,29 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
     return templates.get(doc_type, f"<html><body><h1>{doc_type}</h1><p>Document not found</p></body></html>")
 
 
+def _attachments_txt_block(project: dict) -> list[str]:
+    lines = ["", "-" * 60, "ATTACHMENTS (snapshot at download time)"]
+    any_row = False
+    if project.get("script_file"):
+        name = project.get("script_filename") or "(original filename not captured)"
+        lines.append(
+            f"  [Initial submission · immutable] {name}  —  "
+            f"{format_date_utc(project.get('created_at'))} UTC  —  by {project.get('user_name', 'Client')}"
+        )
+        any_row = True
+    refs = sorted(project.get("reference_files") or [], key=lambda r: r.get("uploaded_at", ""))
+    for r in refs:
+        uploader = "Ocean2Joy Team" if r.get("uploaded_by_role") == "admin" else (r.get("uploaded_by_name") or "Unknown")
+        lines.append(
+            f"  [Reference file] {r.get('original_filename', '')}  —  "
+            f"{format_date_utc(r.get('uploaded_at'))} UTC  —  by {uploader}"
+        )
+        any_row = True
+    if not any_row:
+        lines.append("  (none)")
+    return lines
+
+
 def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str:
     p = project
     name = p.get("user_name", "Client")
@@ -167,6 +233,12 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         f"Title: {title}",
         f"Amount: {amount}",
         f"Date: {date_created}",
+    ]
+
+    if doc_type == "quote_request":
+        lines.extend(_attachments_txt_block(p))
+
+    lines.extend([
         f"",
         f"{'-'*60}",
         f"",
@@ -176,7 +248,7 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
         f"Location: {LOCATION}",
         f"{'='*60}",
-    ]
+    ])
     return "\n".join(lines)
 
 
