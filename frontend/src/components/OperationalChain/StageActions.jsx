@@ -230,6 +230,21 @@ export default function StageActions({ project, user, onUpdated }) {
   return (
     <div className="space-y-3" data-testid="stage-actions">
       {error && <div className="bg-red-50 border border-red-200 text-red-700 text-sm px-4 py-2 rounded-lg" data-testid="stage-actions-error">{error}</div>}
+      {!isAdmin && isOwner && status === 'work_accepted' && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-amber-900" data-testid="payment-reminder-banner">
+          <div className="flex items-start gap-2">
+            <HandCoins className="w-5 h-5 shrink-0 mt-0.5 text-amber-600" />
+            <div>
+              <p className="font-semibold mb-1">Before sending payment, please open the Payment Instructions</p>
+              <p className="text-amber-800">
+                Go to the <strong>Work Accepted</strong> stage on the timeline below and open the <strong>Payment Instructions</strong> document.
+                It contains the exact recipient details, the amount, and the reference note that must be copied into your payment memo.
+                Only after that, click <strong>I Have Sent the Payment</strong> to confirm the transfer.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
       <div className="flex flex-wrap gap-2">{actions}</div>
       {dialog && (
         <ActionDialog
