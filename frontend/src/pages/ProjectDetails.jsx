@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
@@ -12,7 +12,7 @@ import ChatContainer from '../components/Chat/ChatContainer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
   ArrowLeft, FileText, Hash, User, Mail, Briefcase, DollarSign, ShieldCheck,
-  Paperclip, Download,
+  Paperclip, Download, Upload, RefreshCw,
 } from 'lucide-react';
 
 export default function ProjectDetails() {
@@ -23,6 +23,8 @@ export default function ProjectDetails() {
   const [docPreview, setDocPreview] = useState(null);
   const [previewText, setPreviewText] = useState('');
   const [showAdvanceFallback, setShowAdvanceFallback] = useState(false);
+  const [scriptUploading, setScriptUploading] = useState(false);
+  const scriptInputRef = useRef(null);
 
   useEffect(() => {
     loadProject();
@@ -69,6 +71,20 @@ export default function ProjectDetails() {
       a.remove();
       URL.revokeObjectURL(url);
     } catch {}
+  };
+
+  const handleScriptReplace = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setScriptUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('script', file);
+      const { data } = await api.put(`/projects/${id}/script`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      setProject(data);
+    } catch {}
+    setScriptUploading(false);
+    if (scriptInputRef.current) scriptInputRef.current.value = '';
   };
 
   if (loading) {
@@ -135,34 +151,83 @@ export default function ProjectDetails() {
             <p className="mt-4 text-sm text-gray-500 border-t border-gray-100 pt-4 whitespace-pre-wrap" data-testid="project-brief">{project.brief}</p>
           )}
 
-          {project.script_file && (
-            <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-script-attachment">
-              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Script / Reference File</p>
-              {project.script_filename ? (
-                <button
-                  type="button"
-                  onClick={handleScriptDownload}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
-                  data-testid="script-download-button"
-                >
-                  <Paperclip className="w-4 h-4" />
-                  <span className="truncate max-w-xs">{project.script_filename}</span>
-                  <Download className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleScriptDownload}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
-                  data-testid="script-download-button"
-                >
-                  <Paperclip className="w-4 h-4" />
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download</span>
-                </button>
-              )}
-            </div>
-          )}
+          {(() => {
+            const canUploadScript = !project.invoice_sent_at && (user?.role === 'admin' || user?.id === project.user_id);
+            const showUploadNew = !project.script_file && canUploadScript;
+            const showReplace = project.script_file && !project.script_filename && canUploadScript;
+            return (
+              <>
+                {(project.script_file || showUploadNew) && (
+                  <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-script-attachment">
+                    <div className="flex items-center justify-between gap-3 mb-2 flex-wrap">
+                      <p className="text-xs uppercase tracking-wider text-gray-500">Script / Reference File</p>
+                      {canUploadScript && (
+                        <>
+                          <input
+                            ref={scriptInputRef}
+                            type="file"
+                            accept=".pdf,.doc,.docx,.txt,.rtf,.odt"
+                            onChange={handleScriptReplace}
+                            className="hidden"
+                            data-testid="script-upload-input"
+                          />
+                          {showUploadNew && (
+                            <button type="button" disabled={scriptUploading} onClick={() => scriptInputRef.current?.click()}
+                              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-sky-50 border border-sky-200 rounded text-sky-700 hover:bg-sky-100"
+                              data-testid="script-upload-button">
+                              <Upload className="w-3.5 h-3.5" /> {scriptUploading ? 'Uploading…' : 'Upload script'}
+                            </button>
+                          )}
+                          {showReplace && (
+                            <button type="button" disabled={scriptUploading} onClick={() => scriptInputRef.current?.click()}
+                              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-amber-50 border border-amber-200 rounded text-amber-700 hover:bg-amber-100"
+                              data-testid="script-replace-button">
+                              <RefreshCw className="w-3.5 h-3.5" /> {scriptUploading ? 'Uploading…' : 'Re-upload to restore filename'}
+                            </button>
+                          )}
+                          {project.script_filename && !project.invoice_sent_at && (
+                            <button type="button" disabled={scriptUploading} onClick={() => scriptInputRef.current?.click()}
+                              className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-gray-50 border border-gray-200 rounded text-gray-600 hover:bg-gray-100"
+                              data-testid="script-replace-button-2">
+                              <RefreshCw className="w-3.5 h-3.5" /> Replace
+                            </button>
+                          )}
+                        </>
+                      )}
+                    </div>
+                    {project.script_file ? (
+                      project.script_filename ? (
+                        <button type="button" onClick={handleScriptDownload}
+                          className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                          data-testid="script-download-button">
+                          <Paperclip className="w-4 h-4" />
+                          <span className="truncate max-w-xs">{project.script_filename}</span>
+                          <Download className="w-3.5 h-3.5" />
+                        </button>
+                      ) : (
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <button type="button" onClick={handleScriptDownload}
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                            data-testid="script-download-button">
+                            <Paperclip className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Download</span>
+                          </button>
+                          {user?.id === project.user_id && (
+                            <span className="text-xs text-amber-700">
+                              Original filename couldn't be recovered — please re-upload to restore it.
+                            </span>
+                          )}
+                        </div>
+                      )
+                    ) : (
+                      <p className="text-xs text-gray-400 italic">No script uploaded yet.</p>
+                    )}
+                  </div>
+                )}
+              </>
+            );
+          })()}
 
           {/* Quote & payment info (visible once order activated) */}
           {quoteVisible && (

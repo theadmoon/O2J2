@@ -136,6 +136,56 @@ async def download_script(project_id: str, request: Request):
     )
 
 
+@router.put("/{project_id}/script")
+async def replace_script(project_id: str, request: Request, script: UploadFile = File(...)):
+    """Upload or replace the script/reference file. Allowed for the project owner or admin,
+    as long as the project has not progressed past 'order_activated'."""
+    db = get_db()
+    user = await get_current_user(request, db)
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if user["role"] != "admin" and project["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    if project.get("invoice_sent_at"):
+        raise HTTPException(status_code=400, detail="Cannot change script after invoice has been sent")
+    if not script.filename:
+        raise HTTPException(status_code=400, detail="No file provided")
+
+    backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    upload_dir = os.path.join(backend_root, "uploads", "scripts")
+    os.makedirs(upload_dir, exist_ok=True)
+
+    # Remove old file if present
+    if project.get("script_file"):
+        old_path = os.path.join(backend_root, project["script_file"])
+        if os.path.exists(old_path):
+            try:
+                os.remove(old_path)
+            except OSError:
+                pass
+
+    ext = os.path.splitext(script.filename)[1] or ""
+    stored_name = f"{project_id}{ext}"
+    file_path = os.path.join(upload_dir, stored_name)
+    import aiofiles as _af
+    async with _af.open(file_path, "wb") as f:
+        content = await script.read()
+        await f.write(content)
+
+    await db.projects.update_one(
+        {"id": project_id},
+        {"$set": {
+            "script_file": f"uploads/scripts/{stored_name}",
+            "script_filename": script.filename,
+        }},
+    )
+    updated = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    updated["status"] = calculate_current_status(updated)
+    updated["timeline"] = build_timeline(updated)
+    return updated
+
+
 @router.put("/{project_id}/advance")
 async def advance_stage(project_id: str, request: Request):
     db = get_db()
