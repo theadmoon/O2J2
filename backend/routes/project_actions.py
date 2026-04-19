@@ -174,7 +174,6 @@ async def admin_mark_delivered(project_id: str, request: Request):
         db, project_id,
         {"delivered_at": datetime.now(timezone.utc).isoformat()},
     )
-    await get_or_generate_document_number(db, updated, "certificate_delivery")
     return await _set_timestamp_and_return(db, project_id, {})
 
 
@@ -417,7 +416,7 @@ async def record_deliverable_access(project_id: str, file_id: str, request: Requ
             {"$set": {"files_accessed_at": now_iso}},
         )
         fresh = await db.projects.find_one({"id": project_id}, {"_id": 0})
-        await get_or_generate_document_number(db, fresh, "download_confirmation")
+        await get_or_generate_document_number(db, fresh, "certificate_delivery")
 
     return await _set_timestamp_and_return(db, project_id, {})
 
