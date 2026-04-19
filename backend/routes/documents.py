@@ -300,22 +300,17 @@ def _build_delivery_notes_html(
     if dels:
         file_rows = "".join(
             f"<tr><td>{i+1}</td><td>{d.get('original_filename','(unnamed)')}</td>"
-            f"<td><code style='word-break:break-all;font-size:11px;'>{d.get('cloud_url','')}</code></td>"
+            f"<td>{(d.get('description') or '').strip() or '—'}</td>"
             f"<td>{_fmt_datetime_utc(d.get('uploaded_at')) or '—'}</td></tr>"
             for i, d in enumerate(dels)
         )
         files_block = (
-            "<table style='margin-top:10px;'><colgroup><col style='width:5%'/><col style='width:35%'/><col style='width:40%'/><col style='width:20%'/></colgroup>"
-            "<thead><tr><th>#</th><th>File name</th><th>Cloud link</th><th>Shared at</th></tr></thead>"
+            "<table style='margin-top:10px;'><colgroup><col style='width:5%'/><col style='width:45%'/><col style='width:25%'/><col style='width:25%'/></colgroup>"
+            "<thead><tr><th>#</th><th>File name</th><th>Note</th><th>Shared at</th></tr></thead>"
             f"<tbody>{file_rows}</tbody></table>"
         )
     else:
         files_block = "<p style='font-size:12px;color:#888;font-style:italic;'>No deliverables recorded.</p>"
-    notes = (p.get("production_notes") or "").strip()
-    notes_block = (
-        f"<div style='font-size:12px;border:1px solid #e5e7eb;padding:12px;background:#fafafa;border-radius:4px;white-space:pre-wrap;'>{notes}</div>"
-        if notes else ""
-    )
 
     return f"""<html><head>{base_css}</head><body>
     <div class="header"><span class="doc-number">{doc_number}</span><h1>DELIVERY NOTES</h1></div>
@@ -335,14 +330,13 @@ def _build_delivery_notes_html(
     </table></div>
 
     <div class="section"><h2>Materials Shared</h2>
-    <p style="font-size:12px;color:#444;">The following digital deliverables were shared with the client via secure cloud links:</p>
+    <p style="font-size:12px;color:#444;">The following digital deliverables were shared with the client through the secure client portal:</p>
     {files_block}
+    <p style="font-size:11px;color:#888;font-style:italic;margin-top:8px;">Access links are not included in this document. The client must open each link from within the portal so that the time of first access can be recorded.</p>
     </div>
 
-    {'<div class="section"><h2>Notes from Production Team</h2>' + notes_block + '</div>' if notes_block else ''}
-
     <div class="section"><h2>Delivery Method</h2>
-    <p style="font-size:12px;">Files delivered electronically through cloud-hosted share links (Google Drive / Dropbox / WeTransfer). No physical shipment involved — this is a digital-only service.</p>
+    <p style="font-size:12px;">Files delivered electronically through the client portal. No physical shipment involved — this is a digital-only service.</p>
     <p style="font-size:11px;color:#666;font-style:italic;">Client access (timestamp of first link open) is tracked separately in the Certificate of Delivery.</p>
     </div>
 
@@ -398,25 +392,26 @@ def _build_delivery_notes_txt(p: dict, doc_number: str) -> str:
     if dels:
         for i, d in enumerate(dels, start=1):
             lines.append(f"{i}. {d.get('original_filename','(unnamed)')}")
-            lines.append(f"   Cloud link: {d.get('cloud_url','')}")
+            note = (d.get("description") or "").strip()
+            if note:
+                lines.append(f"   Note: {note}")
             shared = _fmt_datetime_utc(d.get("uploaded_at")) or "—"
             lines.append(f"   Shared at: {shared}")
     else:
         lines.append("(no deliverables recorded)")
 
-    notes = (p.get("production_notes") or "").strip()
-    if notes:
-        lines.extend(["", sep, "", "NOTES FROM PRODUCTION TEAM:", "", notes])
-
     lines.extend([
+        "",
+        "Access links are not included in this document.",
+        "The client must open each link from within the portal",
+        "so that the time of first access can be recorded.",
         "",
         sep,
         "",
         "DELIVERY METHOD:",
         "",
-        "Files delivered electronically through cloud-hosted share",
-        "links (Google Drive / Dropbox / WeTransfer). No physical",
-        "shipment involved — this is a digital-only service.",
+        "Files delivered electronically through the client portal.",
+        "No physical shipment involved — this is a digital-only service.",
         "",
         "Client access (timestamp of first link open) is tracked",
         "separately in the Certificate of Delivery.",
