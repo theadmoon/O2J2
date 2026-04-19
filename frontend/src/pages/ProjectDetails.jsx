@@ -352,7 +352,7 @@ export default function ProjectDetails() {
               <h2 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
                 <FileText className="w-4 h-4 text-sky-500" /> Operational Chain
               </h2>
-              <ChainTimeline project={project} onViewDoc={handleViewDoc} />
+              <ChainTimeline project={project} user={user} onViewDoc={handleViewDoc} onUpdated={setProject} />
               {isAdmin && (
                 <div className="mt-4 pt-4 border-t border-gray-100">
                   <label className="flex items-center gap-2 text-xs text-gray-500 cursor-pointer">

@@ -519,6 +519,65 @@ async def download_payment_proof(project_id: str, request: Request):
     return FileResponse(abs_path, filename=download_name)
 
 
+@router.post("/{project_id}/payment-proof")
+async def update_payment_proof(
+    project_id: str,
+    request: Request,
+    paypal_transaction_id: Optional[str] = Form(None),
+    file: Optional[UploadFile] = File(None),
+):
+    """Client (owner) or admin updates the payment proof after stage 10.
+    Can be used to add a screenshot later (if only text was provided) or
+    correct/add the transaction ID. Allowed until payment is confirmed."""
+    db, _, project = await _get_project_for_client(project_id, request)
+    if not project.get("payment_marked_by_client_at"):
+        raise HTTPException(status_code=400, detail="Payment has not been marked as sent yet")
+    if project.get("payment_confirmed_by_manager_at"):
+        raise HTTPException(status_code=400, detail="Payment already confirmed — proof cannot be edited")
+
+    updates = {}
+    if paypal_transaction_id is not None:
+        txid = paypal_transaction_id.strip()
+        if txid:
+            updates["paypal_transaction_id"] = txid
+
+    if file and file.filename:
+        allowed_ext = {".pdf", ".png", ".jpg", ".jpeg"}
+        ext = os.path.splitext(file.filename)[1].lower()
+        if ext not in allowed_ext:
+            raise HTTPException(status_code=400, detail=f"File type {ext} not allowed. Use PDF, PNG or JPG.")
+
+        screenshot_root = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "uploads",
+            "payment_proof",
+        )
+        os.makedirs(screenshot_root, exist_ok=True)
+        project_dir = os.path.join(screenshot_root, project_id)
+        os.makedirs(project_dir, exist_ok=True)
+
+        stored_name = f"payment_proof{ext}"
+        file_path = os.path.join(project_dir, stored_name)
+
+        size = 0
+        async with aiofiles.open(file_path, "wb") as out:
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                await out.write(chunk)
+
+        updates["payment_proof_file"] = os.path.join("uploads", "payment_proof", project_id, stored_name)
+        updates["payment_proof_filename"] = file.filename
+        updates["payment_proof_size"] = size
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="Provide either transaction ID or a screenshot")
+
+    return await _set_timestamp_and_return(db, project_id, updates)
+
+
 # =================================================================
 # DELIVERABLES — upload (admin) + download (client, auto-sets stage 7)
 # =================================================================

@@ -2,6 +2,7 @@ import React from 'react';
 import api from '../../utils/api';
 import { CheckCircle2, Circle, Download, Eye, FileCheck2 } from 'lucide-react';
 import { formatDateTime } from '../../utils/formatters';
+import PaymentProofPanel from './PaymentProofPanel';
 
 const STAGES = [
   { n: 1, key: "submitted", name: "Submitted", field: "created_at", docs: ["quote_request"] },
@@ -32,7 +33,7 @@ const DOC_NAMES = {
   certificate_completion: "Certificate of Completion",
 };
 
-export default function ChainTimeline({ project, onViewDoc }) {
+export default function ChainTimeline({ project, user, onViewDoc, onUpdated }) {
   const API_URL = process.env.REACT_APP_BACKEND_URL;
 
   const handleSignedInvoiceDownload = async () => {
@@ -77,23 +78,6 @@ export default function ChainTimeline({ project, onViewDoc }) {
       const a = document.createElement('a');
       a.href = url;
       a.download = project?.signed_acceptance_act_filename || 'signed-acceptance-act';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-    } catch {
-      /* noop */
-    }
-  };
-
-  const handlePaymentProofDownload = async () => {
-    try {
-      const res = await api.get(`/projects/${project.id}/payment-proof`, { responseType: 'blob' });
-      const blob = new Blob([res.data]);
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = project?.payment_proof_filename || 'payment-proof';
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -206,30 +190,9 @@ export default function ChainTimeline({ project, onViewDoc }) {
                 </div>
               )}
 
-              {/* Client payment artifacts on stage 10 (Payment Sent) */}
-              {completed && stage.key === 'payment_sent' && (project.paypal_transaction_id || project.payment_proof_file) && (
-                <div className="mt-2 flex flex-col gap-1.5">
-                  {project.paypal_transaction_id && (
-                    <div className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 w-fit" data-testid="timeline-txid">
-                      <FileCheck2 className="w-3 h-3" />
-                      <span className="font-semibold">Transaction ID:</span>
-                      <span className="font-mono text-emerald-800">{project.paypal_transaction_id}</span>
-                    </div>
-                  )}
-                  {project.payment_proof_file && (
-                    <button
-                      type="button"
-                      onClick={handlePaymentProofDownload}
-                      className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100 w-fit"
-                      data-testid="timeline-payment-proof-download"
-                    >
-                      <FileCheck2 className="w-3 h-3" />
-                      <span className="font-semibold">Payment Screenshot:</span>
-                      <span className="text-emerald-600 truncate max-w-[200px]">{project.payment_proof_filename}</span>
-                      <Download className="w-3 h-3 ml-0.5" />
-                    </button>
-                  )}
-                </div>
+              {/* Client payment artifacts on stage 10 (Payment Sent) — always show both fields with Add/Edit */}
+              {stage.key === 'payment_sent' && project.payment_marked_by_client_at && (
+                <PaymentProofPanel project={project} user={user} onUpdated={onUpdated} />
               )}
             </div>
           </div>
