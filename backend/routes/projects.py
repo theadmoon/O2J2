@@ -36,7 +36,7 @@ async def create_project(
     user = await get_current_user(request, db)
 
     project_id = str(uuid.uuid4())
-    project_number = await generate_project_number(db, service_type, 0)
+    project_number = await generate_project_number(db, service_type, user.get("name", ""), user.get("email", ""))
 
     script_path = None
     script_filename = None
@@ -123,7 +123,12 @@ async def download_script(project_id: str, request: Request):
     if not os.path.exists(file_path):
         raise HTTPException(status_code=404, detail="Script file missing on disk")
 
-    filename = project.get("script_filename") or os.path.basename(file_path)
+    filename = project.get("script_filename")
+    if not filename:
+        # Legacy project: original filename was not preserved at upload time.
+        # Serve with a neutral name that does not pretend to be the client's.
+        ext = os.path.splitext(file_path)[1] or ""
+        filename = f"attachment{ext}"
     return FileResponse(
         path=file_path,
         filename=filename,

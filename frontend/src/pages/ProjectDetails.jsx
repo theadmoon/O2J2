@@ -63,7 +63,7 @@ export default function ProjectDetails() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = project?.script_filename || 'brief-attachment';
+      a.download = project?.script_filename || `attachment${(project?.script_file?.match(/\.[^.]+$/) || [''])[0]}`;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -137,7 +137,7 @@ export default function ProjectDetails() {
 
           {project.script_file && (
             <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-script-attachment">
-              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Brief Attachment</p>
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Script / Reference File</p>
               <button
                 type="button"
                 onClick={handleScriptDownload}
@@ -145,9 +145,21 @@ export default function ProjectDetails() {
                 data-testid="script-download-button"
               >
                 <Paperclip className="w-4 h-4" />
-                <span className="truncate max-w-xs">{project.script_filename || 'attachment'}</span>
+                <span className="truncate max-w-xs">
+                  {project.script_filename
+                    ? project.script_filename
+                    : (() => {
+                        const ext = (project.script_file.split('.').pop() || '').toUpperCase();
+                        return ext ? `Attached file (.${ext.toLowerCase()})` : 'Attached file';
+                      })()}
+                </span>
                 <Download className="w-3.5 h-3.5" />
               </button>
+              {!project.script_filename && (
+                <p className="text-[11px] text-gray-400 italic mt-1.5">
+                  Original filename was not captured for this legacy project.
+                </p>
+              )}
             </div>
           )}
 

@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from utils.constants import OPERATIONAL_CHAIN_STAGES, SERVICE_TYPES
+import re
 
 
 async def get_next_sequence(db, counter_name: str) -> int:
@@ -12,11 +13,20 @@ async def get_next_sequence(db, counter_name: str) -> int:
     return result["value"]
 
 
-async def generate_project_number(db, service_type: str, quote_amount: int = 0) -> str:
+def _client_slug(user_name: str, user_email: str) -> str:
+    """Produce an uppercase, URL-safe client slug from the user's name.
+    Falls back to the email local-part if the name is empty."""
+    source = (user_name or "").strip() or (user_email or "").split("@")[0]
+    slug = re.sub(r"[^A-Za-z0-9]+", "", source).upper()
+    return slug[:16] or "CLIENT"
+
+
+async def generate_project_number(db, service_type: str, user_name: str = "", user_email: str = "") -> str:
     seq = await get_next_sequence(db, "project")
-    label = SERVICE_TYPES.get(service_type, {}).get("label", "Custom")
-    date_str = datetime.now(timezone.utc).strftime('%d%b%Y')
-    return f"VAPP-{seq}-{label}{quote_amount}USD-{date_str}"
+    service_label = SERVICE_TYPES.get(service_type, {}).get("label", "Custom").upper()
+    client = _client_slug(user_name, user_email)
+    date_str = datetime.now(timezone.utc).strftime('%y%m%d')
+    return f"VAPP-{seq}-{client}-{service_label}-{date_str}"
 
 
 def calculate_current_status(project: dict) -> str:
