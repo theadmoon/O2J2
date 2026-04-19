@@ -16,6 +16,7 @@ import Contact from "./pages/Contact";
 import QuickRequest from "./pages/QuickRequest";
 import LegalInformation from "./pages/LegalInformation";
 import Policies from "./pages/Policies";
+import Profile from "./pages/Profile";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
@@ -59,6 +60,7 @@ function AppRoutes() {
       <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
       <Route path="/projects/new" element={<ProtectedRoute><NewProject /></ProtectedRoute>} />
       <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

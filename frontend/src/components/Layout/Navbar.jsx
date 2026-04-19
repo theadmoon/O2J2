@@ -86,12 +86,16 @@ export default function Navbar() {
                 >
                   Logout
                 </button>
-                <div className="flex items-center space-x-2 pl-4 border-l border-gray-300">
+                <Link
+                  to="/profile"
+                  className="flex items-center space-x-2 pl-4 border-l border-gray-300 hover:opacity-80 transition group"
+                  data-testid="navbar-profile-link"
+                >
                   <div className="w-8 h-8 rounded-full bg-gradient-to-r from-sky-500 to-teal-500 flex items-center justify-center text-white font-semibold">
                     {user?.name?.[0]?.toUpperCase()}
                   </div>
-                  <span className="text-sm text-gray-600">{user?.name}</span>
-                </div>
+                  <span className="text-sm text-gray-600 group-hover:text-sky-600">{user?.name}</span>
+                </Link>
               </>
             ) : (
               <>
