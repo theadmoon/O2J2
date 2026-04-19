@@ -499,7 +499,6 @@ async def client_mark_payment_sent(
         updates["payment_proof_size"] = size
 
     updated = await _set_timestamp_and_return(db, project_id, updates)
-    await get_or_generate_document_number(db, updated, "receipt")
     return await _set_timestamp_and_return(db, project_id, {})
 
 

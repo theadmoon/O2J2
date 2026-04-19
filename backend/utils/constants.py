@@ -48,7 +48,7 @@ OPERATIONAL_CHAIN_STAGES = [
     {"stage_number": 7, "status_key": "files_accessed", "display_name": "Files Accessed", "timestamp_field": "files_accessed_at", "documents": ["certificate_delivery"]},
     {"stage_number": 8, "status_key": "delivery_confirmed", "display_name": "Delivery Confirmed", "timestamp_field": "delivery_confirmed_at", "documents": []},
     {"stage_number": 9, "status_key": "work_accepted", "display_name": "Work Accepted", "timestamp_field": "work_accepted_at", "documents": ["acceptance_act", "payment_instructions"]},
-    {"stage_number": 10, "status_key": "payment_sent", "display_name": "Payment Sent", "timestamp_field": "payment_marked_by_client_at", "documents": ["receipt"]},
+    {"stage_number": 10, "status_key": "payment_sent", "display_name": "Payment Sent", "timestamp_field": "payment_marked_by_client_at", "documents": []},
     {"stage_number": 11, "status_key": "payment_received", "display_name": "Payment Received", "timestamp_field": "payment_confirmed_by_manager_at", "documents": ["payment_confirmation"]},
     {"stage_number": 12, "status_key": "completed", "display_name": "Completed", "timestamp_field": "completed_at", "documents": ["certificate_completion"]},
 ]
