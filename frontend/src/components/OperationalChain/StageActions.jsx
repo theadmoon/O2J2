@@ -165,6 +165,24 @@ export default function StageActions({ project, user, onUpdated }) {
   }
 
   if (actions.length === 0 && status !== 'completed') {
+    // Special instructional banner for the client when deliverables are ready
+    if (!isAdmin && isOwner && status === 'delivered') {
+      return (
+        <div className="bg-emerald-50 border border-emerald-200 rounded-lg p-4 text-sm text-emerald-800" data-testid="stage-delivered-client-banner">
+          <div className="flex items-start gap-2">
+            <PackageCheck className="w-5 h-5 shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold mb-1">Your deliverables are ready!</p>
+              <p className="text-emerald-700">
+                Open the <strong>Deliverables</strong> section below and click the link to access your materials.
+                This will automatically mark them as accessed on your timeline.
+                After reviewing, come back to confirm delivery.
+              </p>
+            </div>
+          </div>
+        </div>
+      );
+    }
     const waitingMsg = isAdmin ? 'Waiting for client to act' : 'Waiting for Ocean2Joy team to act';
     return (
       <div className="bg-sky-50 border border-sky-200 rounded-lg p-4 text-sm text-sky-800 flex items-center gap-2" data-testid="stage-waiting">
