@@ -912,6 +912,29 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         lines.extend(["", "-" * 60, "PAYMENT DETAILS"])
         lines.extend(_payment_method_details_txt(p))
 
+    if doc_type == "production_notes":
+        production_started_at = format_date_utc(p.get("production_started_at")) if p.get("production_started_at") else date_created
+        notes = (p.get("production_notes") or "").strip() or "(no notes provided)"
+        lines.extend([
+            "",
+            "-" * 60,
+            "PRODUCTION RECORD",
+            "",
+            f"Production Started: {production_started_at} UTC",
+            "",
+            "Manager Notes:",
+            notes,
+        ])
+        dels = p.get("deliverables") or []
+        if dels:
+            lines.extend(["", "-" * 60, "DELIVERABLES SHARED"])
+            for d in dels:
+                lines.append(f"• {d.get('original_filename', '(unnamed)')}")
+                if d.get("cloud_url"):
+                    lines.append(f"  Link: {d['cloud_url']}")
+                if d.get("description"):
+                    lines.append(f"  Note: {d['description']}")
+
     lines.extend([
         "",
         f"{'-'*60}",

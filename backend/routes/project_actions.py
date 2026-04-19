@@ -344,40 +344,34 @@ async def client_mark_payment_sent(project_id: str, body: MarkPaymentSentBody, r
 # =================================================================
 
 @router.post("/{project_id}/deliverables")
-async def upload_deliverable(
+async def add_deliverable(
     project_id: str,
     request: Request,
-    file: UploadFile = File(...),
-    description: str = Form(""),
 ):
-    """Admin uploads a deliverable file (mp4/mov/zip/etc). Must be after 'production_started'."""
+    """Admin adds a cloud-hosted deliverable (filename + URL).
+    Materials are hosted in the cloud (Google Drive, Dropbox, WeTransfer, etc.);
+    the platform stores only the filename + link visible to the client.
+    Must be after 'production_started'.
+    """
     db, _, project = await _get_project_for_admin(project_id, request)
     _require_stage(project, "production_started_at", "production_started")
 
-    os.makedirs(DELIVERABLES_ROOT, exist_ok=True)
-    project_dir = os.path.join(DELIVERABLES_ROOT, project_id)
-    os.makedirs(project_dir, exist_ok=True)
-
-    file_id = str(uuid.uuid4())
-    ext = os.path.splitext(file.filename)[1] if file.filename else ""
-    stored_name = f"{file_id}{ext}"
-    file_path = os.path.join(project_dir, stored_name)
-
-    size = 0
-    async with aiofiles.open(file_path, "wb") as out:
-        while True:
-            chunk = await file.read(1024 * 1024)
-            if not chunk:
-                break
-            size += len(chunk)
-            await out.write(chunk)
+    body = await request.json()
+    filename = (body.get("filename") or "").strip()
+    cloud_url = (body.get("cloud_url") or "").strip()
+    description = (body.get("description") or "").strip()
+    if not filename:
+        raise HTTPException(status_code=400, detail="filename is required")
+    if not cloud_url:
+        raise HTTPException(status_code=400, detail="cloud_url is required")
+    if not (cloud_url.startswith("http://") or cloud_url.startswith("https://")):
+        raise HTTPException(status_code=400, detail="cloud_url must start with http:// or https://")
 
     deliverable = {
-        "id": file_id,
-        "original_filename": file.filename or stored_name,
-        "stored_filename": stored_name,
+        "id": str(uuid.uuid4()),
+        "original_filename": filename,
+        "cloud_url": cloud_url,
         "description": description,
-        "size_bytes": size,
         "uploaded_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.projects.update_one(
@@ -387,9 +381,10 @@ async def upload_deliverable(
     return deliverable
 
 
-@router.get("/{project_id}/deliverables/{file_id}")
-async def download_deliverable(project_id: str, file_id: str, request: Request):
-    """Client (or admin) downloads a deliverable. First client download auto-sets stage 7 (files_accessed)."""
+@router.post("/{project_id}/deliverables/{file_id}/access")
+async def record_deliverable_access(project_id: str, file_id: str, request: Request):
+    """Client-side beacon: record that the client opened the cloud link.
+    First access (after 'delivered') auto-advances stage 7 (files_accessed)."""
     db, user, project = await _get_project_for_client(project_id, request)
 
     deliverable = next(
@@ -399,11 +394,19 @@ async def download_deliverable(project_id: str, file_id: str, request: Request):
     if not deliverable:
         raise HTTPException(status_code=404, detail="Deliverable not found")
 
-    file_path = os.path.join(DELIVERABLES_ROOT, project_id, deliverable["stored_filename"])
-    if not os.path.exists(file_path):
-        raise HTTPException(status_code=404, detail="File missing on disk")
+    now_iso = datetime.now(timezone.utc).isoformat()
 
-    # Auto-advance stage 7 on first client download (requires stage 6 done)
+    # Record per-deliverable access timestamp (first access wins)
+    if not deliverable.get("first_accessed_at"):
+        await db.projects.update_one(
+            {"id": project_id, "deliverables.id": file_id},
+            {"$set": {
+                "deliverables.$.first_accessed_at": now_iso,
+                "deliverables.$.first_accessed_by": user.get("id"),
+            }},
+        )
+
+    # Auto-advance stage 7 (files_accessed) on first client access after delivery
     if (
         user["role"] != "admin"
         and project.get("delivered_at")
@@ -411,16 +414,13 @@ async def download_deliverable(project_id: str, file_id: str, request: Request):
     ):
         await db.projects.update_one(
             {"id": project_id},
-            {"$set": {"files_accessed_at": datetime.now(timezone.utc).isoformat()}},
+            {"$set": {"files_accessed_at": now_iso}},
         )
         fresh = await db.projects.find_one({"id": project_id}, {"_id": 0})
         await get_or_generate_document_number(db, fresh, "download_confirmation")
 
-    return FileResponse(
-        path=file_path,
-        filename=deliverable["original_filename"],
-        media_type="application/octet-stream",
-    )
+    return await _set_timestamp_and_return(db, project_id, {})
+
 
 
 @router.delete("/{project_id}/deliverables/{file_id}")
@@ -436,10 +436,6 @@ async def delete_deliverable(project_id: str, file_id: str, request: Request):
     )
     if not deliverable:
         raise HTTPException(status_code=404, detail="Deliverable not found")
-
-    file_path = os.path.join(DELIVERABLES_ROOT, project_id, deliverable["stored_filename"])
-    if os.path.exists(file_path):
-        os.remove(file_path)
 
     await db.projects.update_one(
         {"id": project_id},

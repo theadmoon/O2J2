@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Circle, Download, Eye } from 'lucide-react';
-import { formatDate } from '../../utils/formatters';
+import { formatDateTime } from '../../utils/formatters';
 
 const STAGES = [
   { n: 1, key: "submitted", name: "Submitted", field: "created_at", docs: ["quote_request"] },
@@ -57,7 +57,7 @@ export default function ChainTimeline({ project, onViewDoc }) {
                 <span className="font-mono text-xs text-gray-400">{String(stage.n).padStart(2, '0')}</span>
                 <span className={`text-sm ${completed ? 'text-gray-900 font-medium' : 'text-gray-400'}`}>{stage.name}</span>
                 {completed && (
-                  <span className="text-xs text-gray-400 font-mono ml-auto">{formatDate(project[stage.field])}</span>
+                  <span className="text-xs text-gray-400 font-mono ml-auto">{formatDateTime(project[stage.field])}</span>
                 )}
               </div>
 
