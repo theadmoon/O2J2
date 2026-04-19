@@ -15,6 +15,7 @@ export default function NewProject() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [serviceType, setServiceType] = useState('custom_video');
+  const [projectTitle, setProjectTitle] = useState('');
   const [brief, setBrief] = useState('');
   const [script, setScript] = useState(null);
   const [error, setError] = useState('');
@@ -28,6 +29,7 @@ export default function NewProject() {
       const formData = new FormData();
       formData.append('service_type', serviceType);
       formData.append('brief', brief);
+      if (projectTitle.trim()) formData.append('project_title', projectTitle.trim());
       if (script) formData.append('script', script);
 
       const { data } = await api.post('/projects', formData, {
@@ -74,6 +76,21 @@ export default function NewProject() {
                 <SelectItem value="ai_video">AI-Generated Video</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div>
+            <Label className="text-gray-600 text-xs uppercase tracking-wider flex items-center gap-1">
+              Project Title <span className="text-gray-400 normal-case tracking-normal">(optional)</span>
+            </Label>
+            <Input
+              value={projectTitle}
+              onChange={(e) => setProjectTitle(e.target.value)}
+              maxLength={120}
+              className="mt-1.5"
+              placeholder="e.g. Museum hall narration video"
+              data-testid="new-project-title"
+            />
+            <p className="text-[11px] text-gray-500 mt-1">Give it a short name so you can find it later. You can rename it any time before invoice is sent.</p>
           </div>
 
           <div>

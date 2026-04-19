@@ -13,7 +13,7 @@ import ChatContainer from '../components/Chat/ChatContainer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
   ArrowLeft, FileText, Hash, User, Mail, Briefcase, DollarSign, ShieldCheck,
-  Paperclip, Download,
+  Paperclip, Download, Pencil, Check, X, ChevronDown, ChevronUp,
 } from 'lucide-react';
 
 export default function ProjectDetails() {
@@ -24,6 +24,8 @@ export default function ProjectDetails() {
   const [docPreview, setDocPreview] = useState(null);
   const [previewText, setPreviewText] = useState('');
   const [showAdvanceFallback, setShowAdvanceFallback] = useState(false);
+  const [titleEdit, setTitleEdit] = useState({ editing: false, value: '', saving: false, error: '' });
+  const [briefExpanded, setBriefExpanded] = useState(false);
 
   useEffect(() => {
     loadProject();
@@ -72,6 +74,22 @@ export default function ProjectDetails() {
     } catch {}
   };
 
+  const startTitleEdit = () => setTitleEdit({ editing: true, value: project.project_title || '', saving: false, error: '' });
+  const cancelTitleEdit = () => setTitleEdit({ editing: false, value: '', saving: false, error: '' });
+  const saveTitle = async () => {
+    const trimmed = titleEdit.value.trim();
+    if (!trimmed) { setTitleEdit((s) => ({ ...s, error: 'Title cannot be empty' })); return; }
+    if (trimmed === project.project_title) { cancelTitleEdit(); return; }
+    setTitleEdit((s) => ({ ...s, saving: true, error: '' }));
+    try {
+      const { data } = await api.patch(`/projects/${id}`, { project_title: trimmed });
+      setProject(data);
+      cancelTitleEdit();
+    } catch (err) {
+      setTitleEdit((s) => ({ ...s, saving: false, error: err.response?.data?.detail || err.message || 'Save failed' }));
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -106,9 +124,49 @@ export default function ProjectDetails() {
         {/* Project Header */}
         <div className="border border-gray-200 bg-white rounded-lg p-6 mb-6 shadow-sm">
           <div className="flex items-start justify-between mb-4 gap-4 flex-wrap">
-            <div className="min-w-0">
+            <div className="min-w-0 flex-1">
               <p className="text-xs uppercase tracking-wider font-semibold text-sky-600 mb-1">Project</p>
-              <h1 className="text-2xl font-bold text-gray-900 break-words">{project.project_title}</h1>
+              {titleEdit.editing ? (
+                <div className="flex items-start gap-2 flex-wrap" data-testid="project-title-edit">
+                  <input
+                    type="text"
+                    value={titleEdit.value}
+                    onChange={(e) => setTitleEdit((s) => ({ ...s, value: e.target.value }))}
+                    maxLength={120}
+                    autoFocus
+                    className="text-2xl font-bold text-gray-900 bg-white border-b-2 border-sky-400 outline-none px-1 py-0.5 min-w-[240px] max-w-full"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveTitle();
+                      if (e.key === 'Escape') cancelTitleEdit();
+                    }}
+                    data-testid="project-title-input"
+                  />
+                  <div className="flex items-center gap-1 mt-1.5">
+                    <button type="button" onClick={saveTitle} disabled={titleEdit.saving}
+                      className="p-1.5 bg-sky-500 hover:bg-sky-600 text-white rounded disabled:opacity-50" aria-label="Save"
+                      data-testid="project-title-save">
+                      <Check className="w-4 h-4" />
+                    </button>
+                    <button type="button" onClick={cancelTitleEdit} disabled={titleEdit.saving}
+                      className="p-1.5 bg-gray-100 hover:bg-gray-200 text-gray-600 rounded" aria-label="Cancel"
+                      data-testid="project-title-cancel">
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                  {titleEdit.error && <p className="w-full text-xs text-red-600 mt-1" data-testid="project-title-error">{titleEdit.error}</p>}
+                </div>
+              ) : (
+                <div className="flex items-start gap-2 flex-wrap">
+                  <h1 className="text-2xl font-bold text-gray-900 break-words" data-testid="project-title">{project.project_title}</h1>
+                  {!project.invoice_sent_at && (user?.role === 'admin' || user?.id === project.user_id) && (
+                    <button type="button" onClick={startTitleEdit}
+                      className="mt-1.5 p-1 text-gray-400 hover:text-sky-600 hover:bg-sky-50 rounded transition" aria-label="Edit title"
+                      data-testid="project-title-edit-button">
+                      <Pencil className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <span className="text-xs px-3 py-1.5 rounded-full font-medium bg-sky-100 text-sky-700 capitalize" data-testid="project-status-badge">
               {project.status?.replace(/_/g, ' ')}
@@ -132,9 +190,30 @@ export default function ProjectDetails() {
               <span className="capitalize">{project.service_type?.replace(/_/g, ' ')}</span>
             </div>
           </div>
-          {project.brief && (
-            <p className="mt-4 text-sm text-gray-500 border-t border-gray-100 pt-4 whitespace-pre-wrap" data-testid="project-brief">{project.brief}</p>
-          )}
+          {project.brief && (() => {
+            const long = project.brief.length > 400;
+            const expanded = briefExpanded || !long;
+            return (
+              <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-brief-wrapper">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <p className="text-xs uppercase tracking-wider text-gray-500">Brief</p>
+                  {long && (
+                    <button type="button" onClick={() => setBriefExpanded((v) => !v)}
+                      className="text-xs text-sky-600 hover:text-sky-700 inline-flex items-center gap-1 font-medium"
+                      data-testid="brief-toggle-button">
+                      {expanded ? <>Show less <ChevronUp className="w-3 h-3" /></> : <>Show more <ChevronDown className="w-3 h-3" /></>}
+                    </button>
+                  )}
+                </div>
+                <div className="relative">
+                  <p className={`text-sm text-gray-600 whitespace-pre-wrap ${expanded ? '' : 'line-clamp-3'}`} data-testid="project-brief">{project.brief}</p>
+                  {long && !expanded && (
+                    <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Initial Submission — IMMUTABLE history */}
           {project.script_file && (

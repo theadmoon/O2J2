@@ -30,6 +30,7 @@ async def create_project(
     request: Request,
     service_type: str = Form(...),
     brief: str = Form(...),
+    project_title: str = Form(""),
     script: UploadFile = File(None),
 ):
     db = get_db()
@@ -37,6 +38,14 @@ async def create_project(
 
     project_id = str(uuid.uuid4())
     project_number = await generate_project_number(db, service_type, user.get("name", ""), user.get("email", ""))
+
+    # Title: respect client's choice if provided; otherwise use a neutral "<Name> — DD Mon YYYY" label
+    title_clean = (project_title or "").strip()
+    if not title_clean:
+        today_str = datetime.now(timezone.utc).strftime("%d %b %Y")
+        owner_label = (user.get("name") or "").strip() or (user.get("email") or "Client").split("@")[0]
+        title_clean = f"{owner_label} — {today_str}"
+    title_clean = title_clean[:120]
 
     script_path = None
     script_filename = None
@@ -58,7 +67,7 @@ async def create_project(
         "user_name": user["name"],
         "user_email": user["email"],
         "service_type": service_type,
-        "project_title": brief[:50] if brief else "Untitled Project",
+        "project_title": title_clean,
         "brief": brief,
         "script_file": script_path,
         "script_filename": script_filename,
@@ -103,6 +112,38 @@ async def get_project(project_id: str, request: Request):
     project["status"] = calculate_current_status(project)
     project["timeline"] = build_timeline(project)
     return project
+
+
+@router.patch("/{project_id}")
+async def patch_project(project_id: str, request: Request):
+    """Update editable fields of a project. Currently: project_title only.
+    Allowed for owner and admin, and only until the invoice has been sent."""
+    payload = await request.json()
+    db = get_db()
+    user = await get_current_user(request, db)
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if user["role"] != "admin" and project["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    if project.get("invoice_sent_at"):
+        raise HTTPException(status_code=400, detail="Cannot edit after invoice has been sent")
+
+    updates = {}
+    if "project_title" in payload:
+        new_title = (payload["project_title"] or "").strip()
+        if not new_title:
+            raise HTTPException(status_code=400, detail="Title cannot be empty")
+        updates["project_title"] = new_title[:120]
+
+    if not updates:
+        raise HTTPException(status_code=400, detail="No updatable fields provided")
+
+    await db.projects.update_one({"id": project_id}, {"$set": updates})
+    updated = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    updated["status"] = calculate_current_status(updated)
+    updated["timeline"] = build_timeline(updated)
+    return updated
 
 
 @router.get("/{project_id}/script")
