@@ -4,7 +4,7 @@ import { useAuth, formatApiError } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Waves, ArrowRight } from 'lucide-react';
+import { Waves, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const OCEAN_BG = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80";
 
@@ -15,6 +15,7 @@ export default function Register() {
   const [email, setEmail] = useState('');
   const [paypalEmail, setPaypalEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -62,7 +63,27 @@ export default function Register() {
             </div>
             <div>
               <Label className="text-gray-600 text-xs uppercase tracking-wider">Password</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1.5" placeholder="Min. 6 characters" data-testid="register-password" />
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1.5 pr-10"
+                  placeholder="Min. 6 characters"
+                  data-testid="register-password"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 mt-0.5 p-1 text-gray-400 hover:text-sky-600 transition"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  data-testid="register-password-toggle"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <div>
               <Label className="text-gray-600 text-xs uppercase tracking-wider flex items-center gap-1">

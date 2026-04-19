@@ -4,7 +4,7 @@ import { useAuth, formatApiError } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Waves, ArrowRight } from 'lucide-react';
+import { Waves, ArrowRight, Eye, EyeOff } from 'lucide-react';
 
 const OCEAN_BG = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80";
 
@@ -13,6 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -52,7 +53,27 @@ export default function Login() {
             </div>
             <div>
               <Label className="text-gray-600 text-xs uppercase tracking-wider">Password</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1.5" placeholder="Enter password" data-testid="login-password" />
+              <div className="relative">
+                <Input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="mt-1.5 pr-10"
+                  placeholder="Enter password"
+                  data-testid="login-password"
+                />
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  onClick={() => setShowPassword((v) => !v)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 mt-0.5 p-1 text-gray-400 hover:text-sky-600 transition"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  data-testid="login-password-toggle"
+                >
+                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white h-11 rounded-lg flex items-center justify-center gap-2" data-testid="login-submit-button">
               {loading ? 'Signing in...' : <>Sign In <ArrowRight className="w-4 h-4" /></>}
