@@ -138,7 +138,7 @@ export default function StageActions({ project, user, onUpdated }) {
     }
     if (status === 'production_started') {
       const hasDeliv = (project.deliverables || []).length > 0;
-      actions.push(<ActionButton key="del" icon={PackageCheck} label={hasDeliv ? 'Mark as Delivered' : 'Upload deliverables first'} color="emerald" disabled={!hasDeliv} onClick={() => call('post', `/projects/${project.id}/admin/mark-delivered`)} testId="admin-mark-delivered" loading={loading} />);
+      actions.push(<ActionButton key="del" icon={PackageCheck} label={hasDeliv ? 'Mark as Delivered' : 'Add deliverable link below to enable'} color="emerald" disabled={!hasDeliv} onClick={() => call('post', `/projects/${project.id}/admin/mark-delivered`)} testId="admin-mark-delivered" loading={loading} />);
     }
     if (status === 'payment_sent') {
       actions.push(<ActionButton key="pay" icon={DollarSign} label="Confirm Payment Received" color="teal" onClick={openConfirmPayment} testId="admin-confirm-payment" />);
