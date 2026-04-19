@@ -5,7 +5,7 @@ export function formatDate(dateStr) {
 }
 
 export function formatCurrency(amount) {
-  return `$${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })} USD`;
+  return `$${Number(amount || 0).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 }
 
 export function timeAgo(dateStr) {
