@@ -71,6 +71,7 @@ async def create_project(
         "user_id": user["id"],
         "user_name": user["name"],
         "user_email": user["email"],
+        "user_paypal_email": user.get("paypal_email", ""),
         "service_type": service_type,
         "project_title": title_clean,
         "brief": brief,
@@ -117,6 +118,15 @@ async def get_project(project_id: str, request: Request):
         raise HTTPException(status_code=403, detail="Access denied")
     project["status"] = calculate_current_status(project)
     project["timeline"] = build_timeline(project)
+    # Ensure user_paypal_email is always populated (backfill for legacy projects)
+    if not project.get("user_paypal_email"):
+        owner = await db.users.find_one({"id": project["user_id"]}, {"_id": 0, "paypal_email": 1})
+        if owner and owner.get("paypal_email"):
+            project["user_paypal_email"] = owner["paypal_email"]
+            await db.projects.update_one(
+                {"id": project_id},
+                {"$set": {"user_paypal_email": owner["paypal_email"]}},
+            )
     # Mark current status as "seen" by this user — clears the stage_changed notification
     await db.users.update_one(
         {"id": user["id"]},

@@ -140,12 +140,15 @@ export default function StageActions({ project, user, onUpdated }) {
   });
 
   const needsTxIdFromAdmin = !project.paypal_transaction_id;
+  const clientPaypalInfo = project.user_paypal_email
+    ? `Client paid from PayPal account: ${project.user_paypal_email}. `
+    : 'Client has not set a PayPal account on file. ';
   const openConfirmPayment = () => setDialog({
     key: 'confirm-payment',
     title: 'Confirm Payment Received',
     description: needsTxIdFromAdmin
-      ? 'The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here along with the exact payment time in UTC from your PayPal dashboard. Both fields go into the final closing document.'
-      : 'Confirm that the payment has arrived. Enter the exact payment time in UTC from your PayPal dashboard. You may also correct the transaction ID if needed.',
+      ? `${clientPaypalInfo}The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here along with the exact payment time in UTC from your PayPal dashboard. Both fields go into the final closing document.`
+      : `${clientPaypalInfo}Confirm that the payment has arrived. Enter the exact payment time in UTC from your PayPal dashboard. You may also correct the transaction ID if needed.`,
     submit: 'Confirm Received',
     icon: DollarSign,
     fields: [
