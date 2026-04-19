@@ -85,14 +85,24 @@ def _invoice_dates(project: dict) -> dict:
 
 def _payment_method_details_html(project: dict) -> str:
     method = (project.get("payment_method") or "paypal")
+    pn = project.get("project_number", "")
+    service_label = (project.get("service_type") or "Custom").replace("_", " ").title()
+    memo_line = f"{pn} / {service_label} / Ocean2Joy"
+    memo_block = (
+        "<div style='margin-top:12px;padding:10px 14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;'>"
+        "<p style='margin:0 0 4px 0;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#0369a1;font-weight:700;'>"
+        "Payment note — copy this exact text into your payment memo/reference field:</p>"
+        f"<code style='font-size:13px;font-weight:600;color:#0a1628;'>{memo_line}</code>"
+        "</div>"
+    )
     if method == "paypal":
         return (
             "<p><strong>Method:</strong> PayPal</p>"
             "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
             f"<tr><th>Send to</th><td><code>{PAYPAL_EMAIL}</code></td></tr>"
             f"<tr><th>Beneficiary</th><td>{LEGAL_ENTITY_NAME}</td></tr>"
-            f"<tr><th>Reference</th><td>Include your project number <strong>{project.get('project_number','')}</strong> in the PayPal note.</td></tr>"
             "</table>"
+            + memo_block
         )
     if method == "bank_transfer":
         return (
@@ -104,8 +114,8 @@ def _payment_method_details_html(project: dict) -> str:
             f"<tr><th>IBAN</th><td><code>{BANK_BENEFICIARY_IBAN}</code></td></tr>"
             f"<tr><th>Intermediary 1</th><td>{BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})</td></tr>"
             f"<tr><th>Intermediary 2</th><td>{BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})</td></tr>"
-            f"<tr><th>Reference</th><td>Include project number <strong>{project.get('project_number','')}</strong> in the transfer message.</td></tr>"
             "</table>"
+            + memo_block
         )
     if method == "crypto":
         return (
@@ -115,9 +125,10 @@ def _payment_method_details_html(project: dict) -> str:
             f"<tr><th>Network</th><td>{CRYPTO_NETWORK} — <strong>TRC-20 only</strong></td></tr>"
             f"<tr><th>Wallet address</th><td><code style='word-break:break-all'>{CRYPTO_WALLET_ADDRESS}</code></td></tr>"
             f"<tr><th>Beneficiary</th><td>{LEGAL_ENTITY_NAME}</td></tr>"
-            f"<tr><th>Reference</th><td>After the transfer, send the transaction hash through your project chat and mark the payment as sent. Include project number <strong>{project.get('project_number','')}</strong> for our records.</td></tr>"
             "</table>"
-            "<p style='color:#b45309;font-size:11px;margin-top:8px;'>"
+            + memo_block
+            + "<p style='font-size:11px;color:#555;margin-top:8px;'>After the transfer, send the transaction hash through your project chat and mark the payment as sent.</p>"
+            "<p style='color:#b45309;font-size:11px;margin-top:4px;'>"
             "⚠ Only TRON network (TRC-20) transfers are supported. Assets sent via a different network may be lost."
             "</p>"
         )
@@ -168,13 +179,20 @@ def _payment_method_details_html(project: dict) -> str:
 def _payment_method_details_txt(project: dict) -> list[str]:
     method = (project.get("payment_method") or "paypal")
     pn = project.get("project_number", "")
+    service_label = (project.get("service_type") or "Custom").replace("_", " ").title()
+    memo_line = f"{pn} / {service_label} / Ocean2Joy"
+    memo_block = [
+        "",
+        "  ┌─ PAYMENT NOTE — copy this exact text into your payment memo ─",
+        f"  │ {memo_line}",
+        "  └──────────────────────────────────────────────────────────────",
+    ]
     if method == "paypal":
         return [
             "Method: PayPal",
             f"  Send to: {PAYPAL_EMAIL}",
             f"  Beneficiary: {LEGAL_ENTITY_NAME}",
-            f"  Reference: Include project number {pn} in the PayPal note.",
-        ]
+        ] + memo_block
     if method == "bank_transfer":
         return [
             "Method: Bank Transfer (SWIFT)",
@@ -184,8 +202,7 @@ def _payment_method_details_txt(project: dict) -> list[str]:
             f"  IBAN: {BANK_BENEFICIARY_IBAN}",
             f"  Intermediary 1: {BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})",
             f"  Intermediary 2: {BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})",
-            f"  Reference: Include project number {pn} in the transfer message.",
-        ]
+        ] + memo_block
     if method == "crypto":
         return [
             f"Method: {CRYPTO_ASSET} on {CRYPTO_NETWORK}",
@@ -193,7 +210,8 @@ def _payment_method_details_txt(project: dict) -> list[str]:
             f"  Network: {CRYPTO_NETWORK} — TRC-20 ONLY",
             f"  Wallet address: {CRYPTO_WALLET_ADDRESS}",
             f"  Beneficiary: {LEGAL_ENTITY_NAME}",
-            f"  Reference: Include project number {pn} and send tx hash via project chat.",
+        ] + memo_block + [
+            "  After the transfer, send the transaction hash via project chat.",
             "  WARNING: Only TRON network (TRC-20) transfers are supported. Assets sent via other networks may be lost.",
         ]
     return ["Method: (not selected)"]
@@ -759,9 +777,6 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         ]
         lines.extend(pm_txt_lines[1:])  # drop the first "Method: ..." line (already shown as PAYMENT METHOD)
         lines.extend([
-            "",
-            f'Important: Include project reference "{pn}"',
-            "in payment notes for proper tracking.",
             "",
             sep,
             "",

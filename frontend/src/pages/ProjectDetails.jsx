@@ -351,7 +351,9 @@ export default function ProjectDetails() {
       <Dialog open={!!docPreview} onOpenChange={() => setDocPreview(null)}>
         <DialogContent className="bg-white border-gray-200 max-w-2xl max-h-[80vh]">
           <DialogHeader>
-            <DialogTitle className="text-gray-900 font-bold">{docPreview?.replace(/_/g, ' ').toUpperCase()}</DialogTitle>
+            <DialogTitle className="text-gray-900 font-bold">
+              {project?.document_numbers?.[docPreview] || docPreview?.replace(/_/g, ' ').toUpperCase()}
+            </DialogTitle>
           </DialogHeader>
           <pre className="whitespace-pre-wrap text-xs text-gray-700 font-mono overflow-y-auto max-h-[60vh] p-4 bg-gray-50 border border-gray-200 rounded-lg" data-testid="document-preview-text">
             {previewText}
