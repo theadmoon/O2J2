@@ -169,6 +169,10 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
     attachments_block = _attachments_html_block(p)
     rendered_at = format_date_utc(datetime.now(timezone.utc).isoformat())
     payment_details_block = _payment_method_details_html(p)
+    pm_code = (p.get("payment_method") or "paypal")
+    payment_method_label = PAYMENT_METHODS.get(pm_code, {}).get("display", pm_code.upper())
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    order_activated_at = format_date_utc(p.get("order_activated_at")) if p.get("order_activated_at") else date_created
 
     base_css = """
     <style>
@@ -233,9 +237,66 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             </body></html>""",
 
         "order_confirmation": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>ORDER CONFIRMATION</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>Your order for project <strong>{pn}</strong> has been confirmed.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Service</th><td>{title}</td></tr><tr><th>Date</th><td>{date_created}</td></tr></table></div>
+            <div class="header"><span class="doc-number">{doc_number}</span><h1>ORDER CONFIRMATION</h1><div class="brand">{BRAND_NAME}</div><p style='font-size:12px;color:#666;margin-top:4px;'>Order Activation Confirmation</p></div>
+
+            <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Order</th><td><code>{doc_number}</code></td></tr>
+            <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+            <tr><th>Date Activated</th><td>{order_activated_at} UTC</td></tr>
+            </table></div>
+
+            <div class="section"><h2>Client Information</h2>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Name</th><td>{name}</td></tr>
+            <tr><th>Email</th><td>{email}</td></tr>
+            <tr><th>Project Title</th><td>{title}</td></tr>
+            </table></div>
+
+            <div class="section"><h2>Order Details</h2>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+            </table>
+            <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Project Brief:</p>
+            <div style="white-space: pre-wrap; font-size: 12px; border: 1px solid #e5e7eb; padding: 12px; background: #fafafa; border-radius: 4px;">{p.get('brief','')}</div>
+            </div>
+
+            <div class="section"><h2>Uploaded Materials</h2>
+            <p style="font-size:11px;color:#888;margin-top:-8px;">Snapshot generated at {rendered_at} UTC.</p>
+            {attachments_block}</div>
+
+            <div class="section"><h2>Payment Method Selected</h2>
+            <p style="font-size:14px;font-weight:600;color:#0a1628;">{payment_method_label}</p>
+            <p style="font-size:11px;color:#666;margin-top:4px;">Full payment details will be provided in the invoice once the quote is issued.</p>
+            </div>
+
+            <div class="section" style="background:#f0fdf4;border:1px solid #86efac;padding:12px;border-radius:4px;">
+            <p style="margin:0;font-weight:600;color:#15803d;">✓ ORDER STATUS: ACTIVATED</p>
+            <p style="margin:4px 0 0 0;font-size:12px;color:#166534;">Your order has been activated and sent to our production team for review.</p>
+            </div>
+
+            <div class="section"><h2>Next Steps</h2>
+            <ol style="padding-left:20px;font-size:12px;line-height:1.7;">
+                <li>Manager will review your order and materials</li>
+                <li>You will receive an Invoice with quote and timeline</li>
+                <li>After Invoice confirmation, production will begin</li>
+                <li>You will receive updates during production</li>
+                <li>Final deliverables will be available in your portal</li>
+            </ol></div>
+
+            <div class="section"><h2>Estimated Timeline</h2>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Review</th><td>1–2 business days</td></tr>
+            <tr><th>Quote / Invoice</th><td>Will be sent after review</td></tr>
+            <tr><th>Production</th><td>Timeline specified in Invoice</td></tr>
+            <tr><th>Delivery</th><td>Via secure electronic portal</td></tr>
+            </table></div>
+
+            <div class="section" style="font-size:11px;color:#666;">
+            <p>All communication takes place through the secure client portal chat. Email is used only for urgent matters: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a>.</p>
+            <p style="margin-top:8px;">Order Reference: <strong><code>{pn}</code></strong> — please keep this number for all future correspondence.</p>
+            <p style="margin-top:8px;font-style:italic;">Thank you for choosing {BRAND_NAME}!</p>
+            </div>
+
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
 
@@ -326,6 +387,106 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
     amount = format_currency(p.get("quote_amount", 0))
     date_created = format_date_utc(p.get("created_at"))
     display = DOCUMENT_TYPES.get(doc_type, {}).get("display_name", doc_type.upper())
+
+    # Special rich template for order_confirmation
+    if doc_type == "order_confirmation":
+        pm_code = (p.get("payment_method") or "paypal")
+        pm_label = PAYMENT_METHODS.get(pm_code, {}).get("display", pm_code.upper()).upper()
+        service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+        order_activated_at = format_date_utc(p.get("order_activated_at")) if p.get("order_activated_at") else date_created
+
+        sep = "═" * 60
+        lines = [
+            display.upper(),
+            sep,
+            "",
+            BRAND_NAME,
+            "Order Activation Confirmation",
+            "",
+            f"Order: {doc_number}",
+            f"Project Reference: {pn}",
+            f"Date Activated: {order_activated_at} UTC",
+            "",
+            sep,
+            "",
+            "CLIENT INFORMATION:",
+            f"Name: {name}",
+            f"Email: {email}",
+            f"Project Title: {title}",
+            "",
+            sep,
+            "",
+            "ORDER DETAILS:",
+            "",
+            f"Service Type: {service_type_label}",
+            "",
+            "Project Brief:",
+            p.get("brief", "").strip() or "(not provided)",
+            "",
+            sep,
+            "",
+            "UPLOADED MATERIALS:",
+            "",
+        ]
+        materials_rows = []
+        if p.get("script_file"):
+            fname = p.get("script_filename") or "(original filename not captured)"
+            materials_rows.append(f"✓ {fname} (initial submission · uploaded by {name})")
+        refs = sorted(p.get("reference_files") or [], key=lambda r: r.get("uploaded_at", ""))
+        for r in refs:
+            uploader = "Ocean2Joy Team" if r.get("uploaded_by_role") == "admin" else (r.get("uploaded_by_name") or "Unknown")
+            materials_rows.append(f"✓ {r.get('original_filename', '')} (reference file · uploaded by {uploader})")
+        if not materials_rows:
+            materials_rows.append("(no materials uploaded yet)")
+        lines.extend(materials_rows)
+        lines.extend([
+            "",
+            sep,
+            "",
+            "PAYMENT METHOD SELECTED:",
+            pm_label,
+            "",
+            sep,
+            "",
+            "ORDER STATUS: ✓ ACTIVATED",
+            "",
+            "Your order has been activated and sent to our production",
+            "team for review.",
+            "",
+            sep,
+            "",
+            "NEXT STEPS:",
+            "",
+            "1. Manager will review your order and materials",
+            "2. You will receive an Invoice with quote and timeline",
+            "3. After Invoice confirmation, production will begin",
+            "4. You will receive updates during production",
+            "5. Final deliverables will be available in your portal",
+            "",
+            sep,
+            "",
+            "ESTIMATED TIMELINE:",
+            "Review: 1-2 business days",
+            "Quote/Invoice: Will be sent after review",
+            "Production: Timeline specified in Invoice",
+            "Delivery: Via secure electronic portal",
+            "",
+            sep,
+            "",
+            "All communication through secure client portal chat.",
+            f"For urgent matters only: {CONTACT_EMAIL}",
+            "",
+            sep,
+            "",
+            f"Thank you for choosing {BRAND_NAME.split(' Digital')[0]}!",
+            "",
+            f"Order Reference: {pn}",
+            "Keep this number for all future correspondence.",
+            "",
+            sep,
+        ]
+        )
+        return "\n".join(lines)
 
     lines = [
         f"{'='*60}",
