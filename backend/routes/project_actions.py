@@ -99,6 +99,9 @@ async def admin_activate_order(project_id: str, body: ActivateOrderBody, request
     if body.quote_amount <= 0:
         raise HTTPException(status_code=400, detail="quote_amount must be > 0")
 
+    import logging
+    logging.info(f"[activate-order] project={project_id} quote_amount={body.quote_amount!r} (type={type(body.quote_amount).__name__})")
+
     updates = {
         "quote_amount": body.quote_amount,
         "quote_details": body.quote_details,
