@@ -174,6 +174,7 @@ async def admin_mark_delivered(project_id: str, request: Request):
         db, project_id,
         {"delivered_at": datetime.now(timezone.utc).isoformat()},
     )
+    await get_or_generate_document_number(db, updated, "download_confirmation")
     return await _set_timestamp_and_return(db, project_id, {})
 
 

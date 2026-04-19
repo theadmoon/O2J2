@@ -44,7 +44,7 @@ OPERATIONAL_CHAIN_STAGES = [
     {"stage_number": 3, "status_key": "invoice_sent", "display_name": "Invoice Sent", "timestamp_field": "invoice_sent_at", "documents": ["invoice"]},
     {"stage_number": 4, "status_key": "invoice_signed", "display_name": "Invoice Signed", "timestamp_field": "invoice_signed_at", "documents": []},
     {"stage_number": 5, "status_key": "production_started", "display_name": "Production Started", "timestamp_field": "production_started_at", "documents": ["production_notes"]},
-    {"stage_number": 6, "status_key": "delivered", "display_name": "Delivered", "timestamp_field": "delivered_at", "documents": []},
+    {"stage_number": 6, "status_key": "delivered", "display_name": "Delivered", "timestamp_field": "delivered_at", "documents": ["download_confirmation"]},
     {"stage_number": 7, "status_key": "files_accessed", "display_name": "Files Accessed", "timestamp_field": "files_accessed_at", "documents": ["certificate_delivery"]},
     {"stage_number": 8, "status_key": "delivery_confirmed", "display_name": "Delivery Confirmed", "timestamp_field": "delivery_confirmed_at", "documents": []},
     {"stage_number": 9, "status_key": "work_accepted", "display_name": "Work Accepted", "timestamp_field": "work_accepted_at", "documents": ["acceptance_act"]},
@@ -63,7 +63,7 @@ DOCUMENT_TYPES = {
     "quote_request": {"code": "QUO", "display_name": "Quote Request", "requires_signature": False},
     "production_notes": {"code": "PRD", "display_name": "Production Notes", "requires_signature": False},
     "payment_instructions": {"code": "INS", "display_name": "Payment Instructions", "requires_signature": False},
-    "download_confirmation": {"code": "DWN", "display_name": "Download Confirmation", "requires_signature": False},
+    "download_confirmation": {"code": "DWN", "display_name": "Delivery Notes", "requires_signature": False},
     "receipt": {"code": "RCP", "display_name": "Receipt", "requires_signature": False},
 }
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import api from '../../utils/api';
-import { CheckCircle2, Circle, Download, Eye, FileCheck2, ExternalLink, FileVideo } from 'lucide-react';
+import { CheckCircle2, Circle, Download, Eye, FileCheck2 } from 'lucide-react';
 import { formatDateTime } from '../../utils/formatters';
 
 const STAGES = [
@@ -9,7 +9,7 @@ const STAGES = [
   { n: 3, key: "invoice_sent", name: "Invoice Sent", field: "invoice_sent_at", docs: ["invoice"] },
   { n: 4, key: "invoice_signed", name: "Invoice Signed", field: "invoice_signed_at", docs: [] },
   { n: 5, key: "production_started", name: "Production Started", field: "production_started_at", docs: ["production_notes"] },
-  { n: 6, key: "delivered", name: "Delivered", field: "delivered_at", docs: [] },
+  { n: 6, key: "delivered", name: "Delivered", field: "delivered_at", docs: ["download_confirmation"] },
   { n: 7, key: "files_accessed", name: "Files Accessed", field: "files_accessed_at", docs: ["certificate_delivery"] },
   { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: [] },
   { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["acceptance_act"] },
@@ -24,7 +24,7 @@ const DOC_NAMES = {
   invoice: "Invoice",
   production_notes: "Production Notes",
   certificate_delivery: "Certificate of Delivery",
-  download_confirmation: "Download Confirmation",
+  download_confirmation: "Delivery Notes",
   acceptance_act: "Acceptance Act",
   payment_instructions: "Payment Instructions",
   receipt: "Receipt",
@@ -47,15 +47,6 @@ export default function ChainTimeline({ project, onViewDoc }) {
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-    } catch {
-      /* noop */
-    }
-  };
-
-  const handleDeliverableOpen = async (d) => {
-    window.open(d.cloud_url, '_blank', 'noopener,noreferrer');
-    try {
-      await api.post(`/projects/${project.id}/deliverables/${d.id}/access`);
     } catch {
       /* noop */
     }
@@ -125,24 +116,6 @@ export default function ChainTimeline({ project, onViewDoc }) {
                     <FileCheck2 className="w-3 h-3" /> {project.signed_invoice_filename || 'Signed Invoice'}
                     <Download className="w-3 h-3 ml-1" />
                   </button>
-                </div>
-              )}
-
-              {/* Deliverable cloud links on stage 6 (Delivered) */}
-              {completed && stage.key === 'delivered' && (project.deliverables || []).length > 0 && (
-                <div className="mt-2 flex flex-col gap-1.5">
-                  {project.deliverables.map((d) => (
-                    <button
-                      key={d.id}
-                      type="button"
-                      onClick={() => handleDeliverableOpen(d)}
-                      className="flex items-center gap-1.5 text-xs text-sky-700 bg-sky-50 border border-sky-200 rounded px-2 py-1 hover:bg-sky-100 w-fit"
-                      data-testid={`timeline-deliverable-${d.id}`}
-                    >
-                      <FileVideo className="w-3 h-3" /> {d.original_filename}
-                      <ExternalLink className="w-3 h-3 ml-1" />
-                    </button>
-                  ))}
                 </div>
               )}
             </div>

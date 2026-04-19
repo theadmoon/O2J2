@@ -290,6 +290,159 @@ def _fmt_datetime_utc(iso_str: str) -> str:
         return iso_str
 
 
+def _build_delivery_notes_html(
+    p: dict, doc_number: str, base_css: str,
+    name: str, email: str, pn: str, title: str,
+    service_type_label: str,
+) -> str:
+    delivered_dt = _fmt_datetime_utc(p.get("delivered_at")) or "(pending)"
+    dels = p.get("deliverables") or []
+    if dels:
+        file_rows = "".join(
+            f"<tr><td>{i+1}</td><td>{d.get('original_filename','(unnamed)')}</td>"
+            f"<td><code style='word-break:break-all;font-size:11px;'>{d.get('cloud_url','')}</code></td>"
+            f"<td>{_fmt_datetime_utc(d.get('uploaded_at')) or '—'}</td></tr>"
+            for i, d in enumerate(dels)
+        )
+        files_block = (
+            "<table style='margin-top:10px;'><colgroup><col style='width:5%'/><col style='width:35%'/><col style='width:40%'/><col style='width:20%'/></colgroup>"
+            "<thead><tr><th>#</th><th>File name</th><th>Cloud link</th><th>Shared at</th></tr></thead>"
+            f"<tbody>{file_rows}</tbody></table>"
+        )
+    else:
+        files_block = "<p style='font-size:12px;color:#888;font-style:italic;'>No deliverables recorded.</p>"
+    notes = (p.get("production_notes") or "").strip()
+    notes_block = (
+        f"<div style='font-size:12px;border:1px solid #e5e7eb;padding:12px;background:#fafafa;border-radius:4px;white-space:pre-wrap;'>{notes}</div>"
+        if notes else ""
+    )
+
+    return f"""<html><head>{base_css}</head><body>
+    <div class="header"><span class="doc-number">{doc_number}</span><h1>DELIVERY NOTES</h1></div>
+
+    <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Document</th><td><code>{doc_number}</code></td></tr>
+    <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+    <tr><th>Delivered At</th><td>{delivered_dt}</td></tr>
+    </table></div>
+
+    <div class="section"><h2>Recipient</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Client</th><td>{name}</td></tr>
+    <tr><th>Email</th><td>{email}</td></tr>
+    <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+    <tr><th>Project Title</th><td>{title}</td></tr>
+    </table></div>
+
+    <div class="section"><h2>Materials Shared</h2>
+    <p style="font-size:12px;color:#444;">The following digital deliverables were shared with the client via secure cloud links:</p>
+    {files_block}
+    </div>
+
+    {'<div class="section"><h2>Notes from Production Team</h2>' + notes_block + '</div>' if notes_block else ''}
+
+    <div class="section"><h2>Delivery Method</h2>
+    <p style="font-size:12px;">Files delivered electronically through cloud-hosted share links (Google Drive / Dropbox / WeTransfer). No physical shipment involved — this is a digital-only service.</p>
+    <p style="font-size:11px;color:#666;font-style:italic;">Client access (timestamp of first link open) is tracked separately in the Certificate of Delivery.</p>
+    </div>
+
+    <div class="section"><h2>Issued By</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Service Provider</th><td>{LEGAL_ENTITY_NAME}</td></tr>
+    <tr><th>Tax ID</th><td>{TAX_ID}</td></tr>
+    <tr><th>Issued by</th><td>Ocean2Joy Production Team</td></tr>
+    </table></div>
+
+    <div class="footer">
+    <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+    <p><strong>Brand:</strong> {BRAND_NAME}</p>
+    <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+    </div>
+    </body></html>"""
+
+
+def _build_delivery_notes_txt(p: dict, doc_number: str) -> str:
+    name = p.get("user_name", "Client")
+    email = p.get("user_email", "")
+    pn = p.get("project_number", "")
+    title = p.get("project_title", "")
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    delivered_dt = _fmt_datetime_utc(p.get("delivered_at")) or "(pending)"
+    sep = "═" * 60
+
+    lines = [
+        "DELIVERY NOTES",
+        sep,
+        "",
+        f"Document: {doc_number}",
+        f"Project Reference: {pn}",
+        f"Delivered At: {delivered_dt}",
+        "",
+        sep,
+        "",
+        "RECIPIENT:",
+        f"Client: {name}",
+        f"Email: {email}",
+        f"Service Type: {service_type_label}",
+        f"Project Title: {title}",
+        "",
+        sep,
+        "",
+        "MATERIALS SHARED:",
+        "",
+        "The following digital deliverables were shared with the",
+        "client via secure cloud links:",
+        "",
+    ]
+    dels = p.get("deliverables") or []
+    if dels:
+        for i, d in enumerate(dels, start=1):
+            lines.append(f"{i}. {d.get('original_filename','(unnamed)')}")
+            lines.append(f"   Cloud link: {d.get('cloud_url','')}")
+            shared = _fmt_datetime_utc(d.get("uploaded_at")) or "—"
+            lines.append(f"   Shared at: {shared}")
+    else:
+        lines.append("(no deliverables recorded)")
+
+    notes = (p.get("production_notes") or "").strip()
+    if notes:
+        lines.extend(["", sep, "", "NOTES FROM PRODUCTION TEAM:", "", notes])
+
+    lines.extend([
+        "",
+        sep,
+        "",
+        "DELIVERY METHOD:",
+        "",
+        "Files delivered electronically through cloud-hosted share",
+        "links (Google Drive / Dropbox / WeTransfer). No physical",
+        "shipment involved — this is a digital-only service.",
+        "",
+        "Client access (timestamp of first link open) is tracked",
+        "separately in the Certificate of Delivery.",
+        "",
+        sep,
+        "",
+        "ISSUED BY:",
+        "",
+        f"Service Provider: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID}",
+        "Issued by: Ocean2Joy Production Team",
+        "",
+        sep,
+        "",
+        f"Legal Entity: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID} | {COUNTRY_OF_REGISTRATION}",
+        f"Brand: {BRAND_NAME}",
+        "",
+        f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
+        LOCATION,
+        "",
+        sep,
+    ])
+    return "\n".join(lines)
+
+
 def _build_certificate_delivery_html(
     p: dict, doc_number: str, base_css: str,
     name: str, email: str, pn: str, title: str,
@@ -832,12 +985,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
 
-        "download_confirmation": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>DOWNLOAD CONFIRMATION</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>Files for project <strong>{pn}</strong> have been accessed/downloaded by the client.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Project</th><td>{title}</td></tr></table></div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "download_confirmation": _build_delivery_notes_html(p, doc_number, base_css, name, email, pn, title, service_type_label),
 
         "receipt": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>RECEIPT</h1><div class="brand">{BRAND_NAME}</div></div>
@@ -985,6 +1133,10 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
     # Rich template for certificate_delivery (PayPal-compliant)
     if doc_type == "certificate_delivery":
         return _build_certificate_delivery_txt(p, doc_number)
+
+    # Delivery Notes — admin-side delivery report (stage 6)
+    if doc_type == "download_confirmation":
+        return _build_delivery_notes_txt(p, doc_number)
 
     # Special rich template for invoice (matches Marcos's format)
     if doc_type == "invoice":
