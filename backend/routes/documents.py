@@ -1562,12 +1562,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
         "acceptance_act": _build_acceptance_act_html(p, doc_number, base_css, name, email, pn, title, service_type_label),
 
-        "payment_confirmation": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>PAYMENT CONFIRMATION</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>Payment for project <strong>{pn}</strong> has been received and confirmed.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Amount</th><td>{amount}</td></tr><tr><th>Project</th><td>{title}</td></tr></table></div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "payment_confirmation": _build_receipt_html(p, doc_number, base_css, name, email, pn, title, amount, service_type_label),
 
         "order_confirmation": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>ORDER CONFIRMATION</h1><div class="brand">{BRAND_NAME}</div><p style='font-size:12px;color:#666;margin-top:4px;'>Order Activation Confirmation</p></div>
@@ -1818,6 +1813,10 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
 
     # Receipt — stage 10 after client marks payment sent
     if doc_type == "receipt":
+        return _build_receipt_txt(p, doc_number)
+
+    # Payment Confirmation — stage 11 final receipt after admin confirms payment
+    if doc_type == "payment_confirmation":
         return _build_receipt_txt(p, doc_number)
 
     # Special rich template for invoice (matches Marcos's format)
