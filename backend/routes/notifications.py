@@ -12,6 +12,7 @@ router = APIRouter(prefix="/api", tags=["notifications"])
 # Stages that need the given role to act next
 CLIENT_ACTION_STAGES = {
     "invoice_sent",        # → sign-invoice
+    "delivered",           # → click deliverable link (auto-advances to files_accessed)
     "files_accessed",      # → confirm-delivery
     "delivery_confirmed",  # → accept-work
     "work_accepted",       # → mark-payment-sent
@@ -64,6 +65,8 @@ def _action_hint(role: str, status: str, project: dict) -> str | None:
     else:  # client
         if status == "invoice_sent":
             return "Accept invoice & terms"
+        if status == "delivered":
+            return "Open deliverable link to access materials"
         if status == "files_accessed":
             return "Confirm delivery"
         if status == "delivery_confirmed":
