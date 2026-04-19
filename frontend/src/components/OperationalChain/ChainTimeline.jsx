@@ -144,11 +144,13 @@ export default function ChainTimeline({ project, onViewDoc }) {
                   <button
                     type="button"
                     onClick={handleSignedInvoiceDownload}
-                    className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
+                    className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
                     data-testid="timeline-signed-invoice-download"
                   >
-                    <FileCheck2 className="w-3 h-3" /> {project.signed_invoice_filename || 'Signed Invoice'}
-                    <Download className="w-3 h-3 ml-1" />
+                    <FileCheck2 className="w-3 h-3" />
+                    <span className="font-semibold">Signed Invoice:</span>
+                    <span className="text-emerald-600 truncate max-w-[200px]">{project.signed_invoice_filename}</span>
+                    <Download className="w-3 h-3 ml-0.5" />
                   </button>
                 </div>
               )}
@@ -159,11 +161,13 @@ export default function ChainTimeline({ project, onViewDoc }) {
                   <button
                     type="button"
                     onClick={handleSignedDeliveryCertDownload}
-                    className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
+                    className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
                     data-testid="timeline-signed-delivery-cert-download"
                   >
-                    <FileCheck2 className="w-3 h-3" /> {project.signed_delivery_cert_filename || 'Signed Certificate of Delivery'}
-                    <Download className="w-3 h-3 ml-1" />
+                    <FileCheck2 className="w-3 h-3" />
+                    <span className="font-semibold">Signed Certificate of Delivery:</span>
+                    <span className="text-emerald-600 truncate max-w-[200px]">{project.signed_delivery_cert_filename}</span>
+                    <Download className="w-3 h-3 ml-0.5" />
                   </button>
                 </div>
               )}
@@ -174,11 +178,13 @@ export default function ChainTimeline({ project, onViewDoc }) {
                   <button
                     type="button"
                     onClick={handleSignedAcceptanceActDownload}
-                    className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
+                    className="flex items-center gap-1.5 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
                     data-testid="timeline-signed-acceptance-act-download"
                   >
-                    <FileCheck2 className="w-3 h-3" /> {project.signed_acceptance_act_filename || 'Signed Acceptance Act'}
-                    <Download className="w-3 h-3 ml-1" />
+                    <FileCheck2 className="w-3 h-3" />
+                    <span className="font-semibold">Signed Acceptance Act:</span>
+                    <span className="text-emerald-600 truncate max-w-[200px]">{project.signed_acceptance_act_filename}</span>
+                    <Download className="w-3 h-3 ml-0.5" />
                   </button>
                 </div>
               )}
