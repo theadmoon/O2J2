@@ -58,6 +58,7 @@ def _payment_confirmation_phrase(payment_method: str) -> str:
 
 
 
+def _invoice_dates(project: dict) -> dict:
     """Compute issue/start/delivery dates for the invoice. Uses admin-provided
     values when available, otherwise derives sensible defaults from timestamps."""
     from datetime import datetime as _dt, timedelta as _td
@@ -306,8 +307,8 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
             <tr><th>Service Type</th><td>{service_type_label}</td></tr>
             </table>
-            <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Project Brief:</p>
-            <div style="white-space: pre-wrap; font-size: 12px; border: 1px solid #e5e7eb; padding: 12px; background: #fafafa; border-radius: 4px;">{p.get('brief','')}</div>
+            <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Project Reference:</p>
+            <div style="font-size: 12px; border: 1px solid #e5e7eb; padding: 12px; background: #fafafa; border-radius: 4px;">Customer film production according to client's script — {service_type_label} (Project {pn})</div>
             <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Estimated Production Period:</p>
             <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
             <tr><th>Start</th><td>{inv_dates['start']}</td></tr>
@@ -387,7 +388,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <tr><th>Email</th><td>{email}</td></tr>
             <tr><th>Acceptance Date</th><td>{format_date_utc(p.get('invoice_signed_at')) + ' UTC' if p.get('invoice_signed_at') else '(pending)'}</td></tr>
             </table>
-            <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic;">Acceptance is recorded electronically in the client portal. No handwritten signature is required.</p>
+            <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic;">Acceptance is recorded electronically in the client portal.</p>
             </div>
 
             <div class="footer">
@@ -718,8 +719,8 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
             "",
             f"Service Type: {service_type_label}",
             "",
-            "Project Brief:",
-            p.get("brief", "").strip() or "(not provided)",
+            "Project Reference:",
+            f"Customer film production according to client's script — {service_type_label} (Project {pn})",
             "",
             "Estimated Production Period:",
             f"Start: {inv_dates['start']}",
@@ -815,7 +816,6 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
             f"Acceptance Date: {acceptance_date or '(pending)'}",
             "",
             "Acceptance is recorded electronically in the client portal.",
-            "No handwritten signature is required.",
             "",
             sep,
             "",

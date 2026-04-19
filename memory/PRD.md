@@ -145,3 +145,16 @@ All 11 types (QUO/ORD/INV/PRD/DEL/DWN/ACC/INS/RCP/PAY/CRT) auto-generated with i
 - Email notifications on stage changes (SendGrid/Resend)
 - PayPal/Stripe checkout integration for stage 10 (now external)
 - Multi-deliverable ZIP bundle download
+
+## Task #008: Invoice Template Final Polish (Feb 19, 2026)
+- Replaced full `{brief}` block on the Invoice with a standard reference string:
+  `Customer film production according to client's script — {service_type_label} (Project {project_number})`
+  (applied to both HTML and TXT templates in `/app/backend/routes/documents.py`)
+- Removed legal clause "No handwritten signature is required." — client will upload a signed invoice scan in a subsequent stage
+- Verified that invoice amount pulls strictly from `project.quote_amount` (no hardcoded value)
+- Fixed pre-existing bug: `_invoice_dates` function was missing its `def` line → caused 500 error on `/api/projects/{id}/documents/invoice/txt`
+- Verified via curl on project VAPP-51-JOHN-CUSTOM-260419: 3-page PDF, 31KB, correct content, all 3 $1,200.00 amounts render correctly
+
+### Upcoming (P1)
+- Client upload flow for signed Invoice scan (post Sign Invoice stage)
+- Replace demo video placeholders with final MP4 files (12-35MB)
