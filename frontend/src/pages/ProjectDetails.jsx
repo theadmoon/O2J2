@@ -292,7 +292,7 @@ export default function ProjectDetails() {
             <div className="mt-4 border-t border-gray-100 pt-4 grid sm:grid-cols-3 gap-4 text-sm" data-testid="project-quote-block">
               <div>
                 <p className="text-xs uppercase tracking-wider text-gray-500">Quote</p>
-                <p className="text-lg font-bold text-sky-600 mt-0.5 flex items-center gap-1"><DollarSign className="w-4 h-4" />{formatCurrency(project.quote_amount)}</p>
+                <p className="text-lg font-bold text-sky-600 mt-0.5">{formatCurrency(project.quote_amount)}</p>
               </div>
               {project.quote_details && (
                 <div className="sm:col-span-2">
