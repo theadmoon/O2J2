@@ -757,6 +757,318 @@ def _build_payment_instructions_txt(p: dict, doc_number: str) -> str:
     return "\n".join(lines)
 
 
+def _build_certificate_completion_html(
+    p: dict, doc_number: str, base_css: str,
+    name: str, email: str, pn: str, title: str, amount: str, service_type_label: str,
+) -> str:
+    client_paypal = (p.get("user_paypal_email") or "").strip() or "(not provided)"
+    tx_id = (p.get("paypal_transaction_id") or "").strip() or "(not provided)"
+    payment_method_label = {
+        "paypal": "PayPal",
+        "bank_transfer": "Bank Transfer (SWIFT)",
+        "crypto": f"{CRYPTO_ASSET} on {CRYPTO_NETWORK}",
+    }.get(p.get("payment_method") or "paypal", "PayPal")
+    payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
+    payment_confirmed_dt = _fmt_datetime_utc(p.get("payment_confirmed_by_manager_at")) or "(pending)"
+    completed_dt = _fmt_datetime_utc(p.get("project_closed_at")) or "(pending)"
+
+    # Deliverables list
+    dels = p.get("deliverables") or []
+    files_list = (
+        "<ul style='padding-left:20px;font-size:12px;line-height:1.7;margin:6px 0;'>"
+        + "".join(
+            f"<li>{d.get('original_filename','(unnamed)')}"
+            + (f" — first accessed {_fmt_datetime_utc(d.get('first_accessed_at'))}" if d.get('first_accessed_at') else "")
+            + "</li>"
+            for d in dels
+        )
+        + "</ul>"
+    ) if dels else "<p style='font-size:12px;color:#888;font-style:italic;'>(no deliverables recorded)</p>"
+
+    # Operational chain timeline
+    chain_rows = ""
+    for stage in OPERATIONAL_CHAIN_STAGES:
+        ts = p.get(stage["timestamp_field"])
+        ts_display = _fmt_datetime_utc(ts) if ts else "—"
+        chain_rows += (
+            f"<tr><td style='text-align:center;'>{stage['stage_number']:02d}</td>"
+            f"<td>{stage['display_name']}</td>"
+            f"<td>{ts_display}</td></tr>"
+        )
+    chain_block = (
+        "<table style='margin-top:10px;'><colgroup><col style='width:10%'/><col style='width:45%'/><col style='width:45%'/></colgroup>"
+        "<thead><tr><th>#</th><th>Stage</th><th>Completed (UTC)</th></tr></thead>"
+        f"<tbody>{chain_rows}</tbody></table>"
+    )
+
+    # Generated documents list
+    doc_rows = ""
+    doc_numbers = p.get("document_numbers") or {}
+    for doc_type, info in DOCUMENT_TYPES.items():
+        num = doc_numbers.get(doc_type)
+        if not num:
+            continue
+        doc_rows += (
+            f"<tr><td>{info['display_name']}</td>"
+            f"<td><code>{num}</code></td></tr>"
+        )
+    docs_block = (
+        "<table style='margin-top:10px;'><colgroup><col style='width:50%'/><col style='width:50%'/></colgroup>"
+        "<thead><tr><th>Document</th><th>Reference Number</th></tr></thead>"
+        f"<tbody>{doc_rows}</tbody></table>"
+    ) if doc_rows else "<p style='font-size:12px;color:#888;font-style:italic;'>(no documents generated)</p>"
+
+    # Signed artifacts uploaded by client
+    signed_rows = []
+    if p.get("signed_invoice_filename"):
+        signed_rows.append(f"<li>Signed Invoice — <code>{p['signed_invoice_filename']}</code></li>")
+    if p.get("signed_delivery_cert_filename"):
+        signed_rows.append(f"<li>Signed Certificate of Delivery — <code>{p['signed_delivery_cert_filename']}</code></li>")
+    if p.get("signed_acceptance_act_filename"):
+        signed_rows.append(f"<li>Signed Acceptance Act — <code>{p['signed_acceptance_act_filename']}</code></li>")
+    if p.get("payment_proof_filename"):
+        signed_rows.append(f"<li>Payment Screenshot — <code>{p['payment_proof_filename']}</code></li>")
+    signed_block = (
+        "<ul style='padding-left:20px;font-size:12px;line-height:1.7;margin:6px 0;'>"
+        + "".join(signed_rows)
+        + "</ul>"
+    ) if signed_rows else "<p style='font-size:12px;color:#888;font-style:italic;'>(none)</p>"
+
+    return f"""<html><head>{base_css}</head><body>
+    <div class="header"><span class="doc-number">{doc_number}</span><h1>CERTIFICATE OF COMPLETION</h1>
+    <p style="font-size:11px;color:#666;margin:2px 0 0 0;">Final Closing Document — Digital Video Production Service</p>
+    </div>
+
+    <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Certificate</th><td><code>{doc_number}</code></td></tr>
+    <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+    <tr><th>Completion Date</th><td>{completed_dt}</td></tr>
+    </table>
+    <p style="font-size:12px;margin-top:10px;color:#047857;font-weight:600;">This certificate confirms that the project has been completed in full, delivered, accepted, and paid.</p>
+    </div>
+
+    <div class="section"><h2>Parties</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Client</th><td>{name}</td></tr>
+    <tr><th>Email</th><td>{email}</td></tr>
+    <tr><th>Client PayPal</th><td><code>{client_paypal}</code></td></tr>
+    </table>
+    <p style="font-size:12px;margin-top:10px;"><strong>Service Provider:</strong><br>
+    {LEGAL_ENTITY_NAME}<br>
+    Tax ID: {TAX_ID}<br>
+    Country of Registration: {COUNTRY_OF_REGISTRATION}</p>
+    </div>
+
+    <div class="section"><h2>Service</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Project Title</th><td>{title}</td></tr>
+    <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+    <tr><th>Contract Amount</th><td><strong>{amount}</strong></td></tr>
+    </table>
+    <p style="font-weight:600;margin-top:14px;margin-bottom:4px;font-size:12px;">Deliverables:</p>
+    {files_list}
+    </div>
+
+    <div class="section"><h2>Payment Summary</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Amount</th><td><strong>{amount}</strong></td></tr>
+    <tr><th>Method</th><td>{payment_method_label}</td></tr>
+    <tr><th>Transaction ID</th><td><code>{tx_id}</code></td></tr>
+    <tr><th>Transaction Time (UTC)</th><td>{payment_time}</td></tr>
+    <tr><th>Payment Confirmed</th><td>{payment_confirmed_dt}</td></tr>
+    <tr><th>Payment Status</th><td><strong style="color:#047857;">PAID IN FULL — $0.00 OUTSTANDING</strong></td></tr>
+    </table>
+    </div>
+
+    <div class="section"><h2>Operational Chain</h2>
+    <p style="font-size:12px;color:#444;">Chronological log of the 12-stage workflow (all timestamps in UTC):</p>
+    {chain_block}
+    </div>
+
+    <div class="section"><h2>Generated Documents</h2>
+    <p style="font-size:12px;color:#444;">All formal documents issued during the engagement:</p>
+    {docs_block}
+    </div>
+
+    <div class="section"><h2>Client-Signed Artifacts on File</h2>
+    {signed_block}
+    </div>
+
+    <div class="section"><h2>Legal Confirmation</h2>
+    <p style="font-size:12px;">By issuing this certificate, both parties confirm:</p>
+    <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+        <li>The service was delivered electronically through the secure client portal</li>
+        <li>The client accessed and accepted all deliverables</li>
+        <li>Payment was received in full and confirmed by the service provider</li>
+        <li>No further obligations remain for either party</li>
+        <li>No refunds apply after delivery (per Terms of Service)</li>
+    </ul>
+    </div>
+
+    <div class="footer">
+    <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+    <p><strong>Brand:</strong> {BRAND_NAME}</p>
+    <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+    </div>
+    </body></html>"""
+
+
+def _build_certificate_completion_txt(p: dict, doc_number: str) -> str:
+    name = p.get("user_name", "Client")
+    email = p.get("user_email", "")
+    pn = p.get("project_number", "")
+    title = p.get("project_title", "")
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    amount = format_currency(p.get("quote_amount", 0))
+    client_paypal = (p.get("user_paypal_email") or "").strip() or "(not provided)"
+    tx_id = (p.get("paypal_transaction_id") or "").strip() or "(not provided)"
+    payment_method_label = {
+        "paypal": "PayPal",
+        "bank_transfer": "Bank Transfer (SWIFT)",
+        "crypto": f"{CRYPTO_ASSET} on {CRYPTO_NETWORK}",
+    }.get(p.get("payment_method") or "paypal", "PayPal")
+    payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
+    payment_confirmed_dt = _fmt_datetime_utc(p.get("payment_confirmed_by_manager_at")) or "(pending)"
+    completed_dt = _fmt_datetime_utc(p.get("project_closed_at")) or "(pending)"
+    sep = "═" * 60
+
+    lines = [
+        "CERTIFICATE OF COMPLETION",
+        sep,
+        "",
+        "Final Closing Document — Digital Video Production Service",
+        "",
+        f"Certificate: {doc_number}",
+        f"Project Reference: {pn}",
+        f"Completion Date: {completed_dt}",
+        "",
+        "This certificate confirms that the project has been completed",
+        "in full, delivered, accepted, and paid.",
+        "",
+        sep,
+        "",
+        "PARTIES",
+        "",
+        f"Client: {name}",
+        f"Email: {email}",
+        f"Client PayPal: {client_paypal}",
+        "",
+        "Service Provider:",
+        LEGAL_ENTITY_NAME,
+        f"Tax ID: {TAX_ID}",
+        f"Country of Registration: {COUNTRY_OF_REGISTRATION}",
+        "",
+        sep,
+        "",
+        "SERVICE",
+        "",
+        f"Project Title: {title}",
+        f"Service Type: {service_type_label}",
+        f"Contract Amount: {amount}",
+        "",
+        "Deliverables:",
+    ]
+    dels = p.get("deliverables") or []
+    if dels:
+        for d in dels:
+            access = _fmt_datetime_utc(d.get("first_accessed_at"))
+            line = f"• {d.get('original_filename','(unnamed)')}"
+            if access:
+                line += f" — first accessed {access}"
+            lines.append(line)
+    else:
+        lines.append("(no deliverables recorded)")
+
+    lines.extend([
+        "",
+        sep,
+        "",
+        "PAYMENT SUMMARY",
+        "",
+        f"Amount: {amount}",
+        f"Method: {payment_method_label}",
+        f"Transaction ID: {tx_id}",
+        f"Transaction Time (UTC): {payment_time}",
+        f"Payment Confirmed: {payment_confirmed_dt}",
+        "Payment Status: PAID IN FULL — $0.00 OUTSTANDING",
+        "",
+        sep,
+        "",
+        "OPERATIONAL CHAIN (all timestamps in UTC)",
+        "",
+    ])
+    for stage in OPERATIONAL_CHAIN_STAGES:
+        ts = p.get(stage["timestamp_field"])
+        ts_display = _fmt_datetime_utc(ts) if ts else "—"
+        lines.append(f"  {stage['stage_number']:02d}. {stage['display_name']:<22} {ts_display}")
+
+    lines.extend([
+        "",
+        sep,
+        "",
+        "GENERATED DOCUMENTS",
+        "",
+    ])
+    doc_numbers = p.get("document_numbers") or {}
+    any_doc = False
+    for doc_type, info in DOCUMENT_TYPES.items():
+        num = doc_numbers.get(doc_type)
+        if not num:
+            continue
+        any_doc = True
+        lines.append(f"  • {info['display_name']:<30} {num}")
+    if not any_doc:
+        lines.append("  (none)")
+
+    lines.extend([
+        "",
+        sep,
+        "",
+        "CLIENT-SIGNED ARTIFACTS ON FILE",
+        "",
+    ])
+    any_signed = False
+    for field, label in [
+        ("signed_invoice_filename", "Signed Invoice"),
+        ("signed_delivery_cert_filename", "Signed Certificate of Delivery"),
+        ("signed_acceptance_act_filename", "Signed Acceptance Act"),
+        ("payment_proof_filename", "Payment Screenshot"),
+    ]:
+        val = p.get(field)
+        if val:
+            any_signed = True
+            lines.append(f"  • {label}: {val}")
+    if not any_signed:
+        lines.append("  (none)")
+
+    lines.extend([
+        "",
+        sep,
+        "",
+        "LEGAL CONFIRMATION",
+        "",
+        "By issuing this certificate, both parties confirm:",
+        "",
+        "✓ The service was delivered electronically through the secure portal",
+        "✓ The client accessed and accepted all deliverables",
+        "✓ Payment was received in full and confirmed by the service provider",
+        "✓ No further obligations remain for either party",
+        "✓ No refunds apply after delivery (per Terms of Service)",
+        "",
+        sep,
+        "",
+        f"Legal Entity: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID} | {COUNTRY_OF_REGISTRATION}",
+        f"Brand: {BRAND_NAME}",
+        "",
+        f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
+        LOCATION,
+        "",
+        sep,
+    ])
+    return "\n".join(lines)
+
+
 def _build_receipt_html(
     p: dict, doc_number: str, base_css: str,
     name: str, email: str, pn: str, title: str, amount: str, service_type_label: str,
@@ -1555,12 +1867,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             </div>
             </body></html>""",
 
-        "certificate_completion": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>CERTIFICATE OF COMPLETION</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>This certifies that the project <strong>{pn}</strong> — "{title}" — has been completed in full.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Email</th><td>{email}</td></tr><tr><th>Amount</th><td>{amount}</td></tr></table></div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "certificate_completion": _build_certificate_completion_html(p, doc_number, base_css, name, email, pn, title, amount, service_type_label),
 
         "certificate_delivery": _build_certificate_delivery_html(p, doc_number, base_css, name, email, pn, title, service_type_label, date_created),
 
@@ -1822,6 +2129,10 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
     # Payment Confirmation — stage 11 final receipt after admin confirms payment
     if doc_type == "payment_confirmation":
         return _build_receipt_txt(p, doc_number)
+
+    # Certificate of Completion — final closing document (stage 12)
+    if doc_type == "certificate_completion":
+        return _build_certificate_completion_txt(p, doc_number)
 
     # Special rich template for invoice (matches Marcos's format)
     if doc_type == "invoice":
