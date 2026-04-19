@@ -62,6 +62,15 @@ export default function Register() {
             <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white h-11 rounded-lg flex items-center justify-center gap-2" data-testid="register-submit-button">
               {loading ? 'Creating account...' : <>Create Account <ArrowRight className="w-4 h-4" /></>}
             </Button>
+            <p className="text-xs text-gray-500 leading-relaxed" data-testid="register-gdpr-notice">
+              By creating an account, you agree to our{' '}
+              <Link to="/policies/terms" className="text-sky-600 hover:underline" data-testid="register-terms-link">Terms of Service</Link>
+              {' '}and acknowledge our{' '}
+              <Link to="/policies/privacy" className="text-sky-600 hover:underline" data-testid="register-privacy-link">Privacy Policy</Link>.
+              We process your name and email to deliver our services under GDPR Art. 6(1)(b).
+              You may access, correct, export, or delete your data at any time by emailing{' '}
+              <a href="mailto:ocean2joy@gmail.com" className="text-sky-600 hover:underline">ocean2joy@gmail.com</a>.
+            </p>
           </form>
           <p className="mt-6 text-sm text-gray-500">
             Already have an account?{' '}

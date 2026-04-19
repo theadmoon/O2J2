@@ -204,8 +204,71 @@ POLICIES = {
     },
     "privacy": {
         "title": "Privacy Policy",
-        "updated_at": "2025-02-17T00:00:00Z",
-        "content": """# Privacy Policy\n\n## Data Collection\nWe collect only information necessary to provide our services: name, email, project details.\n\n## Data Usage\nYour data is used solely for project delivery and communication.\n\n## Data Protection\nAll data is stored securely and is not shared with third parties.\n\n## Contact\nFor privacy concerns: ocean2joy@gmail.com""",
+        "updated_at": "2026-02-18T00:00:00Z",
+        "content": """_Last updated: February 18, 2026_
+
+This Privacy Policy explains how **Individual Entrepreneur Vera Iambaeva** (Tax ID: 302335809, Tbilisi, Georgia), operating the Ocean2Joy Digital Video Production brand ("we", "us", "the Controller"), collects and processes personal data in accordance with the **EU General Data Protection Regulation (GDPR)** and the **Law of Georgia on Personal Data Protection**.
+
+## 1. Data Controller
+- **Name:** Individual Entrepreneur Vera Iambaeva
+- **Tax ID:** 302335809
+- **Address:** Tbilisi, Georgia
+- **Contact for privacy matters:** ocean2joy@gmail.com
+
+## 2. What Data We Collect
+- **Account data:** full name, email address, hashed password.
+- **Project data:** brief, uploaded scripts/reference files, deliverable downloads.
+- **Payment data:** PayPal transaction ID (only if you voluntarily provide it), SWIFT transfer references.
+- **Technical data:** IP address and session cookies strictly necessary for authentication.
+
+We do **not** collect payment card details — all payments are handled by external providers (PayPal, your bank).
+
+## 3. Why and On What Legal Basis
+| Purpose | Legal basis (GDPR Art. 6) |
+|---|---|
+| Create and manage your account, deliver services you ordered | 6(1)(b) — Performance of a contract |
+| Issue invoices, receipts, and legally required business records | 6(1)(c) — Legal obligation (Georgian tax law) |
+| Authentication cookies, fraud prevention, platform security | 6(1)(f) — Legitimate interest |
+| Optional marketing communications (only if you opt-in) | 6(1)(a) — Consent |
+
+## 4. How Long We Keep Your Data
+- **Active accounts:** for as long as your account is active.
+- **Closed accounts:** deleted within 30 days of your deletion request, **except** records we are legally required to keep (invoices, tax records) for **6 years** under Georgian tax law.
+- **Project files & deliverables:** retained in your portal for 90 days after delivery unless you request earlier removal.
+
+## 5. Who Has Access
+Your data is accessed only by the Controller and authorised project managers. We do **not** sell, rent, or share your personal data with third parties for marketing. Limited processors may be used strictly to run the service (hosting, email delivery) under contractual confidentiality.
+
+## 6. International Transfers
+The Controller is based in Georgia, which has been recognised by the European Commission as providing an adequate level of data protection for transfers from the EU/EEA. No further safeguards are required.
+
+## 7. Your Rights Under GDPR
+You have the right to:
+- **Access** the data we hold about you (Art. 15).
+- **Rectify** inaccurate or incomplete data (Art. 16).
+- **Erase** your data — "right to be forgotten" (Art. 17), subject to legal retention obligations.
+- **Restrict** or **object** to processing (Art. 18 & 21).
+- **Data portability** — receive your data in a machine-readable format (Art. 20).
+- **Withdraw consent** at any time for processing based on consent (Art. 7(3)).
+- **Lodge a complaint** with your local EU Data Protection Authority or the **Georgian Personal Data Protection Service** (personaldata.ge).
+
+To exercise any right, email **ocean2joy@gmail.com**. We respond within 30 days.
+
+## 8. Cookies
+We use only **strictly necessary cookies** (httpOnly `access_token` and `refresh_token`) for authentication. No analytics, advertising, or third-party tracking cookies are set. No cookie consent banner is legally required for strictly necessary cookies under GDPR Recital 30 and ePrivacy Directive Art. 5(3).
+
+## 9. Security
+Passwords are hashed with bcrypt. All traffic is served over HTTPS. Access tokens are stored in httpOnly, SameSite=Lax cookies to mitigate XSS and CSRF risks.
+
+## 10. Children
+Our services are not directed to individuals under 16. We do not knowingly collect personal data from minors.
+
+## 11. Changes to This Policy
+We may update this Policy. The "Last updated" date above reflects the latest revision. Material changes will be notified by email or portal notice.
+
+## 12. Contact
+For any privacy-related question or to exercise your rights: **ocean2joy@gmail.com**.
+""",
     },
 }
 
