@@ -13,7 +13,7 @@ import ChatContainer from '../components/Chat/ChatContainer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
   ArrowLeft, FileText, Hash, User, Mail, Briefcase, DollarSign, ShieldCheck,
-  Paperclip, Download, Pencil, Check, X, ChevronDown, ChevronUp,
+  Paperclip, Download, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard,
 } from 'lucide-react';
 
 export default function ProjectDetails() {
@@ -190,6 +190,38 @@ export default function ProjectDetails() {
               <span className="capitalize">{project.service_type?.replace(/_/g, ' ')}</span>
             </div>
           </div>
+
+          {/* Payment method */}
+          {(() => {
+            const PM_LABEL = { paypal: 'PayPal', bank_transfer: 'Bank Transfer (SWIFT)', crypto: 'USDT (TRC-20)' };
+            const canEdit = !project.invoice_sent_at && (user?.role === 'admin' || user?.id === project.user_id);
+            return (
+              <div className="mt-4 flex items-center gap-2 text-sm flex-wrap" data-testid="project-payment-method">
+                <CreditCard className="w-4 h-4 text-sky-500" />
+                <span className="text-xs uppercase tracking-wider text-gray-500">Payment:</span>
+                <span className="font-medium text-gray-800">
+                  {PM_LABEL[project.payment_method] || project.payment_method || 'not selected'}
+                </span>
+                {canEdit && (
+                  <select
+                    className="ml-2 text-xs border border-gray-200 rounded px-2 py-1 bg-white hover:border-sky-300 cursor-pointer"
+                    value={project.payment_method || ''}
+                    onChange={async (e) => {
+                      try {
+                        const { data } = await api.patch(`/projects/${id}`, { payment_method: e.target.value });
+                        setProject(data);
+                      } catch {}
+                    }}
+                    data-testid="project-payment-method-select"
+                  >
+                    <option value="paypal">PayPal</option>
+                    <option value="bank_transfer">Bank Transfer (SWIFT)</option>
+                    <option value="crypto">USDT (TRC-20)</option>
+                  </select>
+                )}
+              </div>
+            );
+          })()}
           {/* Brief + Attachments — collapsed by default */}
           {(() => {
             const refCount = (project.reference_files || []).length;

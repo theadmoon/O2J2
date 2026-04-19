@@ -9,6 +9,29 @@ PAYPAL_EMAIL = "302335809@postbox.ge"
 CONTACT_PHONE = "+995 555 375 032"
 LOCATION = "Tbilisi, Georgia"
 
+# Bank transfer (SWIFT)
+BANK_BENEFICIARY_NAME = LEGAL_ENTITY_NAME
+BANK_BENEFICIARY_BANK = "Bank of Georgia"
+BANK_BENEFICIARY_BANK_LOCATION = "Tbilisi, Georgia"
+BANK_BENEFICIARY_BANK_SWIFT = "BAGAGE22"
+BANK_BENEFICIARY_IBAN = "GE29BG0000000541827200"
+BANK_INTERMEDIARY_1_NAME = "Citibank N.A., New York"
+BANK_INTERMEDIARY_1_SWIFT = "CITIUS33"
+BANK_INTERMEDIARY_2_NAME = "JPMorgan Chase Bank National Association, New York"
+BANK_INTERMEDIARY_2_SWIFT = "CHASUS33"
+
+# Crypto (USDT TRC-20)
+CRYPTO_NETWORK = "TRON (TRC-20)"
+CRYPTO_ASSET = "USDT"
+CRYPTO_WALLET_ADDRESS = "TH8qaDB7a2yYXHBBk6Df62vD2g6VKd2sXJ"
+
+# Payment method options shown to the client
+PAYMENT_METHODS = {
+    "paypal": {"label": "PayPal", "display": "PayPal"},
+    "bank_transfer": {"label": "Bank Transfer", "display": "Bank Transfer (SWIFT)"},
+    "crypto": {"label": "Crypto", "display": "USDT (TRC-20)"},
+}
+
 SERVICE_TYPES = {
     "custom_video": {"label": "Custom", "display": "Custom Video Production"},
     "video_editing": {"label": "Editing", "display": "Video Editing"},

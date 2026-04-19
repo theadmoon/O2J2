@@ -6,6 +6,13 @@ from utils.constants import DOCUMENT_TYPES, OPERATIONAL_CHAIN_STAGES
 from utils.constants import (
     LEGAL_ENTITY_NAME, TAX_ID, COUNTRY_OF_REGISTRATION,
     BRAND_NAME, CONTACT_EMAIL, CONTACT_PHONE, LOCATION,
+    PAYPAL_EMAIL,
+    BANK_BENEFICIARY_NAME, BANK_BENEFICIARY_BANK, BANK_BENEFICIARY_BANK_LOCATION,
+    BANK_BENEFICIARY_BANK_SWIFT, BANK_BENEFICIARY_IBAN,
+    BANK_INTERMEDIARY_1_NAME, BANK_INTERMEDIARY_1_SWIFT,
+    BANK_INTERMEDIARY_2_NAME, BANK_INTERMEDIARY_2_SWIFT,
+    CRYPTO_NETWORK, CRYPTO_ASSET, CRYPTO_WALLET_ADDRESS,
+    PAYMENT_METHODS,
 )
 from utils.formatters import format_date_utc, format_currency
 from services.document_service import get_or_generate_document_number
@@ -30,6 +37,81 @@ async def _get_project_and_validate(project_id: str, request: Request):
     if user["role"] != "admin" and project["user_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     return db, project
+
+
+def _payment_method_details_html(project: dict) -> str:
+    method = (project.get("payment_method") or "paypal")
+    if method == "paypal":
+        return (
+            "<p><strong>Method:</strong> PayPal</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Send to</th><td><code>{PAYPAL_EMAIL}</code></td></tr>"
+            f"<tr><th>Beneficiary</th><td>{LEGAL_ENTITY_NAME}</td></tr>"
+            f"<tr><th>Reference</th><td>Include your project number <strong>{project.get('project_number','')}</strong> in the PayPal note.</td></tr>"
+            "</table>"
+        )
+    if method == "bank_transfer":
+        return (
+            "<p><strong>Method:</strong> Bank Transfer (SWIFT)</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Beneficiary</th><td>{BANK_BENEFICIARY_NAME}</td></tr>"
+            f"<tr><th>Beneficiary Bank</th><td>{BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}</td></tr>"
+            f"<tr><th>SWIFT</th><td><code>{BANK_BENEFICIARY_BANK_SWIFT}</code></td></tr>"
+            f"<tr><th>IBAN</th><td><code>{BANK_BENEFICIARY_IBAN}</code></td></tr>"
+            f"<tr><th>Intermediary 1</th><td>{BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})</td></tr>"
+            f"<tr><th>Intermediary 2</th><td>{BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})</td></tr>"
+            f"<tr><th>Reference</th><td>Include project number <strong>{project.get('project_number','')}</strong> in the transfer message.</td></tr>"
+            "</table>"
+        )
+    if method == "crypto":
+        return (
+            f"<p><strong>Method:</strong> {CRYPTO_ASSET} on {CRYPTO_NETWORK}</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Asset</th><td>{CRYPTO_ASSET}</td></tr>"
+            f"<tr><th>Network</th><td>{CRYPTO_NETWORK} — <strong>TRC-20 only</strong></td></tr>"
+            f"<tr><th>Wallet address</th><td><code style='word-break:break-all'>{CRYPTO_WALLET_ADDRESS}</code></td></tr>"
+            f"<tr><th>Beneficiary</th><td>{LEGAL_ENTITY_NAME}</td></tr>"
+            f"<tr><th>Reference</th><td>After the transfer, send the transaction hash through your project chat and mark the payment as sent. Include project number <strong>{project.get('project_number','')}</strong> for our records.</td></tr>"
+            "</table>"
+            "<p style='color:#b45309;font-size:11px;margin-top:8px;'>"
+            "⚠ Only TRON network (TRC-20) transfers are supported. Assets sent via a different network may be lost."
+            "</p>"
+        )
+    return "<p><em>No payment method selected.</em></p>"
+
+
+def _payment_method_details_txt(project: dict) -> list[str]:
+    method = (project.get("payment_method") or "paypal")
+    pn = project.get("project_number", "")
+    if method == "paypal":
+        return [
+            "Method: PayPal",
+            f"  Send to: {PAYPAL_EMAIL}",
+            f"  Beneficiary: {LEGAL_ENTITY_NAME}",
+            f"  Reference: Include project number {pn} in the PayPal note.",
+        ]
+    if method == "bank_transfer":
+        return [
+            "Method: Bank Transfer (SWIFT)",
+            f"  Beneficiary: {BANK_BENEFICIARY_NAME}",
+            f"  Beneficiary Bank: {BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}",
+            f"  SWIFT: {BANK_BENEFICIARY_BANK_SWIFT}",
+            f"  IBAN: {BANK_BENEFICIARY_IBAN}",
+            f"  Intermediary 1: {BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})",
+            f"  Intermediary 2: {BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})",
+            f"  Reference: Include project number {pn} in the transfer message.",
+        ]
+    if method == "crypto":
+        return [
+            f"Method: {CRYPTO_ASSET} on {CRYPTO_NETWORK}",
+            f"  Asset: {CRYPTO_ASSET}",
+            f"  Network: {CRYPTO_NETWORK} — TRC-20 ONLY",
+            f"  Wallet address: {CRYPTO_WALLET_ADDRESS}",
+            f"  Beneficiary: {LEGAL_ENTITY_NAME}",
+            f"  Reference: Include project number {pn} and send tx hash via project chat.",
+            "  WARNING: Only TRON network (TRC-20) transfers are supported. Assets sent via other networks may be lost.",
+        ]
+    return ["Method: (not selected)"]
 
 
 def _attachments_html_block(project: dict) -> str:
@@ -86,6 +168,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
     date_created = format_date_utc(p.get("created_at"))
     attachments_block = _attachments_html_block(p)
     rendered_at = format_date_utc(datetime.now(timezone.utc).isoformat())
+    payment_details_block = _payment_method_details_html(p)
 
     base_css = """
     <style>
@@ -115,7 +198,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <div class="section"><h2>Project Details</h2>
             <table><tr><th>Project</th><td>{pn}</td></tr><tr><th>Title</th><td>{title}</td></tr><tr><th>Date</th><td>{date_created}</td></tr></table></div>
             <div class="section"><h2>Amount Due</h2><table><tr><th>Service</th><th>Amount</th></tr><tr><td>{title}</td><td><strong>{amount}</strong></td></tr></table></div>
-            <div class="section"><h2>Payment Information</h2><p>Please remit payment to:<br>{LEGAL_ENTITY_NAME}<br>Tax ID: {TAX_ID}<br>{COUNTRY_OF_REGISTRATION}</p></div>
+            <div class="section"><h2>Payment Details</h2>{payment_details_block}</div>
             <div class="signature-line">Authorized Signature</div>
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
@@ -183,9 +266,14 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
         "payment_instructions": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>PAYMENT INSTRUCTIONS</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><h2>Payment Details</h2><p>Amount: <strong>{amount}</strong></p><p>Project: {pn}</p>
-            <h2>How to Pay</h2><p>Transfer to:<br>{LEGAL_ENTITY_NAME}<br>Tax ID: {TAX_ID}<br>{COUNTRY_OF_REGISTRATION}</p>
-            <p>Contact: {CONTACT_EMAIL}</p></div>
+            <div class="section"><h2>Summary</h2>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Project</th><td>{pn}</td></tr>
+            <tr><th>Title</th><td>{title}</td></tr>
+            <tr><th>Amount Due</th><td><strong>{amount}</strong></td></tr>
+            </table></div>
+            <div class="section"><h2>How to Pay</h2>{payment_details_block}</div>
+            <div class="section"><p style='font-size:11px;color:#666;'>After sending the payment, please mark it as sent in your project portal. Include the transaction ID/reference where applicable. Contact us at {CONTACT_EMAIL} for any questions.</p></div>
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
 
@@ -245,7 +333,7 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         f"{display}",
         f"Document #: {doc_number}",
         f"{'='*60}",
-        f"",
+        "",
         f"Client: {name}",
         f"Email: {email}",
         f"Project: {pn}",
@@ -260,10 +348,14 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
             lines.extend(["", "-" * 60, "BRIEF", "", brief_text])
         lines.extend(_attachments_txt_block(p))
 
+    if doc_type in ("invoice", "payment_instructions"):
+        lines.extend(["", "-" * 60, "PAYMENT DETAILS"])
+        lines.extend(_payment_method_details_txt(p))
+
     lines.extend([
-        f"",
+        "",
         f"{'-'*60}",
-        f"",
+        "",
         f"{LEGAL_ENTITY_NAME}",
         f"Tax ID: {TAX_ID}",
         f"Country: {COUNTRY_OF_REGISTRATION}",

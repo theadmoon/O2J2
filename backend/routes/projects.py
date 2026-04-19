@@ -31,10 +31,15 @@ async def create_project(
     service_type: str = Form(...),
     brief: str = Form(...),
     project_title: str = Form(""),
+    payment_method: str = Form(...),
     script: UploadFile = File(None),
 ):
     db = get_db()
     user = await get_current_user(request, db)
+
+    from utils.constants import PAYMENT_METHODS
+    if payment_method not in PAYMENT_METHODS:
+        raise HTTPException(status_code=400, detail="Invalid payment method")
 
     project_id = str(uuid.uuid4())
     project_number = await generate_project_number(db, service_type, user.get("name", ""), user.get("email", ""))
@@ -72,6 +77,7 @@ async def create_project(
         "script_file": script_path,
         "script_filename": script_filename,
         "reference_files": [],
+        "payment_method": payment_method,
         "quote_amount": 0,
         "quote_details": "",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -135,6 +141,13 @@ async def patch_project(project_id: str, request: Request):
         if not new_title:
             raise HTTPException(status_code=400, detail="Title cannot be empty")
         updates["project_title"] = new_title[:120]
+
+    if "payment_method" in payload:
+        from utils.constants import PAYMENT_METHODS
+        pm = (payload.get("payment_method") or "").strip()
+        if pm not in PAYMENT_METHODS:
+            raise HTTPException(status_code=400, detail="Invalid payment method")
+        updates["payment_method"] = pm
 
     if not updates:
         raise HTTPException(status_code=400, detail="No updatable fields provided")

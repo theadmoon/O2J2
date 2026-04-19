@@ -2,6 +2,7 @@ from fastapi import APIRouter
 from utils.constants import (
     LEGAL_ENTITY_NAME, TAX_ID, COUNTRY_OF_REGISTRATION,
     CONTACT_EMAIL, CONTACT_PHONE, LOCATION, PAYPAL_EMAIL,
+    CRYPTO_NETWORK, CRYPTO_ASSET,
 )
 
 router = APIRouter(prefix="/api", tags=["public"])
@@ -80,26 +81,40 @@ async def get_demo_videos():
 
 @router.get("/payment-settings")
 async def get_payment_settings():
+    """Public-facing summary of available payment methods.
+
+    We expose only minimum info needed to (a) let PayPal verify Vera Iambaeva's
+    receiving account is legitimate, and (b) inform the client what to expect.
+    Full payment details (IBAN, SWIFT, wallet address) are rendered only inside
+    the authenticated invoice document after the quote has been activated.
+    """
     return {
-        "bank_transfer": {
-            "beneficiary_bank_name": "Bank of Georgia",
-            "beneficiary_bank_location": "Tbilisi, Georgia",
-            "beneficiary_bank_swift": "BAGAGE22",
-            "beneficiary_iban": "GE29BG0000000541827200",
-            "beneficiary_name": LEGAL_ENTITY_NAME,
-            "intermediary_bank_1": {
-                "name": "Citibank N.A., New York",
-                "swift": "CITIUS33",
+        "methods": [
+            {
+                "code": "paypal",
+                "label": "PayPal",
+                "description": "Fast and simple. Confirmed within minutes after the transaction clears.",
+                "public_account": PAYPAL_EMAIL,
+                "public_account_label": "PayPal account",
             },
-            "intermediary_bank_2": {
-                "name": "JPMorgan Chase Bank National Association, New York",
-                "swift": "CHASUS33",
+            {
+                "code": "bank_transfer",
+                "label": "Bank Transfer (SWIFT)",
+                "description": "International wire via SWIFT. Recommended for larger invoices. Typically 3–5 business days.",
+                "public_account": None,
+                "public_account_label": None,
             },
-            "qr_code_url": None,
-        },
-        "paypal_email": PAYPAL_EMAIL,
+            {
+                "code": "crypto",
+                "label": f"{CRYPTO_ASSET} (TRC-20)",
+                "description": "Stablecoin transfer over the TRON network. Only TRC-20 assets are supported.",
+                "public_account": None,
+                "public_account_label": None,
+            },
+        ],
         "currency": "USD",
-        "note": f"Tax ID: {TAX_ID}, {COUNTRY_OF_REGISTRATION}",
+        "beneficiary": LEGAL_ENTITY_NAME,
+        "note": "Full payment details will be provided in your invoice after quote confirmation.",
     }
 
 

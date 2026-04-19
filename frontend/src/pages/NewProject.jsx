@@ -18,17 +18,20 @@ export default function NewProject() {
   const [projectTitle, setProjectTitle] = useState('');
   const [brief, setBrief] = useState('');
   const [script, setScript] = useState(null);
+  const [paymentMethod, setPaymentMethod] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    if (!paymentMethod) { setError('Please choose a payment method.'); return; }
     setLoading(true);
     try {
       const formData = new FormData();
       formData.append('service_type', serviceType);
       formData.append('brief', brief);
+      formData.append('payment_method', paymentMethod);
       if (projectTitle.trim()) formData.append('project_title', projectTitle.trim());
       if (script) formData.append('script', script);
 
@@ -76,6 +79,45 @@ export default function NewProject() {
                 <SelectItem value="ai_video">AI-Generated Video</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div data-testid="new-project-payment-method">
+            <Label className="text-gray-600 text-xs uppercase tracking-wider">
+              Payment Method <span className="text-red-500 ml-0.5">*</span>
+            </Label>
+            <div className="mt-2 grid sm:grid-cols-3 gap-2.5">
+              {[
+                { code: 'paypal', label: 'PayPal', hint: 'Fast · minutes' },
+                { code: 'bank_transfer', label: 'Bank Transfer', hint: 'SWIFT · 3–5 days' },
+                { code: 'crypto', label: 'USDT (TRC-20)', hint: 'Crypto · fast' },
+              ].map((m) => (
+                <label
+                  key={m.code}
+                  className={`flex flex-col gap-1 border rounded-lg px-3 py-2.5 cursor-pointer transition ${
+                    paymentMethod === m.code
+                      ? 'border-sky-500 bg-sky-50 ring-2 ring-sky-100'
+                      : 'border-gray-200 hover:border-sky-300 hover:bg-gray-50'
+                  }`}
+                  data-testid={`payment-method-${m.code}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="paymentMethod"
+                      value={m.code}
+                      checked={paymentMethod === m.code}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="text-sky-500 w-4 h-4"
+                    />
+                    <span className="text-sm font-semibold text-gray-800">{m.label}</span>
+                  </div>
+                  <span className="text-[11px] text-gray-500 ml-6">{m.hint}</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-[11px] text-gray-500 mt-1.5">
+              Full payment details will appear in your invoice after the quote is confirmed. You can change this choice any time before the invoice is sent.
+            </p>
           </div>
 
           <div>
