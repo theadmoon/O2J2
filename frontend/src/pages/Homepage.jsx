@@ -153,7 +153,7 @@ export default function Homepage() {
                   </p>
                   <div className="mb-4">
                     <span className="text-2xl font-bold text-sky-600">
-                      {service.pricing_model === 'per_minute' ? `$${service.base_price}/min` : `From $${service.base_price}`}
+                      {service.pricing_model === 'per_minute' ? `$${service.base_price}/min` : service.pricing_model === 'custom' ? `From $${service.base_price}/min` : `From $${service.base_price}`}
                     </span>
                     <p className="text-sm text-gray-500 mt-1">{service.price_description}</p>
                   </div>
