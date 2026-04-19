@@ -757,6 +757,29 @@ def _build_payment_instructions_txt(p: dict, doc_number: str) -> str:
     return "\n".join(lines)
 
 
+def _recipient_account_html(p: dict) -> str:
+    """Return a short HTML snippet describing our receiving account based on payment_method."""
+    method = p.get("payment_method") or "paypal"
+    if method == "paypal":
+        return f"PayPal <code>{PAYPAL_EMAIL}</code>"
+    if method == "bank_transfer":
+        return f"{BANK_BENEFICIARY_BANK} · IBAN <code>{BANK_BENEFICIARY_IBAN}</code>"
+    if method == "crypto":
+        return f"{CRYPTO_ASSET} on {CRYPTO_NETWORK} · <code style='word-break:break-all;font-size:10px;'>{CRYPTO_WALLET_ADDRESS}</code>"
+    return "(not specified)"
+
+
+def _recipient_account_txt(p: dict) -> str:
+    method = p.get("payment_method") or "paypal"
+    if method == "paypal":
+        return f"PayPal {PAYPAL_EMAIL}"
+    if method == "bank_transfer":
+        return f"{BANK_BENEFICIARY_BANK} · IBAN {BANK_BENEFICIARY_IBAN}"
+    if method == "crypto":
+        return f"{CRYPTO_ASSET} on {CRYPTO_NETWORK} · {CRYPTO_WALLET_ADDRESS}"
+    return "(not specified)"
+
+
 def _build_certificate_completion_html(
     p: dict, doc_number: str, base_css: str,
     name: str, email: str, pn: str, title: str, amount: str, service_type_label: str,
@@ -873,6 +896,8 @@ def _build_certificate_completion_html(
     <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
     <tr><th>Amount</th><td><strong>{amount}</strong></td></tr>
     <tr><th>Method</th><td>{payment_method_label}</td></tr>
+    <tr><th>From (Client)</th><td><code>{client_paypal}</code></td></tr>
+    <tr><th>To (Service Provider)</th><td>{_recipient_account_html(p)}</td></tr>
     <tr><th>Transaction ID</th><td><code>{tx_id}</code></td></tr>
     <tr><th>Transaction Time (UTC)</th><td>{payment_time}</td></tr>
     <tr><th>Payment Confirmed</th><td>{payment_confirmed_dt}</td></tr>
@@ -987,6 +1012,8 @@ def _build_certificate_completion_txt(p: dict, doc_number: str) -> str:
         "",
         f"Amount: {amount}",
         f"Method: {payment_method_label}",
+        f"From (Client): {client_paypal}",
+        f"To (Service Provider): {_recipient_account_txt(p)}",
         f"Transaction ID: {tx_id}",
         f"Transaction Time (UTC): {payment_time}",
         f"Payment Confirmed: {payment_confirmed_dt}",
