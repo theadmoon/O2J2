@@ -14,6 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/
 import {
   ArrowLeft, FileText, Hash, User, Mail, Briefcase, DollarSign, ShieldCheck,
   Paperclip, Download, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard,
+  FileCheck2,
 } from 'lucide-react';
 
 export default function ProjectDetails() {
@@ -67,6 +68,21 @@ export default function ProjectDetails() {
       const a = document.createElement('a');
       a.href = url;
       a.download = project?.script_filename || `attachment${(project?.script_file?.match(/\.[^.]+$/) || [''])[0]}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {}
+  };
+
+  const handleSignedInvoiceDownload = async () => {
+    try {
+      const res = await api.get(`/projects/${id}/signed-invoice`, { responseType: 'blob' });
+      const blob = new Blob([res.data]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = project?.signed_invoice_filename || 'signed-invoice';
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -304,6 +320,20 @@ export default function ProjectDetails() {
                 <div className="sm:col-span-3 flex items-center gap-2 text-xs text-gray-500 bg-gray-50 border border-gray-100 rounded px-3 py-1.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-500" />
                   <span className="font-mono">Transaction ID: {project.paypal_transaction_id}</span>
+                </div>
+              )}
+              {project.signed_invoice_file && (
+                <div className="sm:col-span-3 flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-3 py-2" data-testid="signed-invoice-row">
+                  <FileCheck2 className="w-4 h-4 text-emerald-600" />
+                  <span className="flex-1">Signed invoice uploaded: <span className="font-medium">{project.signed_invoice_filename}</span></span>
+                  <button
+                    type="button"
+                    onClick={handleSignedInvoiceDownload}
+                    className="text-sky-600 hover:text-sky-700 font-semibold underline underline-offset-2"
+                    data-testid="download-signed-invoice"
+                  >
+                    Download
+                  </button>
                 </div>
               )}
             </div>

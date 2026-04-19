@@ -41,6 +41,20 @@ export default function StageActions({ project, user, onUpdated }) {
     }
   };
 
+  const openSignInvoice = () => setDialog({
+    key: 'sign-invoice',
+    title: 'Accept Invoice & Upload Signed Copy',
+    description: 'Download the invoice from the Documents section, print or digitally sign it, then upload the signed copy here (PDF, JPG or PNG).',
+    submit: 'Submit Signed Invoice',
+    icon: PenLine,
+    fields: [
+      { name: 'file', label: 'Signed Invoice File', type: 'file', required: true, accept: '.pdf,.png,.jpg,.jpeg' },
+    ],
+    endpoint: `/projects/${project.id}/client/sign-invoice`,
+    multipart: true,
+    defaultValues: {},
+  });
+
   const openActivateOrder = () => setDialog({
     key: 'activate-order',
     title: 'Activate Order',
@@ -132,7 +146,7 @@ export default function StageActions({ project, user, onUpdated }) {
   // CLIENT (owner) — stage-based
   if (!isAdmin && isOwner) {
     if (status === 'invoice_sent') {
-      actions.push(<ActionButton key="sign" icon={PenLine} label="Accept Invoice & Terms" color="sky" onClick={() => call('post', `/projects/${project.id}/client/sign-invoice`)} testId="client-sign-invoice" loading={loading} />);
+      actions.push(<ActionButton key="sign" icon={PenLine} label="Accept Invoice & Upload Signed Copy" color="sky" onClick={openSignInvoice} testId="client-sign-invoice" />);
     }
     if (status === 'files_accessed') {
       actions.push(<ActionButton key="confD" icon={FileCheck} label="Confirm Delivery Received" color="emerald" onClick={() => call('post', `/projects/${project.id}/client/confirm-delivery`)} testId="client-confirm-delivery" loading={loading} />);
@@ -205,13 +219,23 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
 
   const submit = (e) => {
     e.preventDefault();
+    if (dialog.multipart) {
+      const fd = new FormData();
+      dialog.fields.forEach((f) => {
+        if (f.type === 'file') {
+          if (values[f.name]) fd.append(f.name, values[f.name]);
+        } else if (values[f.name] !== '' && values[f.name] != null) {
+          fd.append(f.name, values[f.name]);
+        }
+      });
+      onSubmit(fd);
+      return;
+    }
     const payload = { ...values };
-    // Convert numeric fields
     dialog.fields.forEach((f) => {
       if (f.type === 'number' && payload[f.name] !== '' && payload[f.name] != null) {
         payload[f.name] = Number(payload[f.name]);
       }
-      // Strip empty optional fields so backend defaults kick in
       if (payload[f.name] === '' && !f.required) {
         delete payload[f.name];
       }
@@ -238,6 +262,15 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
                   placeholder={f.placeholder}
                   className="mt-1.5 resize-none"
+                  data-testid={`dialog-input-${f.name}`}
+                />
+              ) : f.type === 'file' ? (
+                <Input
+                  type="file"
+                  accept={f.accept}
+                  required={f.required}
+                  onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.files?.[0] || null }))}
+                  className="mt-1.5 cursor-pointer file:mr-3 file:py-1 file:px-3 file:rounded file:border-0 file:bg-sky-50 file:text-sky-700 hover:file:bg-sky-100"
                   data-testid={`dialog-input-${f.name}`}
                 />
               ) : (

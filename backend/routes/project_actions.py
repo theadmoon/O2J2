@@ -221,16 +221,72 @@ async def admin_complete(project_id: str, request: Request):
 # =================================================================
 
 @router.post("/{project_id}/client/sign-invoice")
-async def client_sign_invoice(project_id: str, request: Request):
-    """Stage 3 → 4. Client accepts invoice and payment terms."""
+async def client_sign_invoice(
+    project_id: str,
+    request: Request,
+    file: UploadFile = File(...),
+):
+    """Stage 3 → 4. Client uploads the signed invoice scan and accepts terms."""
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "invoice_sent_at", "invoice_sent")
     _require_not_set(project, "invoice_signed_at", "sign-invoice")
 
+    if not file or not file.filename:
+        raise HTTPException(status_code=400, detail="Signed invoice file is required")
+
+    # Accept PDF, PNG, JPG
+    allowed_ext = {".pdf", ".png", ".jpg", ".jpeg"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"File type {ext} not allowed. Use PDF, PNG or JPG.")
+
+    signed_root = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "uploads",
+        "signed_invoices",
+    )
+    os.makedirs(signed_root, exist_ok=True)
+    project_dir = os.path.join(signed_root, project_id)
+    os.makedirs(project_dir, exist_ok=True)
+
+    stored_name = f"signed_invoice{ext}"
+    file_path = os.path.join(project_dir, stored_name)
+
+    size = 0
+    async with aiofiles.open(file_path, "wb") as out:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            await out.write(chunk)
+
     return await _set_timestamp_and_return(
         db, project_id,
-        {"invoice_signed_at": datetime.now(timezone.utc).isoformat()},
+        {
+            "invoice_signed_at": datetime.now(timezone.utc).isoformat(),
+            "signed_invoice_file": os.path.join("uploads", "signed_invoices", project_id, stored_name),
+            "signed_invoice_filename": file.filename,
+            "signed_invoice_size": size,
+        },
     )
+
+
+@router.get("/{project_id}/signed-invoice")
+async def download_signed_invoice(project_id: str, request: Request):
+    """Owner client or admin downloads the signed invoice uploaded by the client."""
+    db, _, project = await _get_project_for_client(project_id, request)
+    rel = project.get("signed_invoice_file")
+    if not rel:
+        raise HTTPException(status_code=404, detail="No signed invoice uploaded yet")
+    abs_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        rel,
+    )
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Signed invoice file not found on disk")
+    download_name = project.get("signed_invoice_filename") or os.path.basename(abs_path)
+    return FileResponse(abs_path, filename=download_name)
 
 
 @router.post("/{project_id}/client/confirm-delivery")
