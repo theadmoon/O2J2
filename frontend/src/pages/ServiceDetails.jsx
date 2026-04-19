@@ -13,6 +13,7 @@ function ServiceDetails() {
 
   useEffect(() => {
     fetchServiceDetails();
+    window.scrollTo(0, 0);
   }, [serviceId]);
 
   const fetchServiceDetails = async () => {

@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useEffect } from "react";
 import "@/App.css";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import Navbar from "./components/Layout/Navbar";
 import Homepage from "./pages/Homepage";
@@ -44,25 +44,36 @@ function PublicRoute({ children }) {
   return children;
 }
 
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
+
 function AppRoutes() {
   return (
-    <Routes>
-      <Route path="/" element={<><Navbar /><Homepage /></>} />
-      <Route path="/services" element={<><Navbar /><Services /></>} />
-      <Route path="/services/:serviceId" element={<><Navbar /><ServiceDetails /></>} />
-      <Route path="/how-it-works" element={<><Navbar /><HowItWorks /></>} />
-      <Route path="/contact" element={<><Navbar /><Contact /></>} />
-      <Route path="/request" element={<><Navbar /><QuickRequest /></>} />
-      <Route path="/legal" element={<><Navbar /><LegalInformation /></>} />
-      <Route path="/policies/:type" element={<><Navbar /><Policies /></>} />
-      <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-      <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
-      <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
-      <Route path="/projects/new" element={<ProtectedRoute><NewProject /></ProtectedRoute>} />
-      <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<><Navbar /><Homepage /></>} />
+        <Route path="/services" element={<><Navbar /><Services /></>} />
+        <Route path="/services/:serviceId" element={<><Navbar /><ServiceDetails /></>} />
+        <Route path="/how-it-works" element={<><Navbar /><HowItWorks /></>} />
+        <Route path="/contact" element={<><Navbar /><Contact /></>} />
+        <Route path="/request" element={<><Navbar /><QuickRequest /></>} />
+        <Route path="/legal" element={<><Navbar /><LegalInformation /></>} />
+        <Route path="/policies/:type" element={<><Navbar /><Policies /></>} />
+        <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+        <Route path="/register" element={<PublicRoute><Register /></PublicRoute>} />
+        <Route path="/dashboard" element={<ProtectedRoute><ClientDashboard /></ProtectedRoute>} />
+        <Route path="/projects/new" element={<ProtectedRoute><NewProject /></ProtectedRoute>} />
+        <Route path="/projects/:id" element={<ProtectedRoute><ProjectDetails /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
 
