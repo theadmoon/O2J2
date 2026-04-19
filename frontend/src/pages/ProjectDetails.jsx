@@ -25,7 +25,7 @@ export default function ProjectDetails() {
   const [previewText, setPreviewText] = useState('');
   const [showAdvanceFallback, setShowAdvanceFallback] = useState(false);
   const [titleEdit, setTitleEdit] = useState({ editing: false, value: '', saving: false, error: '' });
-  const [briefExpanded, setBriefExpanded] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   useEffect(() => {
     loadProject();
@@ -190,65 +190,70 @@ export default function ProjectDetails() {
               <span className="capitalize">{project.service_type?.replace(/_/g, ' ')}</span>
             </div>
           </div>
-          {project.brief && (() => {
-            const long = project.brief.length > 400;
-            const expanded = briefExpanded || !long;
+          {/* Brief + Attachments — collapsed by default */}
+          {(() => {
+            const refCount = (project.reference_files || []).length;
+            const attachmentCount = (project.script_file ? 1 : 0) + refCount;
             return (
-              <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-brief-wrapper">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <p className="text-xs uppercase tracking-wider text-gray-500">Brief</p>
-                  {long && (
-                    <button type="button" onClick={() => setBriefExpanded((v) => !v)}
-                      className="text-xs text-sky-600 hover:text-sky-700 inline-flex items-center gap-1 font-medium"
-                      data-testid="brief-toggle-button">
-                      {expanded ? <>Show less <ChevronUp className="w-3 h-3" /></> : <>Show more <ChevronDown className="w-3 h-3" /></>}
-                    </button>
-                  )}
-                </div>
-                <div className="relative">
-                  <p className={`text-sm text-gray-600 whitespace-pre-wrap ${expanded ? '' : 'line-clamp-3'}`} data-testid="project-brief">{project.brief}</p>
-                  {long && !expanded && (
-                    <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none" />
-                  )}
-                </div>
+              <div className="mt-4 border-t border-gray-100 pt-3" data-testid="project-details-collapsible">
+                <button
+                  type="button"
+                  onClick={() => setDetailsExpanded((v) => !v)}
+                  className="w-full flex items-center justify-between gap-3 py-1.5 text-left hover:bg-gray-50 -mx-2 px-2 rounded transition"
+                  data-testid="project-details-toggle"
+                  aria-expanded={detailsExpanded}
+                >
+                  <div className="flex items-center gap-3 text-sm">
+                    <p className="text-xs uppercase tracking-wider text-gray-500 font-semibold">Brief & attachments</p>
+                    <span className="text-[11px] text-gray-400">
+                      {project.brief ? `${project.brief.length.toLocaleString()} chars` : 'no brief'}
+                      {' · '}
+                      {attachmentCount} {attachmentCount === 1 ? 'file' : 'files'}
+                    </span>
+                  </div>
+                  {detailsExpanded
+                    ? <ChevronUp className="w-4 h-4 text-gray-400 shrink-0" />
+                    : <ChevronDown className="w-4 h-4 text-gray-400 shrink-0" />}
+                </button>
+
+                {detailsExpanded && (
+                  <div className="mt-3 space-y-4" data-testid="project-details-content">
+                    {project.brief && (
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-1">Brief</p>
+                        <p className="text-sm text-gray-600 whitespace-pre-wrap" data-testid="project-brief">{project.brief}</p>
+                      </div>
+                    )}
+                    {project.script_file && (
+                      <div data-testid="project-initial-submission">
+                        <p className="text-[11px] uppercase tracking-wider text-gray-400 mb-1.5">
+                          Initial submission <span className="normal-case tracking-normal text-gray-300">· immutable</span>
+                        </p>
+                        {project.script_filename ? (
+                          <button type="button" onClick={handleScriptDownload}
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                            data-testid="script-download-button">
+                            <Paperclip className="w-4 h-4" />
+                            <span className="truncate max-w-xs">{project.script_filename}</span>
+                            <Download className="w-3.5 h-3.5" />
+                          </button>
+                        ) : (
+                          <button type="button" onClick={handleScriptDownload}
+                            className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                            data-testid="script-download-button">
+                            <Paperclip className="w-4 h-4" />
+                            <Download className="w-3.5 h-3.5" />
+                            <span>Download</span>
+                          </button>
+                        )}
+                      </div>
+                    )}
+                    <ReferenceFiles project={project} user={user} onUpdated={(p) => setProject(p)} />
+                  </div>
+                )}
               </div>
             );
           })()}
-
-          {/* Initial Submission — IMMUTABLE history */}
-          {project.script_file && (
-            <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-initial-submission">
-              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">
-                Initial Submission <span className="text-[10px] text-gray-400 normal-case tracking-normal">· immutable</span>
-              </p>
-              {project.script_filename ? (
-                <button
-                  type="button"
-                  onClick={handleScriptDownload}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
-                  data-testid="script-download-button"
-                >
-                  <Paperclip className="w-4 h-4" />
-                  <span className="truncate max-w-xs">{project.script_filename}</span>
-                  <Download className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleScriptDownload}
-                  className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
-                  data-testid="script-download-button"
-                >
-                  <Paperclip className="w-4 h-4" />
-                  <Download className="w-3.5 h-3.5" />
-                  <span>Download</span>
-                </button>
-              )}
-            </div>
-          )}
-
-          {/* Additional reference files — APPEND-ONLY */}
-          <ReferenceFiles project={project} user={user} onUpdated={(p) => setProject(p)} />
 
           {/* Quote & payment info (visible once order activated) */}
           {quoteVisible && (
