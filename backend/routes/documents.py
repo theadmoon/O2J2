@@ -97,7 +97,7 @@ def _payment_method_details_html(project: dict) -> str:
         "<div style='padding:12px 14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;font-size:12px;line-height:1.65;'>"
         f"<p style='margin:0 0 6px 0;font-weight:700;color:#0a1628;'>{service_label} production according to client's script</p>"
         f"<p style='margin:0 0 6px 0;'>• Project Reference: <strong>{pn}</strong></p>"
-        "<p style='margin:0 0 6px 0;'>Payment terms: 100% post-payment (invoice is issued after delivery).</p>"
+        "<p style='margin:0 0 6px 0;'>Payment terms: 100% post-payment (payable after the Client has received the deliverables and accepted the work).</p>"
         f"<p style='margin:0 0 6px 0;'>By completing payment via {method_phrase}, the Client confirms successful receipt of the delivered digital materials and accepts that no refunds apply after delivery.</p>"
         "<p style='margin:0;'>• No physical shipment — digital service delivered electronically</p>"
         "</div>"
@@ -198,7 +198,8 @@ def _payment_method_details_txt(project: dict) -> list[str]:
         "",
         f"  {service_label} production according to client's script",
         f"  • Project Reference: {pn}",
-        "  Payment terms: 100% post-payment (invoice is issued after delivery).",
+        "  Payment terms: 100% post-payment (payable after the Client has received",
+        "  the deliverables and accepted the work).",
         f"  By completing payment via {method_phrase}, the Client confirms successful",
         "  receipt of the delivered digital materials and accepts that no refunds",
         "  apply after delivery.",
