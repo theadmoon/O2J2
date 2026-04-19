@@ -62,6 +62,7 @@ async def create_project(
         "brief": brief,
         "script_file": script_path,
         "script_filename": script_filename,
+        "reference_files": [],
         "quote_amount": 0,
         "quote_details": "",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -137,9 +138,32 @@ async def download_script(project_id: str, request: Request):
 
 
 @router.put("/{project_id}/script")
-async def replace_script(project_id: str, request: Request, script: UploadFile = File(...)):
-    """Upload or replace the script/reference file. Allowed for the project owner or admin,
-    as long as the project has not progressed past 'order_activated'."""
+async def replace_script_deprecated(project_id: str, request: Request):
+    """Deprecated. The initial script is part of the immutable Quote Request.
+    Use POST /reference-files to add supplementary documents."""
+    raise HTTPException(
+        status_code=410,
+        detail="The initial submission is immutable. Please use 'Add reference file' to submit additional documents.",
+    )
+
+
+REFERENCE_FILES_ROOT = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "uploads",
+    "reference_files",
+)
+
+
+@router.post("/{project_id}/reference-files")
+async def add_reference_file(
+    project_id: str,
+    request: Request,
+    file: UploadFile = File(...),
+    note: str = Form(""),
+):
+    """Attach an additional reference document to the project. Append-only: does not
+    modify or replace the original submission. Allowed for owner and admin until
+    invoice is sent."""
     db = get_db()
     user = await get_current_user(request, db)
     project = await db.projects.find_one({"id": project_id}, {"_id": 0})
@@ -148,42 +172,102 @@ async def replace_script(project_id: str, request: Request, script: UploadFile =
     if user["role"] != "admin" and project["user_id"] != user["id"]:
         raise HTTPException(status_code=403, detail="Access denied")
     if project.get("invoice_sent_at"):
-        raise HTTPException(status_code=400, detail="Cannot change script after invoice has been sent")
-    if not script.filename:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot add reference files after invoice has been sent",
+        )
+    if not file.filename:
         raise HTTPException(status_code=400, detail="No file provided")
 
-    backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    upload_dir = os.path.join(backend_root, "uploads", "scripts")
-    os.makedirs(upload_dir, exist_ok=True)
+    project_dir = os.path.join(REFERENCE_FILES_ROOT, project_id)
+    os.makedirs(project_dir, exist_ok=True)
 
-    # Remove old file if present
-    if project.get("script_file"):
-        old_path = os.path.join(backend_root, project["script_file"])
-        if os.path.exists(old_path):
-            try:
-                os.remove(old_path)
-            except OSError:
-                pass
+    file_id = str(uuid.uuid4())
+    ext = os.path.splitext(file.filename)[1] or ""
+    stored_name = f"{file_id}{ext}"
+    file_path = os.path.join(project_dir, stored_name)
 
-    ext = os.path.splitext(script.filename)[1] or ""
-    stored_name = f"{project_id}{ext}"
-    file_path = os.path.join(upload_dir, stored_name)
-    import aiofiles as _af
-    async with _af.open(file_path, "wb") as f:
-        content = await script.read()
-        await f.write(content)
+    size = 0
+    async with aiofiles.open(file_path, "wb") as out:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            await out.write(chunk)
 
+    ref = {
+        "id": file_id,
+        "original_filename": file.filename,
+        "stored_filename": stored_name,
+        "size_bytes": size,
+        "uploaded_by": user["id"],
+        "uploaded_by_name": user["name"],
+        "uploaded_by_role": user["role"],
+        "uploaded_at": datetime.now(timezone.utc).isoformat(),
+        "note": note.strip(),
+    }
     await db.projects.update_one(
         {"id": project_id},
-        {"$set": {
-            "script_file": f"uploads/scripts/{stored_name}",
-            "script_filename": script.filename,
-        }},
+        {"$push": {"reference_files": ref}},
     )
-    updated = await db.projects.find_one({"id": project_id}, {"_id": 0})
-    updated["status"] = calculate_current_status(updated)
-    updated["timeline"] = build_timeline(updated)
-    return updated
+    return ref
+
+
+@router.get("/{project_id}/reference-files/{file_id}")
+async def download_reference_file(project_id: str, file_id: str, request: Request):
+    db = get_db()
+    user = await get_current_user(request, db)
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if user["role"] != "admin" and project["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+
+    ref = next((r for r in project.get("reference_files", []) if r["id"] == file_id), None)
+    if not ref:
+        raise HTTPException(status_code=404, detail="Reference file not found")
+    file_path = os.path.join(REFERENCE_FILES_ROOT, project_id, ref["stored_filename"])
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="File missing on disk")
+
+    return FileResponse(
+        path=file_path,
+        filename=ref["original_filename"],
+        media_type="application/octet-stream",
+    )
+
+
+@router.delete("/{project_id}/reference-files/{file_id}")
+async def delete_reference_file(project_id: str, file_id: str, request: Request):
+    """Delete a reference file. Allowed for its original uploader or admin,
+    only while invoice has not been sent."""
+    db = get_db()
+    user = await get_current_user(request, db)
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if project.get("invoice_sent_at"):
+        raise HTTPException(status_code=400, detail="Cannot delete after invoice has been sent")
+
+    ref = next((r for r in project.get("reference_files", []) if r["id"] == file_id), None)
+    if not ref:
+        raise HTTPException(status_code=404, detail="Reference file not found")
+
+    if user["role"] != "admin" and ref.get("uploaded_by") != user["id"]:
+        raise HTTPException(status_code=403, detail="Only the uploader or admin can delete this file")
+
+    file_path = os.path.join(REFERENCE_FILES_ROOT, project_id, ref["stored_filename"])
+    if os.path.exists(file_path):
+        try:
+            os.remove(file_path)
+        except OSError:
+            pass
+    await db.projects.update_one(
+        {"id": project_id},
+        {"$pull": {"reference_files": {"id": file_id}}},
+    )
+    return {"ok": True}
 
 
 @router.put("/{project_id}/advance")
