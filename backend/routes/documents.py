@@ -87,12 +87,18 @@ def _payment_method_details_html(project: dict) -> str:
     method = (project.get("payment_method") or "paypal")
     pn = project.get("project_number", "")
     service_label = (project.get("service_type") or "Custom").replace("_", " ").title()
-    memo_line = f"{pn} / {service_label} / Ocean2Joy"
+    method_phrase = {
+        "paypal": "PayPal",
+        "bank_transfer": "SWIFT bank transfer",
+        "crypto": "USDT (TRC-20) transfer",
+    }.get(method, "the selected payment method")
     memo_block = (
-        "<div style='margin-top:12px;padding:10px 14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;'>"
-        "<p style='margin:0 0 4px 0;font-size:10px;text-transform:uppercase;letter-spacing:0.05em;color:#0369a1;font-weight:700;'>"
-        "Payment note — copy this exact text into your payment memo/reference field:</p>"
-        f"<code style='font-size:13px;font-weight:600;color:#0a1628;'>{memo_line}</code>"
+        "<div style='margin-top:12px;padding:12px 14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;font-size:12px;line-height:1.65;'>"
+        f"<p style='margin:0 0 6px 0;font-weight:700;color:#0a1628;'>{service_label} production according to client's script</p>"
+        f"<p style='margin:0 0 6px 0;'>• Project Reference: <strong>{pn}</strong></p>"
+        "<p style='margin:0 0 6px 0;'>Payment terms: 100% post-payment (invoice is issued after delivery).</p>"
+        f"<p style='margin:0 0 6px 0;'>By completing payment via {method_phrase}, the Client confirms successful receipt of the delivered digital materials and accepts that no refunds apply after delivery.</p>"
+        "<p style='margin:0;'>• No physical shipment — digital service delivered electronically</p>"
         "</div>"
     )
     if method == "paypal":
@@ -180,12 +186,20 @@ def _payment_method_details_txt(project: dict) -> list[str]:
     method = (project.get("payment_method") or "paypal")
     pn = project.get("project_number", "")
     service_label = (project.get("service_type") or "Custom").replace("_", " ").title()
-    memo_line = f"{pn} / {service_label} / Ocean2Joy"
+    method_phrase = {
+        "paypal": "PayPal",
+        "bank_transfer": "SWIFT bank transfer",
+        "crypto": "USDT (TRC-20) transfer",
+    }.get(method, "the selected payment method")
     memo_block = [
         "",
-        "  ┌─ PAYMENT NOTE — copy this exact text into your payment memo ─",
-        f"  │ {memo_line}",
-        "  └──────────────────────────────────────────────────────────────",
+        f"  {service_label} production according to client's script",
+        f"  • Project Reference: {pn}",
+        "  Payment terms: 100% post-payment (invoice is issued after delivery).",
+        f"  By completing payment via {method_phrase}, the Client confirms successful",
+        "  receipt of the delivered digital materials and accepts that no refunds",
+        "  apply after delivery.",
+        "  • No physical shipment — digital service delivered electronically",
     ]
     if method == "paypal":
         return [
@@ -404,9 +418,25 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <table style="margin-top:14px;"><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
             <tr><th>Client Name</th><td>{name}</td></tr>
             <tr><th>Email</th><td>{email}</td></tr>
-            <tr><th>Acceptance Date</th><td>{format_date_utc(p.get('invoice_signed_at')) + ' UTC' if p.get('invoice_signed_at') else '(pending)'}</td></tr>
+            <tr><th>Invoice Issue Date</th><td>{inv_dates['issued']}</td></tr>
             </table>
             <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic;">Acceptance is recorded electronically in the client portal.</p>
+            </div>
+
+            <div class="section"><h2>Client Signature</h2>
+            <p style="font-size:12px;color:#444;">Please download this invoice, sign on the signature line below, and upload the signed copy back through your client portal.</p>
+            <table style="margin-top:40px;border-collapse:collapse;"><colgroup><col style='width:55%'/><col style='width:5%'/><col style='width:40%'/></colgroup>
+              <tr>
+                <td style="padding:0;border:none;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555;">Client Signature</td>
+                <td style="border:none;"></td>
+                <td style="padding:0;border:none;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555;">Date</td>
+              </tr>
+              <tr>
+                <td style="padding-top:6px;border:none;font-size:11px;color:#888;">Printed Name: {name}</td>
+                <td style="border:none;"></td>
+                <td style="padding-top:6px;border:none;"></td>
+              </tr>
+            </table>
             </div>
 
             <div class="footer">
@@ -828,9 +858,22 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
             "",
             f"Client Name: {name}",
             f"Email: {email}",
-            f"Acceptance Date: {acceptance_date or '(pending)'}",
+            f"Invoice Issue Date: {inv_dates['issued']}",
             "",
             "Acceptance is recorded electronically in the client portal.",
+            "",
+            sep,
+            "",
+            "CLIENT SIGNATURE:",
+            "",
+            "Please download this invoice, sign on the signature line below,",
+            "and upload the signed copy back through your client portal.",
+            "",
+            f"  Printed Name: {name}",
+            "",
+            "  Client Signature: ______________________________________",
+            "",
+            "  Date: __________________________________________________",
             "",
             sep,
             "",
