@@ -1178,9 +1178,9 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
         .header h1 { font-size: 24px; color: #0a1628; margin: 0; }
         .header .brand { font-size: 14px; color: #666; }
         .doc-number { font-size: 12px; color: #888; float: right; }
-        .section { margin-bottom: 20px; }
+        .section { margin-bottom: 20px; page-break-inside: avoid; break-inside: avoid; }
         .section h2 { font-size: 16px; color: #0a1628; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; table-layout: fixed; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; table-layout: fixed; page-break-inside: avoid; break-inside: avoid; }
         table th, table td {
           border: 1px solid #ddd; padding: 8px 10px; text-align: left;
           vertical-align: top; font-size: 12px;
