@@ -31,7 +31,12 @@ export default function StageActions({ project, user, onUpdated }) {
     setError('');
     setLoading(true);
     try {
-      const { data } = await api.request({ method, url, data: body });
+      const isForm = typeof FormData !== 'undefined' && body instanceof FormData;
+      const config = { method, url, data: body };
+      if (isForm) {
+        config.headers = { 'Content-Type': 'multipart/form-data' };
+      }
+      const { data } = await api.request(config);
       onUpdated(data);
       setDialog(null);
     } catch (err) {
