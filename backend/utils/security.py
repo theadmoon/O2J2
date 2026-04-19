@@ -58,6 +58,7 @@ async def get_current_user(request: Request, db) -> dict:
             "id": user["id"],
             "email": user["email"],
             "name": user["name"],
+            "paypal_email": user.get("paypal_email", ""),
             "role": user["role"],
             "created_at": user.get("created_at"),
         }

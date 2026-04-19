@@ -13,6 +13,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [paypalEmail, setPaypalEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,7 @@ export default function Register() {
     setError('');
     setLoading(true);
     try {
-      await register(email, password, name);
+      await register(email, password, name, paypalEmail);
       navigate('/dashboard');
     } catch (err) {
       setError(formatApiError(err.response?.data?.detail) || err.message);
@@ -44,7 +45,11 @@ export default function Register() {
       <div className="flex-1 flex items-center justify-center px-6 py-16 bg-white">
         <div className="w-full max-w-md">
           <p className="text-xs uppercase tracking-wider font-semibold text-sky-600 mb-2">Create Account</p>
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">Join Ocean2Joy</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-4">Join Ocean2Joy</h1>
+          <div className="mb-6 text-xs text-gray-500 bg-sky-50 border border-sky-100 rounded-lg px-3 py-2.5 leading-relaxed" data-testid="register-info-banner">
+            <strong className="text-gray-700">Heads up:</strong> all order communication happens inside your portal — messages in the project chat, documents in your cabinet.
+            We don't send marketing or notification emails (including no "welcome" email). Email is used only for critical cases.
+          </div>
           {error && <div className="bg-red-50 border border-red-200 text-red-600 text-sm px-4 py-3 rounded-lg mb-6" data-testid="register-error">{error}</div>}
           <form onSubmit={handleSubmit} className="space-y-5" data-testid="register-form">
             <div>
@@ -58,6 +63,16 @@ export default function Register() {
             <div>
               <Label className="text-gray-600 text-xs uppercase tracking-wider">Password</Label>
               <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="mt-1.5" placeholder="Min. 6 characters" data-testid="register-password" />
+            </div>
+            <div>
+              <Label className="text-gray-600 text-xs uppercase tracking-wider flex items-center gap-1">
+                PayPal Account <span className="text-gray-400 normal-case tracking-normal">(optional)</span>
+              </Label>
+              <Input type="email" value={paypalEmail} onChange={(e) => setPaypalEmail(e.target.value)} className="mt-1.5" placeholder="only if different from email above" data-testid="register-paypal-email" />
+              <p className="text-xs text-gray-500 mt-1.5 leading-relaxed">
+                Payments are currently processed <strong>manually</strong> — PayPal and SWIFT are not yet integrated into the portal.
+                If you plan to pay via PayPal and your PayPal email differs from the one above, please provide it so we can reconcile incoming payments.
+              </p>
             </div>
             <Button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white h-11 rounded-lg flex items-center justify-center gap-2" data-testid="register-submit-button">
               {loading ? 'Creating account...' : <>Create Account <ArrowRight className="w-4 h-4" /></>}

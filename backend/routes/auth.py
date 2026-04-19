@@ -15,6 +15,7 @@ class RegisterInput(BaseModel):
     email: EmailStr
     password: str
     name: str
+    paypal_email: str = ""
 
 
 class LoginInput(BaseModel):
@@ -40,6 +41,7 @@ async def register(data: RegisterInput, response: Response):
         "email": data.email.lower(),
         "password_hash": hash_password(data.password),
         "name": data.name,
+        "paypal_email": (data.paypal_email or "").strip().lower(),
         "role": "client",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "is_active": True,
@@ -54,6 +56,7 @@ async def register(data: RegisterInput, response: Response):
         "id": user_id,
         "email": data.email.lower(),
         "name": data.name,
+        "paypal_email": user_doc["paypal_email"],
         "role": "client",
     }
 
@@ -76,6 +79,7 @@ async def login(data: LoginInput, response: Response):
         "id": user["id"],
         "email": user["email"],
         "name": user["name"],
+        "paypal_email": user.get("paypal_email", ""),
         "role": user["role"],
     }
 

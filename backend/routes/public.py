@@ -217,6 +217,7 @@ This Privacy Policy explains how **Individual Entrepreneur Vera Iambaeva** (Tax 
 
 ## 2. What Data We Collect
 - **Account data:** full name, email address, hashed password.
+- **Optional PayPal account** (separate email, if different from account email) — used only to reconcile incoming PayPal payments.
 - **Project data:** brief, uploaded scripts/reference files, deliverable downloads.
 - **Payment data:** PayPal transaction ID (only if you voluntarily provide it), SWIFT transfer references.
 - **Technical data:** IP address and session cookies strictly necessary for authentication.
@@ -229,7 +230,9 @@ We do **not** collect payment card details — all payments are handled by exter
 | Create and manage your account, deliver services you ordered | 6(1)(b) — Performance of a contract |
 | Issue invoices, receipts, and legally required business records | 6(1)(c) — Legal obligation (Georgian tax law) |
 | Authentication cookies, fraud prevention, platform security | 6(1)(f) — Legitimate interest |
-| Optional marketing communications (only if you opt-in) | 6(1)(a) — Consent |
+| Reconcile incoming PayPal payments against the PayPal email you provided | 6(1)(b) — Performance of a contract |
+
+We do **not** process your data for marketing, analytics, profiling, or newsletters. We do not collect consent (Art. 6(1)(a)) because we do not perform any processing that would require it.
 
 ## 4. How Long We Keep Your Data
 - **Active accounts:** for as long as your account is active.
@@ -257,16 +260,34 @@ To exercise any right, email **ocean2joy@gmail.com**. We respond within 30 days.
 ## 8. Cookies
 We use only **strictly necessary cookies** (httpOnly `access_token` and `refresh_token`) for authentication. No analytics, advertising, or third-party tracking cookies are set. No cookie consent banner is legally required for strictly necessary cookies under GDPR Recital 30 and ePrivacy Directive Art. 5(3).
 
-## 9. Security
+## 9. How We Communicate With You (In-Portal First)
+All order communication takes place **inside your client portal**:
+- **Messages** go through the project chat — to reach us, post a message in your project; we reply there.
+- **Documents** (invoices, acceptance acts, receipts, certificates) are stored in your personal cabinet and downloadable as PDF/TXT at any time — we never attach them to emails.
+- **Status updates** on the 12-stage operational chain are visible in real time in your project page — no email notifications are sent.
+
+We do **not** send marketing, newsletter, or notification emails. We do **not** send a "welcome" email on registration. Email (ocean2joy@gmail.com) is used **only in exceptional cases** — for example, if we cannot reach you through the portal for a time-critical matter, or to fulfil a legal data-subject request. Because we do not push notifications, please sign in regularly to check your project status and messages.
+
+## 10. Payments (Currently Manual)
+At this time, **payment systems are not integrated into the portal**. Payments are processed in semi-manual mode:
+- You receive payment details (PayPal account or SWIFT/IBAN) in the portal after accepting the quote.
+- You transfer funds via your preferred method.
+- You mark the payment as sent in the portal (optionally providing a PayPal transaction ID), and we verify receipt manually before advancing the project.
+
+We plan to integrate automated payment providers (PayPal Checkout / Stripe) in a future release. When that happens, this Policy will be updated to disclose the processors, data transfer destinations, and legal bases involved.
+
+If you register a **PayPal Account** during sign-up (optional, see §2), we use it solely to reconcile incoming PayPal payments with your account. It is not used for marketing, not shared with third parties, and can be removed at any time by contacting us.
+
+## 11. Security
 Passwords are hashed with bcrypt. All traffic is served over HTTPS. Access tokens are stored in httpOnly, SameSite=Lax cookies to mitigate XSS and CSRF risks.
 
-## 10. Children
+## 12. Children
 Our services are not directed to individuals under 16. We do not knowingly collect personal data from minors.
 
-## 11. Changes to This Policy
-We may update this Policy. The "Last updated" date above reflects the latest revision. Material changes will be notified by email or portal notice.
+## 13. Changes to This Policy
+We may update this Policy. The "Last updated" date above reflects the latest revision. Material changes will be notified through a prominent notice inside your client portal (no email).
 
-## 12. Contact
+## 14. Contact
 For any privacy-related question or to exercise your rights: **ocean2joy@gmail.com**.
 """,
     },
