@@ -117,6 +117,11 @@ async def get_project(project_id: str, request: Request):
         raise HTTPException(status_code=403, detail="Access denied")
     project["status"] = calculate_current_status(project)
     project["timeline"] = build_timeline(project)
+    # Mark current status as "seen" by this user — clears the stage_changed notification
+    await db.users.update_one(
+        {"id": user["id"]},
+        {"$set": {f"seen_project_status.{project_id}": project["status"]}},
+    )
     return project
 
 

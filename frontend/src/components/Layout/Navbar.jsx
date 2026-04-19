@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { HiMenu, HiX } from 'react-icons/hi';
 import { useState } from 'react';
 import Logo from './Logo';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
   const { user, logout, quickSwitch } = useAuth();
@@ -79,6 +80,8 @@ export default function Navbar() {
                     👥 Client
                   </button>
                 </div>
+
+                <NotificationBell />
 
                 <button
                   onClick={handleLogout}
