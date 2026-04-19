@@ -11,9 +11,9 @@ const STAGES = [
   { n: 5, key: "production_started", name: "Production Started", field: "production_started_at", docs: ["production_notes"] },
   { n: 6, key: "delivered", name: "Delivered", field: "delivered_at", docs: ["download_confirmation"] },
   { n: 7, key: "files_accessed", name: "Files Accessed", field: "files_accessed_at", docs: ["certificate_delivery"] },
-  { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: [] },
-  { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["acceptance_act"] },
-  { n: 10, key: "payment_sent", name: "Payment Sent", field: "payment_marked_by_client_at", docs: ["payment_instructions", "receipt"] },
+  { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: ["acceptance_act"] },
+  { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["payment_instructions"] },
+  { n: 10, key: "payment_sent", name: "Payment Sent", field: "payment_marked_by_client_at", docs: ["receipt"] },
   { n: 11, key: "payment_received", name: "Payment Received", field: "payment_confirmed_by_manager_at", docs: ["payment_confirmation"] },
   { n: 12, key: "completed", name: "Completed", field: "completed_at", docs: ["certificate_completion"] },
 ];
@@ -60,6 +60,23 @@ export default function ChainTimeline({ project, onViewDoc }) {
       const a = document.createElement('a');
       a.href = url;
       a.download = project?.signed_delivery_cert_filename || 'signed-delivery-certificate';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      /* noop */
+    }
+  };
+
+  const handleSignedAcceptanceActDownload = async () => {
+    try {
+      const res = await api.get(`/projects/${project.id}/signed-acceptance-act`, { responseType: 'blob' });
+      const blob = new Blob([res.data]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = project?.signed_acceptance_act_filename || 'signed-acceptance-act';
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -146,6 +163,21 @@ export default function ChainTimeline({ project, onViewDoc }) {
                     data-testid="timeline-signed-delivery-cert-download"
                   >
                     <FileCheck2 className="w-3 h-3" /> {project.signed_delivery_cert_filename || 'Signed Certificate of Delivery'}
+                    <Download className="w-3 h-3 ml-1" />
+                  </button>
+                </div>
+              )}
+
+              {/* Signed Acceptance Act on stage 9 (Work Accepted) */}
+              {completed && stage.key === 'work_accepted' && project.signed_acceptance_act_file && (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={handleSignedAcceptanceActDownload}
+                    className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
+                    data-testid="timeline-signed-acceptance-act-download"
+                  >
+                    <FileCheck2 className="w-3 h-3" /> {project.signed_acceptance_act_filename || 'Signed Acceptance Act'}
                     <Download className="w-3 h-3 ml-1" />
                   </button>
                 </div>

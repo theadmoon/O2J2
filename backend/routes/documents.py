@@ -290,6 +290,473 @@ def _fmt_datetime_utc(iso_str: str) -> str:
         return iso_str
 
 
+def _build_acceptance_act_html(
+    p: dict, doc_number: str, base_css: str,
+    name: str, email: str, pn: str, title: str, service_type_label: str,
+) -> str:
+    delivered_dt = _fmt_datetime_utc(p.get("delivered_at")) or "(pending)"
+    accepted_dt = _fmt_datetime_utc(p.get("work_accepted_at")) or "(to be signed)"
+    dels = p.get("deliverables") or []
+    files_list = (
+        "<ul style='padding-left:20px;font-size:12px;line-height:1.7;margin:6px 0;'>"
+        + "".join(f"<li>{d.get('original_filename','(unnamed)')}</li>" for d in dels)
+        + "</ul>"
+    ) if dels else "<p style='font-size:12px;color:#888;font-style:italic;'>(no deliverables recorded)</p>"
+
+    return f"""<html><head>{base_css}</head><body>
+    <div class="header"><span class="doc-number">{doc_number}</span><h1>ACCEPTANCE ACT</h1>
+    <p style="font-size:11px;color:#666;margin:2px 0 0 0;">Digital Video Production Service — Acceptance Certificate</p>
+    </div>
+
+    <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Act</th><td><code>{doc_number}</code></td></tr>
+    <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+    <tr><th>Client</th><td>{name}</td></tr>
+    </table>
+    <p style="font-size:12px;margin-top:10px;"><strong>Service Provider:</strong><br>
+    {LEGAL_ENTITY_NAME}<br>
+    Tax ID: {TAX_ID}<br>
+    Country of Registration: {COUNTRY_OF_REGISTRATION}</p>
+    </div>
+
+    <div class="section"><h2>Project Details</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Title</th><td>{title}</td></tr>
+    <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+    <tr><th>Delivery Date</th><td>{delivered_dt}</td></tr>
+    <tr><th>Delivery Method</th><td>Secure Digital Portal</td></tr>
+    </table>
+    <p style="font-weight:600;margin-top:14px;margin-bottom:4px;font-size:12px;">Deliverables:</p>
+    {files_list}
+    </div>
+
+    <div class="section"><h2>Acceptance Confirmation</h2>
+    <p style="font-size:12px;">By signing this document, the Client confirms:</p>
+    <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+        <li>Receipt of all deliverable digital files</li>
+        <li>Access to files via secure download portal</li>
+        <li>Acceptance of delivered materials as complete</li>
+        <li>Agreement that work meets specified requirements</li>
+        <li>Completion of the service contract</li>
+    </ul>
+    </div>
+
+    <div class="section"><h2>Client Signature</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Name</th><td>{name}</td></tr>
+    <tr><th>Email</th><td>{email}</td></tr>
+    <tr><th>Date</th><td>{accepted_dt}</td></tr>
+    </table>
+    <table style="margin-top:40px;border-collapse:collapse;"><colgroup><col style='width:55%'/><col style='width:5%'/><col style='width:40%'/></colgroup>
+      <tr>
+        <td style="padding:0;border:none;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555;">Client Signature</td>
+        <td style="border:none;"></td>
+        <td style="padding:0;border:none;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555;">Date</td>
+      </tr>
+      <tr>
+        <td style="padding-top:6px;border:none;font-size:11px;color:#888;">Printed Name: {name}</td>
+        <td style="border:none;"></td>
+        <td style="padding-top:6px;border:none;"></td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="section">
+    <p style="font-size:11px;color:#666;font-style:italic;">This document serves as legal confirmation of service delivery and client acceptance for project {pn}.</p>
+    </div>
+
+    <div class="footer">
+    <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+    <p><strong>Brand:</strong> {BRAND_NAME}</p>
+    <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+    </div>
+    </body></html>"""
+
+
+def _build_acceptance_act_txt(p: dict, doc_number: str) -> str:
+    name = p.get("user_name", "Client")
+    email = p.get("user_email", "")
+    pn = p.get("project_number", "")
+    title = p.get("project_title", "")
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    delivered_dt = _fmt_datetime_utc(p.get("delivered_at")) or "(pending)"
+    accepted_dt = _fmt_datetime_utc(p.get("work_accepted_at")) or "(to be signed)"
+    sep = "═" * 60
+
+    lines = [
+        "ACCEPTANCE ACT",
+        sep,
+        "",
+        "Digital Video Production Service",
+        "Acceptance Certificate",
+        "",
+        f"Act: {doc_number}",
+        f"Project Reference: {pn}",
+        f"Client: {name}",
+        "",
+        "Service Provider:",
+        LEGAL_ENTITY_NAME,
+        f"Tax ID: {TAX_ID}",
+        f"Country of Registration: {COUNTRY_OF_REGISTRATION}",
+        "",
+        sep,
+        "",
+        "PROJECT DETAILS:",
+        "",
+        f"Title: {title}",
+        f"Service Type: {service_type_label}",
+        "",
+        "Deliverables:",
+    ]
+    dels = p.get("deliverables") or []
+    if dels:
+        for d in dels:
+            lines.append(f"- {d.get('original_filename','(unnamed)')}")
+    else:
+        lines.append("- (no deliverables recorded)")
+    lines.extend([
+        "",
+        f"Delivery Date: {delivered_dt}",
+        "Delivery Method: Secure Digital Portal",
+        "",
+        sep,
+        "",
+        "ACCEPTANCE CONFIRMATION:",
+        "",
+        "By signing this document, the Client confirms:",
+        "",
+        "✓ Receipt of all deliverable digital files",
+        "✓ Access to files via secure download portal",
+        "✓ Acceptance of delivered materials as complete",
+        "✓ Agreement that work meets specified requirements",
+        "✓ Completion of the service contract",
+        "",
+        sep,
+        "",
+        "CLIENT SIGNATURE:",
+        "",
+        f"Name: {name}",
+        f"Email: {email}",
+        f"Date: {accepted_dt}",
+        "",
+        "",
+        "Signature: ___________________________________________",
+        "",
+        sep,
+        "",
+        "This document serves as legal confirmation of service delivery",
+        f"and client acceptance for project {pn}.",
+        "",
+        sep,
+        "",
+        f"Legal Entity: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID} | {COUNTRY_OF_REGISTRATION}",
+        f"Brand: {BRAND_NAME}",
+        "",
+        f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
+        LOCATION,
+        "",
+        sep,
+    ])
+    return "\n".join(lines)
+
+
+def _build_payment_instructions_html(
+    p: dict, doc_number: str, base_css: str,
+    name: str, email: str, pn: str, title: str, amount: str, service_type_label: str,
+) -> str:
+    method = p.get("payment_method") or "paypal"
+    method_phrase = {
+        "paypal": "PayPal",
+        "bank_transfer": "SWIFT bank transfer",
+        "crypto": "USDT (TRC-20) transfer",
+    }.get(method, "the selected payment method")
+    memo_html = (
+        f"<p style='margin:0 0 6px 0;font-weight:700;color:#0a1628;'>{service_type_label} production according to client's script</p>"
+        f"<p style='margin:0 0 6px 0;'>- Project Reference: <strong>{pn}</strong></p>"
+        "<p style='margin:0 0 6px 0;'>Payment terms: 100% post-payment (payable after the Client has received the deliverables and accepted the work).</p>"
+        f"<p style='margin:0 0 6px 0;'>By completing payment via {method_phrase}, the Client confirms successful receipt of the delivered digital materials and accepts that no refunds apply after delivery.</p>"
+        "<p style='margin:0;'>- No physical shipment — digital service delivered electronically</p>"
+    )
+
+    if method == "paypal":
+        header_title = "PAYPAL PAYMENT INSTRUCTIONS"
+        send_to_block = (
+            f"<p style='font-size:13px;'>Please send <strong>{amount}</strong> to:</p>"
+            f"<p style='font-size:14px;'><span style='background:#fef9c3;padding:4px 8px;border-radius:3px;'>PayPal Account: <code>{PAYPAL_EMAIL}</code></span></p>"
+            "<p style='font-size:11px;color:#666;'>(This is our payment receiving account)</p>"
+        )
+        steps = [
+            "Log in to your PayPal account (www.paypal.com)",
+            'Click "Send Money" or "Send & Request"',
+            f"Enter recipient email: <code>{PAYPAL_EMAIL}</code> (our PayPal business account for receiving payments)",
+            f"Enter amount: <strong>{amount}</strong>",
+            'Select payment type: "Goods &amp; Services" (IMPORTANT: This protects both parties)',
+            'In the "Add a note" / "What\'s this payment for?" field → paste the text you copied above',
+            "Review all details carefully",
+            'Click "Send" to complete payment',
+        ]
+        method_line = "Payment Method: PayPal (Goods & Services)"
+    elif method == "bank_transfer":
+        header_title = "BANK TRANSFER PAYMENT INSTRUCTIONS"
+        send_to_block = (
+            f"<p style='font-size:13px;'>Please transfer <strong>{amount}</strong> via SWIFT to:</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Beneficiary</th><td>{BANK_BENEFICIARY_NAME}</td></tr>"
+            f"<tr><th>Beneficiary Bank</th><td>{BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}</td></tr>"
+            f"<tr><th>SWIFT</th><td><code>{BANK_BENEFICIARY_BANK_SWIFT}</code></td></tr>"
+            f"<tr><th>IBAN</th><td><code>{BANK_BENEFICIARY_IBAN}</code></td></tr>"
+            f"<tr><th>Intermediary 1</th><td>{BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})</td></tr>"
+            f"<tr><th>Intermediary 2</th><td>{BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})</td></tr>"
+            "</table>"
+        )
+        steps = [
+            "Log in to your bank's online portal or visit a branch",
+            "Initiate an international SWIFT transfer using the details above",
+            f"Enter amount: <strong>{amount}</strong>",
+            "In the payment message / reference field → paste the text you copied above",
+            "Confirm and authorize the transfer",
+            "Keep the transfer confirmation receipt",
+        ]
+        method_line = "Payment Method: SWIFT Bank Transfer"
+    else:  # crypto
+        header_title = "CRYPTO (USDT TRC-20) PAYMENT INSTRUCTIONS"
+        send_to_block = (
+            f"<p style='font-size:13px;'>Please send <strong>{amount}</strong> worth of {CRYPTO_ASSET} on {CRYPTO_NETWORK} to:</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Asset</th><td>{CRYPTO_ASSET}</td></tr>"
+            f"<tr><th>Network</th><td>{CRYPTO_NETWORK} — <strong>TRC-20 only</strong></td></tr>"
+            f"<tr><th>Wallet address</th><td><code style='word-break:break-all'>{CRYPTO_WALLET_ADDRESS}</code></td></tr>"
+            "</table>"
+            "<p style='color:#b45309;font-size:11px;margin-top:6px;'>⚠ Only TRON network (TRC-20) transfers are supported. Assets sent via a different network may be lost.</p>"
+        )
+        steps = [
+            "Open your crypto wallet / exchange",
+            "Choose USDT and TRC-20 network",
+            f"Send amount equivalent to <strong>{amount}</strong>",
+            "Copy the transaction hash (TxID) from your wallet",
+            "In the payment note / memo field (if available) → paste the text you copied above",
+            "Send the transaction hash via project chat along with the transaction screenshot",
+        ]
+        method_line = f"Payment Method: {CRYPTO_ASSET} on {CRYPTO_NETWORK} (TRC-20)"
+
+    steps_html = "\n".join(f"<li>{s}</li>" for s in steps)
+
+    return f"""<html><head>{base_css}</head><body>
+    <div class="header"><span class="doc-number">{doc_number}</span><h1>{header_title}</h1>
+    <p style="font-size:11px;color:#666;margin:2px 0 0 0;">{BRAND_NAME}</p>
+    </div>
+
+    <div class="section">
+    {send_to_block}
+    </div>
+
+    <div class="section"><h2>Copy this text for payment comment</h2>
+    <div style="padding:14px;background:#f0f9ff;border-left:3px solid #0ea5e9;border-radius:4px;font-size:12px;line-height:1.65;">
+    {memo_html}
+    </div>
+    <p style="font-size:11px;color:#666;margin-top:6px;font-style:italic;">Select the text above and copy (Ctrl+A → Ctrl+C), then paste into the payment note/reference field.</p>
+    </div>
+
+    <div class="section"><h2>Step-by-step payment instructions</h2>
+    <ol style="padding-left:20px;font-size:12px;line-height:1.75;">
+    {steps_html}
+    </ol>
+    </div>
+
+    <div class="section"><h2>After completing payment</h2>
+    <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+        <li>You will receive a transaction confirmation (e.g. PayPal Transaction ID like <code>12ABC34567DEF890</code>)</li>
+        <li>Screenshot your payment confirmation (optional but recommended)</li>
+        <li>Return to this portal → open the project page</li>
+        <li>Click <strong>Mark Payment Sent</strong> and paste the transaction ID</li>
+        <li>Manager will confirm payment within 24 hours</li>
+        <li>Project will be marked as <em>Completed</em></li>
+    </ul>
+    </div>
+
+    <div class="section"><h2>Need help?</h2>
+    <p style="font-size:12px;">All communication through the secure client portal chat.<br>
+    For urgent payment issues only: <code>{CONTACT_EMAIL}</code></p>
+    </div>
+
+    <div class="section">
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Project</th><td><code>{pn}</code></td></tr>
+    <tr><th>Amount Due</th><td><strong>{amount}</strong></td></tr>
+    <tr><th>Payment Method</th><td>{method_line.split(': ',1)[1]}</td></tr>
+    </table>
+    </div>
+
+    <div class="footer">
+    <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+    <p><strong>Brand:</strong> {BRAND_NAME}</p>
+    <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+    </div>
+    </body></html>"""
+
+
+def _build_payment_instructions_txt(p: dict, doc_number: str) -> str:
+    name = p.get("user_name", "Client")
+    pn = p.get("project_number", "")
+    amount = format_currency(p.get("quote_amount", 0))
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    method = p.get("payment_method") or "paypal"
+    method_phrase = {
+        "paypal": "PayPal",
+        "bank_transfer": "SWIFT bank transfer",
+        "crypto": "USDT (TRC-20) transfer",
+    }.get(method, "the selected payment method")
+    sep = "═" * 60
+    dash = "─" * 60
+
+    if method == "paypal":
+        header = "PAYPAL PAYMENT INSTRUCTIONS"
+        send_to_lines = [
+            f"Please send {amount} to:",
+            "",
+            f"  PayPal Account: {PAYPAL_EMAIL}",
+            "  (This is our payment receiving account)",
+        ]
+        steps = [
+            "Log in to your PayPal account (www.paypal.com)",
+            'Click "Send Money" or "Send & Request"',
+            f"Enter recipient email: {PAYPAL_EMAIL}",
+            "   (This is our PayPal business account for receiving payments)",
+            f"Enter amount: {amount}",
+            'Select payment type: "Goods & Services"',
+            "   (IMPORTANT: This protects both parties)",
+            'In the "Add a note" or "What\'s this payment for?" field:',
+            "   → PASTE the text you copied above",
+            "Review all details carefully",
+            'Click "Send" to complete payment',
+        ]
+        method_line = "PayPal (Goods & Services)"
+    elif method == "bank_transfer":
+        header = "BANK TRANSFER PAYMENT INSTRUCTIONS"
+        send_to_lines = [
+            f"Please transfer {amount} via SWIFT to:",
+            "",
+            f"  Beneficiary: {BANK_BENEFICIARY_NAME}",
+            f"  Beneficiary Bank: {BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}",
+            f"  SWIFT: {BANK_BENEFICIARY_BANK_SWIFT}",
+            f"  IBAN: {BANK_BENEFICIARY_IBAN}",
+            f"  Intermediary 1: {BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})",
+            f"  Intermediary 2: {BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})",
+        ]
+        steps = [
+            "Log in to your bank's online portal or visit a branch",
+            "Initiate an international SWIFT transfer using the details above",
+            f"Enter amount: {amount}",
+            "In the payment message / reference field:",
+            "   → PASTE the text you copied above",
+            "Confirm and authorize the transfer",
+            "Keep the transfer confirmation receipt",
+        ]
+        method_line = "SWIFT Bank Transfer"
+    else:
+        header = "CRYPTO (USDT TRC-20) PAYMENT INSTRUCTIONS"
+        send_to_lines = [
+            f"Please send {amount} worth of {CRYPTO_ASSET} on {CRYPTO_NETWORK} to:",
+            "",
+            f"  Asset: {CRYPTO_ASSET}",
+            f"  Network: {CRYPTO_NETWORK} — TRC-20 ONLY",
+            f"  Wallet address: {CRYPTO_WALLET_ADDRESS}",
+            "",
+            "  WARNING: Only TRON network (TRC-20) transfers are supported.",
+            "  Assets sent via a different network may be lost.",
+        ]
+        steps = [
+            "Open your crypto wallet / exchange",
+            "Choose USDT and TRC-20 network",
+            f"Send amount equivalent to {amount}",
+            "Copy the transaction hash (TxID) from your wallet",
+            "In the payment memo (if available):",
+            "   → PASTE the text you copied above",
+            "Send the transaction hash via project chat along with the screenshot",
+        ]
+        method_line = f"{CRYPTO_ASSET} on {CRYPTO_NETWORK} (TRC-20)"
+
+    lines = [
+        header,
+        sep,
+        "",
+        BRAND_NAME,
+        "",
+    ] + send_to_lines + [
+        "",
+        sep,
+        "",
+        "COPY THIS TEXT FOR PAYMENT COMMENT:",
+        dash,
+        "",
+        f"{service_type_label} production according to client's script",
+        "",
+        f"- Project Reference: {pn}",
+        "",
+        "Payment terms: 100% post-payment (payable after the Client has",
+        "received the deliverables and accepted the work).",
+        "",
+        f"By completing payment via {method_phrase}, the Client confirms",
+        "successful receipt of the delivered digital materials and accepts",
+        "that no refunds apply after delivery.",
+        "",
+        "- No physical shipment — digital service delivered electronically",
+        "",
+        dash,
+        "",
+        sep,
+        "",
+        "STEP-BY-STEP PAYMENT INSTRUCTIONS:",
+        "",
+    ]
+    step_num = 0
+    for s in steps:
+        if s.startswith("   "):
+            lines.append(f"   {s.strip()}")
+        else:
+            step_num += 1
+            lines.append(f"{step_num}. {s}")
+    lines.extend([
+        "",
+        sep,
+        "",
+        "AFTER COMPLETING PAYMENT:",
+        "",
+        "• You will receive a transaction confirmation",
+        "  (e.g. PayPal Transaction ID like 12ABC34567DEF890)",
+        "",
+        "• Screenshot your payment confirmation (optional but recommended)",
+        "",
+        "• Return to this portal:",
+        "  → Open the project page",
+        "  → Click \"Mark Payment Sent\"",
+        "  → Paste the transaction ID",
+        "",
+        "• Manager will confirm payment within 24 hours",
+        "",
+        "• Project will be marked as \"Completed\"",
+        "",
+        sep,
+        "",
+        "NEED HELP?",
+        "",
+        "All communication through secure client portal chat.",
+        f"For urgent payment issues only: {CONTACT_EMAIL}",
+        "",
+        sep,
+        "",
+        f"Project: {pn}",
+        f"Amount Due: {amount}",
+        f"Payment Method: {method_line}",
+        "",
+        BRAND_NAME,
+        "",
+        sep,
+    ])
+    return "\n".join(lines)
+
+
 def _build_delivery_notes_html(
     p: dict, doc_number: str, base_css: str,
     name: str, email: str, pn: str, title: str,
@@ -863,13 +1330,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
         "certificate_delivery": _build_certificate_delivery_html(p, doc_number, base_css, name, email, pn, title, service_type_label, date_created),
 
-        "acceptance_act": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>ACCEPTANCE ACT</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>The client hereby confirms acceptance of work performed under project <strong>{pn}</strong>.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Project</th><td>{title}</td></tr><tr><th>Amount</th><td>{amount}</td></tr></table></div>
-            <div class="signature-line">Client Signature</div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "acceptance_act": _build_acceptance_act_html(p, doc_number, base_css, name, email, pn, title, service_type_label),
 
         "payment_confirmation": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>PAYMENT CONFIRMATION</h1><div class="brand">{BRAND_NAME}</div></div>
@@ -967,18 +1428,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
 
-        "payment_instructions": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>PAYMENT INSTRUCTIONS</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><h2>Summary</h2>
-            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
-            <tr><th>Project</th><td>{pn}</td></tr>
-            <tr><th>Title</th><td>{title}</td></tr>
-            <tr><th>Amount Due</th><td><strong>{amount}</strong></td></tr>
-            </table></div>
-            <div class="section"><h2>How to Pay</h2>{payment_details_block}</div>
-            <div class="section"><p style='font-size:11px;color:#666;'>After sending the payment, please mark it as sent in your project portal. Include the transaction ID/reference where applicable. Contact us at {CONTACT_EMAIL} for any questions.</p></div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "payment_instructions": _build_payment_instructions_html(p, doc_number, base_css, name, email, pn, title, amount, service_type_label),
 
         "download_confirmation": _build_delivery_notes_html(p, doc_number, base_css, name, email, pn, title, service_type_label),
 
@@ -1132,6 +1582,14 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
     # Delivery Notes — admin-side delivery report (stage 6)
     if doc_type == "download_confirmation":
         return _build_delivery_notes_txt(p, doc_number)
+
+    # Acceptance Act — client confirms acceptance of work (stage 8 → 9)
+    if doc_type == "acceptance_act":
+        return _build_acceptance_act_txt(p, doc_number)
+
+    # Payment Instructions — stage 9 after Accept Work
+    if doc_type == "payment_instructions":
+        return _build_payment_instructions_txt(p, doc_number)
 
     # Special rich template for invoice (matches Marcos's format)
     if doc_type == "invoice":

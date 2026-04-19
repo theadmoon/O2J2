@@ -74,6 +74,20 @@ export default function StageActions({ project, user, onUpdated }) {
     defaultValues: {},
   });
 
+  const openAcceptWork = () => setDialog({
+    key: 'accept-work',
+    title: 'Accept Work & Upload Signed Acceptance Act',
+    description: 'Download the Acceptance Act from the Delivery Confirmed stage, sign it, and upload the signed copy (PDF, JPG or PNG). This legally confirms the work is accepted as complete. After submission you will receive Payment Instructions.',
+    submit: 'Accept Work',
+    icon: ThumbsUp,
+    fields: [
+      { name: 'file', label: 'Signed Acceptance Act', type: 'file', required: true, accept: '.pdf,.png,.jpg,.jpeg' },
+    ],
+    endpoint: `/projects/${project.id}/client/accept-work`,
+    multipart: true,
+    defaultValues: {},
+  });
+
   const openActivateOrder = () => setDialog({
     key: 'activate-order',
     title: 'Activate Order',
@@ -171,7 +185,7 @@ export default function StageActions({ project, user, onUpdated }) {
       actions.push(<ActionButton key="confD" icon={FileCheck} label="Confirm Delivery & Upload Signed Cert" color="emerald" onClick={openConfirmDelivery} testId="client-confirm-delivery" />);
     }
     if (status === 'delivery_confirmed') {
-      actions.push(<ActionButton key="accW" icon={ThumbsUp} label="Accept Work (sign Acceptance Act)" color="sky" onClick={() => call('post', `/projects/${project.id}/client/accept-work`)} testId="client-accept-work" loading={loading} />);
+      actions.push(<ActionButton key="accW" icon={ThumbsUp} label="Accept Work & Upload Signed Act" color="sky" onClick={openAcceptWork} testId="client-accept-work" />);
     }
     if (status === 'work_accepted') {
       actions.push(<ActionButton key="paid" icon={HandCoins} label="I Have Sent the Payment" color="amber" onClick={openMarkPaymentSent} testId="client-mark-payment-sent" />);

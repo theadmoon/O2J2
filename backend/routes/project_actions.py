@@ -330,7 +330,7 @@ async def client_confirm_delivery(
             size += len(chunk)
             await out.write(chunk)
 
-    return await _set_timestamp_and_return(
+    updated = await _set_timestamp_and_return(
         db, project_id,
         {
             "delivery_confirmed_at": datetime.now(timezone.utc).isoformat(),
@@ -339,6 +339,9 @@ async def client_confirm_delivery(
             "signed_delivery_cert_size": size,
         },
     )
+    # Pre-generate the acceptance_act document number so client can download & sign it
+    await get_or_generate_document_number(db, updated, "acceptance_act")
+    return await _set_timestamp_and_return(db, project_id, {})
 
 
 @router.get("/{project_id}/signed-delivery-cert")
@@ -359,19 +362,73 @@ async def download_signed_delivery_cert(project_id: str, request: Request):
 
 
 @router.post("/{project_id}/client/accept-work")
-async def client_accept_work(project_id: str, request: Request):
-    """Stage 8 → 9. Client signs the acceptance act."""
+async def client_accept_work(
+    project_id: str,
+    request: Request,
+    file: UploadFile = File(...),
+):
+    """Stage 8 → 9. Client uploads the signed Acceptance Act to confirm work acceptance."""
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "delivery_confirmed_at", "delivery_confirmed")
     _require_not_set(project, "work_accepted_at", "accept-work")
 
+    if not file or not file.filename:
+        raise HTTPException(status_code=400, detail="Signed Acceptance Act is required")
+
+    allowed_ext = {".pdf", ".png", ".jpg", ".jpeg"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"File type {ext} not allowed. Use PDF, PNG or JPG.")
+
+    signed_root = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "uploads",
+        "signed_acceptance_acts",
+    )
+    os.makedirs(signed_root, exist_ok=True)
+    project_dir = os.path.join(signed_root, project_id)
+    os.makedirs(project_dir, exist_ok=True)
+
+    stored_name = f"signed_acceptance_act{ext}"
+    file_path = os.path.join(project_dir, stored_name)
+
+    size = 0
+    async with aiofiles.open(file_path, "wb") as out:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            await out.write(chunk)
+
     updates = {
         "work_accepted_at": datetime.now(timezone.utc).isoformat(),
         "acceptance_status": "accepted",
+        "signed_acceptance_act_file": os.path.join("uploads", "signed_acceptance_acts", project_id, stored_name),
+        "signed_acceptance_act_filename": file.filename,
+        "signed_acceptance_act_size": size,
     }
     updated = await _set_timestamp_and_return(db, project_id, updates)
     await get_or_generate_document_number(db, updated, "acceptance_act")
+    await get_or_generate_document_number(db, updated, "payment_instructions")
     return await _set_timestamp_and_return(db, project_id, {})
+
+
+@router.get("/{project_id}/signed-acceptance-act")
+async def download_signed_acceptance_act(project_id: str, request: Request):
+    """Owner client or admin downloads the signed Acceptance Act uploaded by the client."""
+    db, _, project = await _get_project_for_client(project_id, request)
+    rel = project.get("signed_acceptance_act_file")
+    if not rel:
+        raise HTTPException(status_code=404, detail="No signed acceptance act uploaded yet")
+    abs_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        rel,
+    )
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Signed acceptance act file not found on disk")
+    download_name = project.get("signed_acceptance_act_filename") or os.path.basename(abs_path)
+    return FileResponse(abs_path, filename=download_name)
 
 
 class MarkPaymentSentBody(BaseModel):
