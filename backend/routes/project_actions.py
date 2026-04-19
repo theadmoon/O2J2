@@ -87,6 +87,8 @@ class ActivateOrderBody(BaseModel):
     quote_details: str = ""
     quote_request_manager_comments: str = ""
     project_title: Optional[str] = None
+    estimated_start_date: Optional[str] = None      # ISO date YYYY-MM-DD
+    estimated_delivery_date: Optional[str] = None   # ISO date YYYY-MM-DD
 
 
 @router.post("/{project_id}/admin/activate-order")
@@ -105,6 +107,10 @@ async def admin_activate_order(project_id: str, body: ActivateOrderBody, request
     }
     if body.project_title:
         updates["project_title"] = body.project_title
+    if body.estimated_start_date:
+        updates["estimated_start_date"] = body.estimated_start_date
+    if body.estimated_delivery_date:
+        updates["estimated_delivery_date"] = body.estimated_delivery_date
 
     updated = await _set_timestamp_and_return(db, project_id, updates)
     # Pre-generate Order Confirmation doc number

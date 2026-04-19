@@ -39,7 +39,73 @@ async def _get_project_and_validate(project_id: str, request: Request):
     return db, project
 
 
+def _invoice_dates(project: dict) -> dict:
+    """Compute issue/start/delivery dates for the invoice. Uses admin-provided
+    values when available, otherwise derives sensible defaults from timestamps."""
+    from datetime import datetime as _dt, timedelta as _td
+    issued_iso = project.get("invoice_sent_at") or project.get("order_activated_at") or project.get("created_at")
+    issued = _dt.fromisoformat(issued_iso.replace("Z", "+00:00")) if issued_iso else _dt.now(timezone.utc)
+
+    start_str = project.get("estimated_start_date")
+    delivery_str = project.get("estimated_delivery_date")
+
+    if start_str:
+        start_date = _dt.fromisoformat(start_str)
+    else:
+        start_date = issued + _td(days=2)
+    if delivery_str:
+        delivery_date = _dt.fromisoformat(delivery_str)
+    else:
+        delivery_date = start_date + _td(days=21)
+
+    def fmt(d):
+        return d.strftime("%B %d, %Y")
+
+    return {"issued": fmt(issued), "start": fmt(start_date), "delivery": fmt(delivery_date)}
+
+
 def _payment_method_details_html(project: dict) -> str:
+    method = (project.get("payment_method") or "paypal")
+    if method == "paypal":
+        return (
+            "<p><strong>Method:</strong> PayPal</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Send to</th><td><code>{PAYPAL_EMAIL}</code></td></tr>"
+            f"<tr><th>Beneficiary</th><td>{LEGAL_ENTITY_NAME}</td></tr>"
+            f"<tr><th>Reference</th><td>Include your project number <strong>{project.get('project_number','')}</strong> in the PayPal note.</td></tr>"
+            "</table>"
+        )
+    if method == "bank_transfer":
+        return (
+            "<p><strong>Method:</strong> Bank Transfer (SWIFT)</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Beneficiary</th><td>{BANK_BENEFICIARY_NAME}</td></tr>"
+            f"<tr><th>Beneficiary Bank</th><td>{BANK_BENEFICIARY_BANK}, {BANK_BENEFICIARY_BANK_LOCATION}</td></tr>"
+            f"<tr><th>SWIFT</th><td><code>{BANK_BENEFICIARY_BANK_SWIFT}</code></td></tr>"
+            f"<tr><th>IBAN</th><td><code>{BANK_BENEFICIARY_IBAN}</code></td></tr>"
+            f"<tr><th>Intermediary 1</th><td>{BANK_INTERMEDIARY_1_NAME} (SWIFT: {BANK_INTERMEDIARY_1_SWIFT})</td></tr>"
+            f"<tr><th>Intermediary 2</th><td>{BANK_INTERMEDIARY_2_NAME} (SWIFT: {BANK_INTERMEDIARY_2_SWIFT})</td></tr>"
+            f"<tr><th>Reference</th><td>Include project number <strong>{project.get('project_number','')}</strong> in the transfer message.</td></tr>"
+            "</table>"
+        )
+    if method == "crypto":
+        return (
+            f"<p><strong>Method:</strong> {CRYPTO_ASSET} on {CRYPTO_NETWORK}</p>"
+            "<table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>"
+            f"<tr><th>Asset</th><td>{CRYPTO_ASSET}</td></tr>"
+            f"<tr><th>Network</th><td>{CRYPTO_NETWORK} — <strong>TRC-20 only</strong></td></tr>"
+            f"<tr><th>Wallet address</th><td><code style='word-break:break-all'>{CRYPTO_WALLET_ADDRESS}</code></td></tr>"
+            f"<tr><th>Beneficiary</th><td>{LEGAL_ENTITY_NAME}</td></tr>"
+            f"<tr><th>Reference</th><td>After the transfer, send the transaction hash through your project chat and mark the payment as sent. Include project number <strong>{project.get('project_number','')}</strong> for our records.</td></tr>"
+            "</table>"
+            "<p style='color:#b45309;font-size:11px;margin-top:8px;'>"
+            "⚠ Only TRON network (TRC-20) transfers are supported. Assets sent via a different network may be lost."
+            "</p>"
+        )
+    return "<p><em>No payment method selected.</em></p>"
+
+
+
     method = (project.get("payment_method") or "paypal")
     if method == "paypal":
         return (
@@ -173,6 +239,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
     payment_method_label = PAYMENT_METHODS.get(pm_code, {}).get("display", pm_code.upper())
     service_type_label = (p.get("service_type") or "").replace("_", " ").title()
     order_activated_at = format_date_utc(p.get("order_activated_at")) if p.get("order_activated_at") else date_created
+    inv_dates = _invoice_dates(p)
 
     base_css = """
     <style>
@@ -197,14 +264,120 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
 
     templates = {
         "invoice": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>INVOICE</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><h2>Bill To</h2><p><strong>{name}</strong><br>{email}</p></div>
-            <div class="section"><h2>Project Details</h2>
-            <table><tr><th>Project</th><td>{pn}</td></tr><tr><th>Title</th><td>{title}</td></tr><tr><th>Date</th><td>{date_created}</td></tr></table></div>
-            <div class="section"><h2>Amount Due</h2><table><tr><th>Service</th><th>Amount</th></tr><tr><td>{title}</td><td><strong>{amount}</strong></td></tr></table></div>
-            <div class="section"><h2>Payment Details</h2>{payment_details_block}</div>
-            <div class="signature-line">Authorized Signature</div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
+            <div class="header"><span class="doc-number">{doc_number}</span><h1>INVOICE</h1>
+            <div class="brand">{LEGAL_ENTITY_NAME}</div>
+            <p style="font-size:11px;color:#666;margin:2px 0;">Tax ID: {TAX_ID} · Country of Registration: {COUNTRY_OF_REGISTRATION}</p>
+            <p style="font-size:11px;color:#666;margin:2px 0 10px 0;">Custom Digital Video Services</p>
+            </div>
+
+            <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Invoice</th><td><code>{doc_number}</code></td></tr>
+            <tr><th>Date Issued</th><td>{inv_dates['issued']}</td></tr>
+            <tr><th>Due Date</th><td>Upon Delivery of Digital Assets</td></tr>
+            </table></div>
+
+            <div class="section"><h2>Bill To</h2>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Client</th><td><strong>{name}</strong></td></tr>
+            <tr><th>Email</th><td>{email}</td></tr>
+            <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+            <tr><th>Project Title</th><td>{title}</td></tr>
+            </table></div>
+
+            <div class="section"><h2>Service Description</h2>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+            </table>
+            <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Project Brief:</p>
+            <div style="white-space: pre-wrap; font-size: 12px; border: 1px solid #e5e7eb; padding: 12px; background: #fafafa; border-radius: 4px;">{p.get('brief','')}</div>
+            <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Estimated Production Period:</p>
+            <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Start</th><td>{inv_dates['start']}</td></tr>
+            <tr><th>Delivery</th><td>{inv_dates['delivery']}</td></tr>
+            </table>
+            </div>
+
+            <div class="section"><h2>Pricing</h2>
+            <table><colgroup><col style='width:70%'/><col style='width:30%'/></colgroup>
+            <thead><tr><th>Description</th><th style="text-align:right;">Amount</th></tr></thead>
+            <tbody>
+            <tr><td>Service Fee</td><td style="text-align:right;font-family:monospace;">{amount}</td></tr>
+            </tbody>
+            </table>
+            <table style="margin-top:12px;"><colgroup><col style='width:70%'/><col style='width:30%'/></colgroup>
+            <tr><td style="border:none;">Subtotal</td><td style="border:none;text-align:right;font-family:monospace;">{amount}</td></tr>
+            <tr><td style="border:none;">Tax (Digital Services)</td><td style="border:none;text-align:right;font-family:monospace;">$0.00</td></tr>
+            <tr style="border-top:2px solid #0a1628;"><td style="border:none;border-top:2px solid #0a1628;font-weight:700;padding-top:8px;">TOTAL AMOUNT DUE</td><td style="border:none;border-top:2px solid #0a1628;text-align:right;font-family:monospace;font-weight:700;padding-top:8px;">{amount}</td></tr>
+            </table>
+            </div>
+
+            <div class="section"><h2>Payment Terms</h2>
+            <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+                <li>100% post-payment model — pay after delivery</li>
+                <li>Invoice issued before production begins</li>
+                <li>Payment due upon delivery of digital files</li>
+                <li>Payment confirms acceptance of delivered work</li>
+                <li>No refunds after delivery completion</li>
+                <li>All deliverables provided electronically</li>
+            </ul></div>
+
+            <div class="section"><h2>Payment Method</h2>
+            <p style="font-size:14px;font-weight:600;color:#0a1628;">{payment_method_label}</p>
+            {payment_details_block}
+            </div>
+
+            <div class="section"><h2>Communication</h2>
+            <p style="font-size:12px;">All project communication should be conducted through the secure client portal chat system.</p>
+            <p style="font-size:11px;color:#666;">For urgent technical matters only: <a href="mailto:{CONTACT_EMAIL}">{CONTACT_EMAIL}</a></p>
+            </div>
+
+            <div class="section"><h2>Notes</h2>
+            <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+                <li>This is a digital service — no physical goods shipped</li>
+                <li>All files delivered via secure client portal</li>
+                <li>By accepting this invoice, you agree to the terms above</li>
+                <li>Production begins after invoice confirmation</li>
+                <li>Delivery timeline confirmed after production start</li>
+            </ul></div>
+
+            <div class="section"><h2>Legal Framework & Terms</h2>
+            <p style="font-size:12px;">This Invoice-Offer is governed by:</p>
+            <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+                <li>Terms of Service: <a href="https://ocean2joy.com/policies/terms">ocean2joy.com/policies/terms</a></li>
+                <li>Service Agreement: <a href="https://ocean2joy.com/legal">ocean2joy.com/legal</a></li>
+                <li>Refund Policy: <a href="https://ocean2joy.com/policies/refund">ocean2joy.com/policies/refund</a></li>
+                <li>Privacy Policy: <a href="https://ocean2joy.com/policies/privacy">ocean2joy.com/policies/privacy</a></li>
+            </ul>
+            <p style="font-size:12px;margin-top:10px;font-weight:600;">By accepting this invoice in the client portal, Client confirms:</p>
+            <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+                <li>Reading and accepting all documents listed above</li>
+                <li>Agreement with 100% post-payment terms</li>
+                <li>Understanding that no refunds apply after delivery</li>
+                <li>Acceptance that this is a digital service (no physical goods)</li>
+            </ul>
+            </div>
+
+            <div class="section"><h2>Client Acceptance</h2>
+            <p style="font-size:12px;">By accepting this invoice in the client portal, the Client confirms:</p>
+            <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+                <li>Agreement with all terms and pricing stated above</li>
+                <li>Authorization to begin production</li>
+                <li>Understanding of payment terms (due upon delivery)</li>
+            </ul>
+            <table style="margin-top:14px;"><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+            <tr><th>Client Name</th><td>{name}</td></tr>
+            <tr><th>Email</th><td>{email}</td></tr>
+            <tr><th>Acceptance Date</th><td>{format_date_utc(p.get('invoice_signed_at')) + ' UTC' if p.get('invoice_signed_at') else '(pending)'}</td></tr>
+            </table>
+            <p style="font-size:11px;color:#666;margin-top:10px;font-style:italic;">Acceptance is recorded electronically in the client portal. No handwritten signature is required.</p>
+            </div>
+
+            <div class="footer">
+            <p style="font-style:italic;text-align:center;margin-bottom:12px;">Thank you for choosing {BRAND_NAME}! Professional digital video production services.</p>
+            <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+            <p><strong>Brand:</strong> {BRAND_NAME}</p>
+            <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+            </div>
             </body></html>""",
 
         "certificate_completion": f"""<html><head>{base_css}</head><body>
@@ -488,6 +661,162 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         )
         return "\n".join(lines)
 
+    # Special rich template for invoice (matches Marcos's format)
+    if doc_type == "invoice":
+        sep = "═" * 60
+        inv_dates = _invoice_dates(p)
+        service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+        pm_code = (p.get("payment_method") or "paypal")
+        pm_label = PAYMENT_METHODS.get(pm_code, {}).get("display", pm_code.upper()).upper()
+        pm_txt_lines = _payment_method_details_txt(p)
+        acceptance_date = (format_date_utc(p.get("invoice_signed_at")) + " UTC") if p.get("invoice_signed_at") else ""
+        tax_str = "$0.00"
+
+        lines = [
+            "INVOICE",
+            sep,
+            "",
+            LEGAL_ENTITY_NAME,
+            f"Tax ID: {TAX_ID}",
+            f"Country of Registration: {COUNTRY_OF_REGISTRATION}",
+            "",
+            "Custom Digital Video Services",
+            "",
+            f"Invoice: {doc_number}",
+            f"Date Issued: {inv_dates['issued']}",
+            "Due Date: Upon Delivery of Digital Assets",
+            "",
+            sep,
+            "",
+            "BILL TO:",
+            name,
+            f"Email: {email}",
+            f"Project Reference: {pn}",
+            f"Project Title: {title}",
+            "",
+            sep,
+            "",
+            "SERVICE DESCRIPTION:",
+            "",
+            f"Service Type: {service_type_label}",
+            "",
+            "Project Brief:",
+            p.get("brief", "").strip() or "(not provided)",
+            "",
+            "Estimated Production Period:",
+            f"Start: {inv_dates['start']}",
+            f"Delivery: {inv_dates['delivery']}",
+            "",
+            sep,
+            "",
+            "PRICING:",
+            "",
+            f"Service Fee                           {amount}",
+            "",
+            sep,
+            "",
+            f"SUBTOTAL:                             {amount}",
+            f"Tax (Digital Services):                          {tax_str}",
+            "                                      ────────────────",
+            f"TOTAL AMOUNT DUE:                     {amount}",
+            "",
+            sep,
+            "",
+            "PAYMENT TERMS:",
+            "",
+            "✓ 100% post-payment model (pay after delivery)",
+            "✓ Invoice issued before production begins",
+            "✓ Payment due upon delivery of digital files",
+            "✓ Payment confirms acceptance of delivered work",
+            "✓ No refunds after delivery completion",
+            "✓ All deliverables provided electronically",
+            "",
+            sep,
+            "",
+            "PAYMENT METHOD:",
+            "",
+            pm_label,
+            "",
+        ]
+        lines.extend(pm_txt_lines[1:])  # drop the first "Method: ..." line (already shown as PAYMENT METHOD)
+        lines.extend([
+            "",
+            f'Important: Include project reference "{pn}"',
+            "in payment notes for proper tracking.",
+            "",
+            sep,
+            "",
+            "COMMUNICATION:",
+            "",
+            "All project communication should be conducted through",
+            "the secure client portal chat system.",
+            "",
+            "For urgent technical matters only:",
+            CONTACT_EMAIL,
+            "",
+            sep,
+            "",
+            "NOTES:",
+            "",
+            "• This is a digital service — no physical goods shipped",
+            "• All files delivered via secure client portal",
+            "• By accepting this invoice, you agree to the terms above",
+            "• Production begins after invoice confirmation",
+            "• Delivery timeline confirmed after production start",
+            "",
+            sep,
+            "",
+            "LEGAL FRAMEWORK & TERMS:",
+            "",
+            "This Invoice-Offer is governed by:",
+            "",
+            "• Terms of Service: ocean2joy.com/policies/terms",
+            "• Service Agreement: ocean2joy.com/legal",
+            "• Refund Policy: ocean2joy.com/policies/refund",
+            "• Privacy Policy: ocean2joy.com/policies/privacy",
+            "",
+            "By accepting this invoice in the client portal, Client confirms:",
+            "✓ Reading and accepting all documents listed above",
+            "✓ Agreement with 100% post-payment terms",
+            "✓ Understanding that no refunds apply after delivery",
+            "✓ Acceptance that this is a digital service (no physical goods)",
+            "",
+            "Full legal documentation: ocean2joy.com/legal",
+            "",
+            sep,
+            "",
+            "CLIENT ACCEPTANCE:",
+            "",
+            "By accepting this invoice in the client portal, the Client confirms:",
+            "✓ Agreement with all terms and pricing stated above",
+            "✓ Authorization to begin production",
+            "✓ Understanding of payment terms (due upon delivery)",
+            "",
+            f"Client Name: {name}",
+            f"Email: {email}",
+            f"Acceptance Date: {acceptance_date or '(pending)'}",
+            "",
+            "Acceptance is recorded electronically in the client portal.",
+            "No handwritten signature is required.",
+            "",
+            sep,
+            "",
+            f"Thank you for choosing {BRAND_NAME.split(' Digital')[0]}!",
+            "Professional digital video production services.",
+            "",
+            sep,
+            "",
+            f"Legal Entity: {LEGAL_ENTITY_NAME}",
+            f"Tax ID: {TAX_ID} | {COUNTRY_OF_REGISTRATION}",
+            f"Brand: {BRAND_NAME}",
+            "",
+            f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
+            LOCATION,
+            "",
+            sep,
+        ])
+        return "\n".join(lines)
+
     lines = [
         f"{'='*60}",
         f"{BRAND_NAME}",
@@ -509,7 +838,7 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
             lines.extend(["", "-" * 60, "BRIEF", "", brief_text])
         lines.extend(_attachments_txt_block(p))
 
-    if doc_type in ("invoice", "payment_instructions"):
+    if doc_type == "payment_instructions":
         lines.extend(["", "-" * 60, "PAYMENT DETAILS"])
         lines.extend(_payment_method_details_txt(p))
 

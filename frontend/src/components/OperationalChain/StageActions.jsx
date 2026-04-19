@@ -51,12 +51,16 @@ export default function StageActions({ project, user, onUpdated }) {
       { name: 'quote_amount', label: 'Quote Amount (USD)', type: 'number', required: true, placeholder: '450' },
       { name: 'quote_details', label: 'Quote Details', type: 'textarea', placeholder: 'Breakdown of pricing...' },
       { name: 'quote_request_manager_comments', label: 'Internal Comments', type: 'textarea', placeholder: 'Notes for the team...' },
+      { name: 'estimated_start_date', label: 'Estimated Production Start', type: 'date', placeholder: '' },
+      { name: 'estimated_delivery_date', label: 'Estimated Delivery Date', type: 'date', placeholder: '' },
     ],
     endpoint: `/projects/${project.id}/admin/activate-order`,
     defaultValues: {
       quote_amount: project.quote_amount || '',
       quote_details: project.quote_details || '',
       quote_request_manager_comments: project.quote_request_manager_comments || '',
+      estimated_start_date: project.estimated_start_date || '',
+      estimated_delivery_date: project.estimated_delivery_date || '',
     },
   });
 
@@ -206,6 +210,10 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
     dialog.fields.forEach((f) => {
       if (f.type === 'number' && payload[f.name] !== '' && payload[f.name] != null) {
         payload[f.name] = Number(payload[f.name]);
+      }
+      // Strip empty optional fields so backend defaults kick in
+      if (payload[f.name] === '' && !f.required) {
+        delete payload[f.name];
       }
     });
     onSubmit(payload);
