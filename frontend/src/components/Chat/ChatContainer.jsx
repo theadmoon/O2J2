@@ -58,6 +58,7 @@ export default function ChatContainer({ projectId }) {
         {messages.map((m) => {
           const isOwn = m.sender_id === user?.id;
           const time = m.created_at ? new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const displayName = m.sender_role === 'admin' ? 'Ocean2Joy Team' : m.sender_name;
           return (
             <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`} data-testid={`message-${m.id}`}>
               <div className={`max-w-[75%] px-3 py-2 text-sm rounded-lg ${
@@ -66,7 +67,7 @@ export default function ChatContainer({ projectId }) {
                   : 'bg-gray-50 border border-gray-200 text-gray-700'
               }`}>
                 <div className="flex items-baseline justify-between gap-2 mb-1">
-                  <p className="text-xs text-gray-400 font-mono">{m.sender_name} ({m.sender_role})</p>
+                  <p className="text-xs text-gray-400 font-mono">{displayName}</p>
                   {time && <p className="text-[10px] text-gray-400 font-mono tabular-nums shrink-0">{time}</p>}
                 </div>
                 <p className="whitespace-pre-wrap break-words">{m.message}</p>

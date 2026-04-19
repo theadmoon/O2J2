@@ -155,11 +155,6 @@ export default function ProjectDetails() {
                 </span>
                 <Download className="w-3.5 h-3.5" />
               </button>
-              {!project.script_filename && (
-                <p className="text-[11px] text-gray-400 italic mt-1.5">
-                  Original filename was not captured for this legacy project.
-                </p>
-              )}
             </div>
           )}
 
