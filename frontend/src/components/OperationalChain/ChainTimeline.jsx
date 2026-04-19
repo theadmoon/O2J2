@@ -52,6 +52,23 @@ export default function ChainTimeline({ project, onViewDoc }) {
     }
   };
 
+  const handleSignedDeliveryCertDownload = async () => {
+    try {
+      const res = await api.get(`/projects/${project.id}/signed-delivery-cert`, { responseType: 'blob' });
+      const blob = new Blob([res.data]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = project?.signed_delivery_cert_filename || 'signed-delivery-certificate';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    } catch {
+      /* noop */
+    }
+  };
+
   return (
     <div className="space-y-1" data-testid="chain-timeline">
       {STAGES.map((stage, idx) => {
@@ -114,6 +131,21 @@ export default function ChainTimeline({ project, onViewDoc }) {
                     data-testid="timeline-signed-invoice-download"
                   >
                     <FileCheck2 className="w-3 h-3" /> {project.signed_invoice_filename || 'Signed Invoice'}
+                    <Download className="w-3 h-3 ml-1" />
+                  </button>
+                </div>
+              )}
+
+              {/* Signed Certificate of Delivery on stage 8 (Delivery Confirmed) */}
+              {completed && stage.key === 'delivery_confirmed' && project.signed_delivery_cert_file && (
+                <div className="mt-2">
+                  <button
+                    type="button"
+                    onClick={handleSignedDeliveryCertDownload}
+                    className="flex items-center gap-1 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-2 py-1 hover:bg-emerald-100"
+                    data-testid="timeline-signed-delivery-cert-download"
+                  >
+                    <FileCheck2 className="w-3 h-3" /> {project.signed_delivery_cert_filename || 'Signed Certificate of Delivery'}
                     <Download className="w-3 h-3 ml-1" />
                   </button>
                 </div>

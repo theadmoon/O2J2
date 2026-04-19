@@ -60,6 +60,20 @@ export default function StageActions({ project, user, onUpdated }) {
     defaultValues: {},
   });
 
+  const openConfirmDelivery = () => setDialog({
+    key: 'confirm-delivery',
+    title: 'Confirm Delivery & Upload Signed Certificate',
+    description: 'Download the Certificate of Delivery from the Files Accessed stage, sign it, and upload the signed copy (PDF, JPG or PNG). This confirms you physically received and can open the delivered materials.',
+    submit: 'Confirm Delivery',
+    icon: FileCheck,
+    fields: [
+      { name: 'file', label: 'Signed Certificate of Delivery', type: 'file', required: true, accept: '.pdf,.png,.jpg,.jpeg' },
+    ],
+    endpoint: `/projects/${project.id}/client/confirm-delivery`,
+    multipart: true,
+    defaultValues: {},
+  });
+
   const openActivateOrder = () => setDialog({
     key: 'activate-order',
     title: 'Activate Order',
@@ -154,7 +168,7 @@ export default function StageActions({ project, user, onUpdated }) {
       actions.push(<ActionButton key="sign" icon={PenLine} label="Accept Invoice & Upload Signed Copy" color="sky" onClick={openSignInvoice} testId="client-sign-invoice" />);
     }
     if (status === 'files_accessed') {
-      actions.push(<ActionButton key="confD" icon={FileCheck} label="Confirm Delivery Received" color="emerald" onClick={() => call('post', `/projects/${project.id}/client/confirm-delivery`)} testId="client-confirm-delivery" loading={loading} />);
+      actions.push(<ActionButton key="confD" icon={FileCheck} label="Confirm Delivery & Upload Signed Cert" color="emerald" onClick={openConfirmDelivery} testId="client-confirm-delivery" />);
     }
     if (status === 'delivery_confirmed') {
       actions.push(<ActionButton key="accW" icon={ThumbsUp} label="Accept Work (sign Acceptance Act)" color="sky" onClick={() => call('post', `/projects/${project.id}/client/accept-work`)} testId="client-accept-work" loading={loading} />);

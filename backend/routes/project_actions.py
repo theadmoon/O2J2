@@ -290,16 +290,72 @@ async def download_signed_invoice(project_id: str, request: Request):
 
 
 @router.post("/{project_id}/client/confirm-delivery")
-async def client_confirm_delivery(project_id: str, request: Request):
-    """Stage 7 → 8. Client confirms the deliverables are correct."""
+async def client_confirm_delivery(
+    project_id: str,
+    request: Request,
+    file: UploadFile = File(...),
+):
+    """Stage 7 → 8. Client uploads the signed Certificate of Delivery confirming
+    physical receipt of the materials."""
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "files_accessed_at", "files_accessed")
     _require_not_set(project, "delivery_confirmed_at", "confirm-delivery")
 
+    if not file or not file.filename:
+        raise HTTPException(status_code=400, detail="Signed Certificate of Delivery is required")
+
+    allowed_ext = {".pdf", ".png", ".jpg", ".jpeg"}
+    ext = os.path.splitext(file.filename)[1].lower()
+    if ext not in allowed_ext:
+        raise HTTPException(status_code=400, detail=f"File type {ext} not allowed. Use PDF, PNG or JPG.")
+
+    signed_root = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "uploads",
+        "signed_delivery_certs",
+    )
+    os.makedirs(signed_root, exist_ok=True)
+    project_dir = os.path.join(signed_root, project_id)
+    os.makedirs(project_dir, exist_ok=True)
+
+    stored_name = f"signed_delivery_cert{ext}"
+    file_path = os.path.join(project_dir, stored_name)
+
+    size = 0
+    async with aiofiles.open(file_path, "wb") as out:
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            size += len(chunk)
+            await out.write(chunk)
+
     return await _set_timestamp_and_return(
         db, project_id,
-        {"delivery_confirmed_at": datetime.now(timezone.utc).isoformat()},
+        {
+            "delivery_confirmed_at": datetime.now(timezone.utc).isoformat(),
+            "signed_delivery_cert_file": os.path.join("uploads", "signed_delivery_certs", project_id, stored_name),
+            "signed_delivery_cert_filename": file.filename,
+            "signed_delivery_cert_size": size,
+        },
     )
+
+
+@router.get("/{project_id}/signed-delivery-cert")
+async def download_signed_delivery_cert(project_id: str, request: Request):
+    """Owner client or admin downloads the signed Certificate of Delivery uploaded by the client."""
+    db, _, project = await _get_project_for_client(project_id, request)
+    rel = project.get("signed_delivery_cert_file")
+    if not rel:
+        raise HTTPException(status_code=404, detail="No signed delivery certificate uploaded yet")
+    abs_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        rel,
+    )
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Signed delivery certificate file not found on disk")
+    download_name = project.get("signed_delivery_cert_filename") or os.path.basename(abs_path)
+    return FileResponse(abs_path, filename=download_name)
 
 
 @router.post("/{project_id}/client/accept-work")
