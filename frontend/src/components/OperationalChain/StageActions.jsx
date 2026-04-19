@@ -144,15 +144,19 @@ export default function StageActions({ project, user, onUpdated }) {
     key: 'confirm-payment',
     title: 'Confirm Payment Received',
     description: needsTxIdFromAdmin
-      ? 'The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here. The ID is mandatory because it is printed on the final closing document.'
-      : 'Confirm that the payment has arrived. You may correct the transaction ID if needed.',
+      ? 'The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here along with the exact payment time in UTC from your PayPal dashboard. Both fields go into the final closing document.'
+      : 'Confirm that the payment has arrived. Enter the exact payment time in UTC from your PayPal dashboard. You may also correct the transaction ID if needed.',
     submit: 'Confirm Received',
     icon: DollarSign,
     fields: [
       { name: 'paypal_transaction_id', label: 'Transaction ID', type: 'text', required: needsTxIdFromAdmin, placeholder: 'Bank reference or PayPal ID' },
+      { name: 'paypal_transaction_time_utc', label: 'Transaction Time (UTC, from PayPal)', type: 'datetime-local', required: true, placeholder: 'YYYY-MM-DDTHH:MM', hint: 'Copy the exact completion time from your PayPal business dashboard — this value must be in UTC and will be printed on the Certificate of Completion.' },
     ],
     endpoint: `/projects/${project.id}/admin/confirm-payment`,
-    defaultValues: { paypal_transaction_id: project.paypal_transaction_id || '' },
+    defaultValues: {
+      paypal_transaction_id: project.paypal_transaction_id || '',
+      paypal_transaction_time_utc: project.paypal_transaction_time_utc || '',
+    },
   });
 
   // ---- ACTION BUTTONS: pick based on status + role ----
@@ -355,6 +359,7 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
                   data-testid={`dialog-input-${f.name}`}
                 />
               )}
+              {f.hint && <p className="text-xs text-gray-500 mt-1">{f.hint}</p>}
             </div>
           ))}
           {error && <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded" data-testid={`dialog-error-${dialog.key}`}>{error}</div>}

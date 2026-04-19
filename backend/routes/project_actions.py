@@ -180,11 +180,15 @@ async def admin_mark_delivered(project_id: str, request: Request):
 
 class ConfirmPaymentBody(BaseModel):
     paypal_transaction_id: Optional[str] = None
+    paypal_transaction_time_utc: Optional[str] = None  # ISO 8601 UTC as read from PayPal
 
 
 @router.post("/{project_id}/admin/confirm-payment")
 async def admin_confirm_payment(project_id: str, body: ConfirmPaymentBody, request: Request):
-    """Stage 10 → 11. Admin confirms payment was received."""
+    """Stage 10 → 11. Admin confirms payment was received.
+    `paypal_transaction_time_utc` is the timestamp read from the PayPal business
+    account (UTC), used as the authoritative reference in the closing document.
+    """
     db, _, project = await _get_project_for_admin(project_id, request)
     _require_stage(project, "payment_marked_by_client_at", "payment_sent")
     _require_not_set(project, "payment_confirmed_by_manager_at", "confirm-payment")
@@ -195,6 +199,8 @@ async def admin_confirm_payment(project_id: str, body: ConfirmPaymentBody, reque
     }
     if body.paypal_transaction_id:
         updates["paypal_transaction_id"] = body.paypal_transaction_id
+    if body.paypal_transaction_time_utc:
+        updates["paypal_transaction_time_utc"] = body.paypal_transaction_time_utc.strip()
 
     updated = await _set_timestamp_and_return(db, project_id, updates)
     await get_or_generate_document_number(db, updated, "payment_confirmation")
