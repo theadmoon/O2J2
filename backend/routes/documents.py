@@ -769,9 +769,7 @@ def _build_receipt_html(
 
     issued_dt = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else format_date_utc(p.get("payment_marked_by_client_at"))
     payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
-    payment_confirmed_date = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else "(pending)"
-    payment_status = "COMPLETED" if p.get("payment_confirmed_by_manager_at") else "PENDING CONFIRMATION"
-    payment_status_color = "#047857" if p.get("payment_confirmed_by_manager_at") else "#b45309"
+    payment_confirmed_date = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else format_date_utc(p.get("payment_marked_by_client_at"))
     tx_id = (p.get("paypal_transaction_id") or "").strip() or "(not provided)"
     client_paypal = (p.get("user_paypal_email") or "").strip() or "(not provided)"
 
@@ -834,7 +832,7 @@ def _build_receipt_html(
     <tr><th>Payment Date</th><td>{payment_time}</td></tr>
     <tr><th>Payment Confirmed</th><td>{payment_confirmed_date}</td></tr>
     <tr><th>Transaction ID</th><td><code>{tx_id}</code></td></tr>
-    <tr><th>Payment Status</th><td><strong style="color:{payment_status_color};">{payment_status}</strong></td></tr>
+    <tr><th>Payment Status</th><td><strong style="color:#047857;">COMPLETED</strong></td></tr>
     </table></div>
 
     <div class="section"><h2>Services Rendered</h2>
@@ -889,7 +887,6 @@ def _build_receipt_txt(p: dict, doc_number: str) -> str:
     payment_confirmed_date = format_date_utc(p.get("payment_confirmed_by_manager_at")) if p.get("payment_confirmed_by_manager_at") else "(pending)"
     tx_id = (p.get("paypal_transaction_id") or "").strip() or "(not provided)"
     client_paypal = (p.get("user_paypal_email") or "").strip() or "(not provided)"
-    payment_status = "COMPLETED" if p.get("payment_confirmed_by_manager_at") else "PENDING CONFIRMATION"
     delivered_date = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "(pending)"
     files_accessed_date = format_date_utc(p.get("files_accessed_at")) if p.get("files_accessed_at") else "(pending)"
     sep = "═" * 60
@@ -940,7 +937,7 @@ def _build_receipt_txt(p: dict, doc_number: str) -> str:
         f"Payment Date: {payment_time}",
         f"Payment Confirmed: {payment_confirmed_date}",
         f"Transaction ID: {tx_id}",
-        f"Payment Status: {payment_status}",
+        "Payment Status: COMPLETED",
         "",
         sep,
         "",
