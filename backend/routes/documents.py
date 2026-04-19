@@ -39,7 +39,25 @@ async def _get_project_and_validate(project_id: str, request: Request):
     return db, project
 
 
-def _invoice_dates(project: dict) -> dict:
+def _service_default_description(service_type: str) -> str:
+    m = {
+        "custom_video": "Custom digital video production according to client's script and brief.",
+        "video_editing": "Professional digital video editing services according to client's source materials and specifications.",
+        "ai_video": "AI-generated digital video production according to client's concept and specifications.",
+    }
+    return m.get(service_type, "Custom digital video services according to client's brief.")
+
+
+def _payment_confirmation_phrase(payment_method: str) -> str:
+    phrases = {
+        "paypal": "By completing payment via PayPal",
+        "bank_transfer": "By completing the SWIFT bank transfer",
+        "crypto": "By completing the USDT (TRC-20) transfer",
+    }
+    return phrases.get(payment_method, "By completing the payment")
+
+
+
     """Compute issue/start/delivery dates for the invoice. Uses admin-provided
     values when available, otherwise derives sensible defaults from timestamps."""
     from datetime import datetime as _dt, timedelta as _td
