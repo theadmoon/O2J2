@@ -12,6 +12,7 @@ import ChatContainer from '../components/Chat/ChatContainer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
   ArrowLeft, FileText, Hash, User, Mail, Briefcase, DollarSign, ShieldCheck,
+  Paperclip, Download,
 } from 'lucide-react';
 
 export default function ProjectDetails() {
@@ -25,6 +26,7 @@ export default function ProjectDetails() {
 
   useEffect(() => {
     loadProject();
+    window.scrollTo(0, 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -51,6 +53,21 @@ export default function ProjectDetails() {
     try {
       const { data } = await api.put(`/projects/${id}/advance`);
       setProject(data);
+    } catch {}
+  };
+
+  const handleScriptDownload = async () => {
+    try {
+      const res = await api.get(`/projects/${id}/script`, { responseType: 'blob' });
+      const blob = new Blob([res.data]);
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = project?.script_filename || 'brief-attachment';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
     } catch {}
   };
 
@@ -115,7 +132,23 @@ export default function ProjectDetails() {
             </div>
           </div>
           {project.brief && (
-            <p className="mt-4 text-sm text-gray-500 border-t border-gray-100 pt-4" data-testid="project-brief">{project.brief}</p>
+            <p className="mt-4 text-sm text-gray-500 border-t border-gray-100 pt-4 whitespace-pre-wrap" data-testid="project-brief">{project.brief}</p>
+          )}
+
+          {project.script_file && (
+            <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-script-attachment">
+              <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Brief Attachment</p>
+              <button
+                type="button"
+                onClick={handleScriptDownload}
+                className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                data-testid="script-download-button"
+              >
+                <Paperclip className="w-4 h-4" />
+                <span className="truncate max-w-xs">{project.script_filename || 'attachment'}</span>
+                <Download className="w-3.5 h-3.5" />
+              </button>
+            </div>
           )}
 
           {/* Quote & payment info (visible once order activated) */}

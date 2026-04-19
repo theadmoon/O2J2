@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
+from fastapi.responses import FileResponse
 from database.connection import get_db
 from utils.security import get_current_user
 from services.project_service import (
@@ -38,7 +39,8 @@ async def create_project(
     project_number = await generate_project_number(db, service_type, 0)
 
     script_path = None
-    if script:
+    script_filename = None
+    if script and script.filename:
         upload_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads", "scripts")
         os.makedirs(upload_dir, exist_ok=True)
         ext = os.path.splitext(script.filename)[1] if script.filename else ".pdf"
@@ -47,6 +49,7 @@ async def create_project(
             content = await script.read()
             await f.write(content)
         script_path = f"uploads/scripts/{project_id}{ext}"
+        script_filename = script.filename
 
     project_doc = {
         "id": project_id,
@@ -58,6 +61,7 @@ async def create_project(
         "project_title": brief[:50] if brief else "Untitled Project",
         "brief": brief,
         "script_file": script_path,
+        "script_filename": script_filename,
         "quote_amount": 0,
         "quote_details": "",
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -98,6 +102,33 @@ async def get_project(project_id: str, request: Request):
     project["status"] = calculate_current_status(project)
     project["timeline"] = build_timeline(project)
     return project
+
+
+@router.get("/{project_id}/script")
+async def download_script(project_id: str, request: Request):
+    """Download the client's original brief/script attachment."""
+    db = get_db()
+    user = await get_current_user(request, db)
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+    if user["role"] != "admin" and project["user_id"] != user["id"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    if not project.get("script_file"):
+        raise HTTPException(status_code=404, detail="No script file attached")
+
+    # script_file is stored as "uploads/scripts/<id>.ext"
+    backend_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    file_path = os.path.join(backend_root, project["script_file"])
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Script file missing on disk")
+
+    filename = project.get("script_filename") or os.path.basename(file_path)
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/octet-stream",
+    )
 
 
 @router.put("/{project_id}/advance")

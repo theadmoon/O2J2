@@ -9,7 +9,8 @@ export default function ChatContainer({ projectId }) {
   const [messages, setMessages] = useState([]);
   const [text, setText] = useState('');
   const [sending, setSending] = useState(false);
-  const endRef = useRef(null);
+  const listRef = useRef(null);
+  const prevCount = useRef(0);
 
   useEffect(() => {
     loadMessages();
@@ -19,7 +20,11 @@ export default function ChatContainer({ projectId }) {
   }, [projectId]);
 
   useEffect(() => {
-    endRef.current?.scrollIntoView({ behavior: 'smooth' });
+    // Scroll only the chat list, never the window. Only when new messages arrived.
+    if (messages.length > prevCount.current && listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+    prevCount.current = messages.length;
   }, [messages]);
 
   const loadMessages = async () => {
@@ -46,7 +51,7 @@ export default function ChatContainer({ projectId }) {
       <div className="px-4 py-3 border-b border-gray-200">
         <h3 className="text-sm text-gray-900 font-semibold">Project Chat</h3>
       </div>
-      <div className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+      <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
         {messages.length === 0 && (
           <p className="text-xs text-gray-400 text-center py-8">No messages yet. Start the conversation.</p>
         )}
@@ -65,7 +70,6 @@ export default function ChatContainer({ projectId }) {
             </div>
           );
         })}
-        <div ref={endRef} />
       </div>
       <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 flex gap-2">
         <Input
