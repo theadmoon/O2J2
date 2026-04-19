@@ -279,6 +279,272 @@ def _attachments_html_block(project: dict) -> str:
     )
 
 
+def _fmt_datetime_utc(iso_str: str) -> str:
+    """Return '19 Apr 2026 at 15:36 UTC' or empty string."""
+    if not iso_str:
+        return ""
+    try:
+        dt = datetime.fromisoformat(iso_str.replace("Z", "+00:00"))
+        return dt.strftime("%d %b %Y at %H:%M UTC")
+    except Exception:
+        return iso_str
+
+
+def _build_certificate_delivery_html(
+    p: dict, doc_number: str, base_css: str,
+    name: str, email: str, pn: str, title: str,
+    service_type_label: str, date_created: str,
+) -> str:
+    delivered_dt = _fmt_datetime_utc(p.get("delivered_at")) or date_created
+    confirmed_dt = _fmt_datetime_utc(p.get("delivery_confirmed_at")) or "(pending)"
+    prod_start = format_date_utc(p.get("production_started_at")) if p.get("production_started_at") else "—"
+    prod_end = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "—"
+    production_period = f"{prod_start} → {prod_end}"
+    brief_text = (p.get("brief") or "").strip() or "(not provided)"
+
+    dels = p.get("deliverables") or []
+    if dels:
+        file_rows = "".join(
+            f"<tr><td>{i+1}</td><td>{d.get('original_filename','(unnamed)')}</td>"
+            f"<td>{_fmt_datetime_utc(d.get('first_accessed_at')) or '— not yet accessed'}</td></tr>"
+            for i, d in enumerate(dels)
+        )
+        files_block = (
+            "<table style='margin-top:10px;'><colgroup><col style='width:5%'/><col style='width:55%'/><col style='width:40%'/></colgroup>"
+            "<thead><tr><th>#</th><th>File name</th><th>First accessed</th></tr></thead>"
+            f"<tbody>{file_rows}</tbody></table>"
+        )
+    else:
+        files_block = "<p style='font-size:12px;color:#888;font-style:italic;'>No deliverables recorded.</p>"
+
+    return f"""<html><head>{base_css}</head><body>
+    <div class="header"><span class="doc-number">{doc_number}</span><h1>CERTIFICATE OF DELIVERY</h1></div>
+
+    <div class="section"><table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Certificate</th><td><code>{doc_number}</code></td></tr>
+    <tr><th>Project Reference</th><td><code>{pn}</code></td></tr>
+    <tr><th>Delivery Date</th><td>{delivered_dt}</td></tr>
+    </table></div>
+
+    <div class="section"><h2>Delivered To</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Client</th><td><strong>{name}</strong></td></tr>
+    <tr><th>Email</th><td>{email}</td></tr>
+    <tr><th>Account</th><td>Active</td></tr>
+    </table></div>
+
+    <div class="section"><h2>Service Delivered</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Service Type</th><td>{service_type_label}</td></tr>
+    <tr><th>Project Title</th><td>{title}</td></tr>
+    <tr><th>Production Period</th><td>{production_period}</td></tr>
+    </table>
+    <p style="font-weight:600;margin-top:14px;margin-bottom:6px;">Brief:</p>
+    <div style="font-size:12px;border:1px solid #e5e7eb;padding:12px;background:#fafafa;border-radius:4px;white-space:pre-wrap;">{brief_text}</div>
+    </div>
+
+    <div class="section"><h2>Digital Deliverables Transferred</h2>
+    <p style="font-size:12px;color:#444;">The following files were made available via secure client portal on {delivered_dt}:</p>
+    {files_block}
+    <table style="margin-top:10px;"><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Delivery Method</th><td>Electronic portal (cloud-hosted links)</td></tr>
+    <tr><th>Access Provided</th><td>{delivered_dt}</td></tr>
+    </table>
+    </div>
+
+    <div class="section"><h2>Delivery Confirmation</h2>
+    <p style="font-size:12px;">By signing this certificate, the Client confirms:</p>
+    <ul style="padding-left:20px;font-size:12px;line-height:1.7;">
+        <li>Receipt of access to all listed files</li>
+        <li>Successful opening of deliverable links</li>
+        <li>Files are accessible and viewable</li>
+        <li>Electronic delivery completed as agreed</li>
+        <li>No physical shipment involved (digital-only service)</li>
+    </ul>
+    <p style="font-size:11px;color:#888;font-style:italic;margin-top:8px;">This is NOT an acceptance of quality or approval. Quality acceptance is documented separately in the Acceptance Act.</p>
+    </div>
+
+    <div class="section"><h2>Client Confirmation</h2>
+    <p style="font-size:12px;">I confirm receipt of the above digital files via electronic delivery on the date specified.</p>
+    <table style="margin-top:10px;"><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Client Name</th><td>{name}</td></tr>
+    <tr><th>Client Email</th><td>{email}</td></tr>
+    <tr><th>Confirmation Date</th><td>{confirmed_dt}</td></tr>
+    </table>
+    <table style="margin-top:40px;border-collapse:collapse;"><colgroup><col style='width:55%'/><col style='width:5%'/><col style='width:40%'/></colgroup>
+      <tr>
+        <td style="padding:0;border:none;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555;">Client Signature</td>
+        <td style="border:none;"></td>
+        <td style="padding:0;border:none;border-top:1px solid #333;padding-top:6px;font-size:11px;color:#555;">Date</td>
+      </tr>
+      <tr>
+        <td style="padding-top:6px;border:none;font-size:11px;color:#888;">Printed Name: {name}</td>
+        <td style="border:none;"></td>
+        <td style="padding-top:6px;border:none;"></td>
+      </tr>
+    </table>
+    </div>
+
+    <div class="section"><h2>Service Provider Confirmation</h2>
+    <table><colgroup><col style='width:30%'/><col style='width:70%'/></colgroup>
+    <tr><th>Service Provider</th><td>{LEGAL_ENTITY_NAME}</td></tr>
+    <tr><th>Tax ID</th><td>{TAX_ID}</td></tr>
+    <tr><th>Country of Registration</th><td>{COUNTRY_OF_REGISTRATION}</td></tr>
+    <tr><th>Delivered by</th><td>Production Team</td></tr>
+    <tr><th>Date</th><td>{delivered_dt}</td></tr>
+    </table>
+    </div>
+
+    <div class="section"><h2>Notes for PayPal / Payment Processors</h2>
+    <ul style="padding-left:20px;font-size:12px;line-height:1.75;">
+        <li>This is a <strong>DIGITAL SERVICE</strong> delivery (no physical goods)</li>
+        <li>Delivery method: secure electronic portal</li>
+        <li>Client confirmed file access (timestamps above)</li>
+        <li>Service Provider: {LEGAL_ENTITY_NAME}</li>
+        <li>Service category: Custom digital video production</li>
+        <li>No shipping / tracking (electronic delivery only)</li>
+    </ul>
+    <p style="font-size:11px;color:#666;font-style:italic;margin-top:8px;">This certificate serves as proof of service delivery for dispute resolution and compliance purposes.</p>
+    </div>
+
+    <div class="footer">
+    <p><strong>Legal Entity:</strong> {LEGAL_ENTITY_NAME} · Tax ID: {TAX_ID} · {COUNTRY_OF_REGISTRATION}</p>
+    <p><strong>Brand:</strong> {BRAND_NAME}</p>
+    <p>Contact: {CONTACT_EMAIL} · {CONTACT_PHONE} · {LOCATION}</p>
+    </div>
+    </body></html>"""
+
+
+def _build_certificate_delivery_txt(p: dict, doc_number: str) -> str:
+    name = p.get("user_name", "Client")
+    email = p.get("user_email", "")
+    pn = p.get("project_number", "")
+    title = p.get("project_title", "")
+    service_type_label = (p.get("service_type") or "").replace("_", " ").title()
+    delivered_dt = _fmt_datetime_utc(p.get("delivered_at")) or "(pending)"
+    confirmed_dt = _fmt_datetime_utc(p.get("delivery_confirmed_at")) or "(pending)"
+    prod_start = format_date_utc(p.get("production_started_at")) if p.get("production_started_at") else "—"
+    prod_end = format_date_utc(p.get("delivered_at")) if p.get("delivered_at") else "—"
+    brief_text = (p.get("brief") or "").strip() or "(not provided)"
+    sep = "═" * 60
+
+    lines = [
+        "CERTIFICATE OF DELIVERY",
+        sep,
+        "",
+        f"Certificate: {doc_number}",
+        f"Project Reference: {pn}",
+        f"Delivery Date: {delivered_dt}",
+        "",
+        sep,
+        "",
+        "DELIVERED TO:",
+        f"Client: {name}",
+        f"Email: {email}",
+        "Account: Active",
+        "",
+        sep,
+        "",
+        "SERVICE DELIVERED:",
+        f"Service Type: {service_type_label}",
+        f"Project Title: {title}",
+        f"Production Period: {prod_start} → {prod_end}",
+        "",
+        "Brief:",
+        brief_text,
+        "",
+        sep,
+        "",
+        "DIGITAL DELIVERABLES TRANSFERRED:",
+        "",
+        f"The following files were made available via secure client portal on {delivered_dt}:",
+        "",
+    ]
+    dels = p.get("deliverables") or []
+    if dels:
+        for i, d in enumerate(dels, start=1):
+            lines.append(f"{i}. {d.get('original_filename','(unnamed)')}")
+            accessed = _fmt_datetime_utc(d.get("first_accessed_at"))
+            lines.append(f"   First accessed: {accessed if accessed else '— not yet accessed'}")
+    else:
+        lines.append("(no deliverables recorded)")
+    lines.extend([
+        "",
+        "Delivery Method: Electronic portal (cloud-hosted links)",
+        f"Access Provided: {delivered_dt}",
+        "",
+        sep,
+        "",
+        "DELIVERY CONFIRMATION:",
+        "",
+        "By signing this certificate, the Client confirms:",
+        "",
+        "✓ Receipt of access to all listed files",
+        "✓ Successful opening of deliverable links",
+        "✓ Files are accessible and viewable",
+        "✓ Electronic delivery completed as agreed",
+        "✓ No physical shipment involved (digital-only service)",
+        "",
+        "This is NOT an acceptance of quality or approval.",
+        "Quality acceptance is documented separately in",
+        "the Acceptance Act.",
+        "",
+        sep,
+        "",
+        "CLIENT CONFIRMATION:",
+        "",
+        "I confirm receipt of the above digital files via",
+        "electronic delivery on the date specified.",
+        "",
+        f"Client Name: {name}",
+        f"Client Email: {email}",
+        f"Confirmation Date: {confirmed_dt}",
+        "",
+        "",
+        "Client Signature: ______________________________________",
+        "",
+        "Date: __________________________________________________",
+        "",
+        sep,
+        "",
+        "SERVICE PROVIDER CONFIRMATION:",
+        "",
+        f"Service Provider: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID}",
+        f"Country of Registration: {COUNTRY_OF_REGISTRATION}",
+        "Delivered by: Production Team",
+        f"Date: {delivered_dt}",
+        "",
+        sep,
+        "",
+        "IMPORTANT NOTES FOR PAYPAL / PAYMENT PROCESSORS:",
+        "",
+        "✓ This is a DIGITAL SERVICE delivery (no physical goods)",
+        "✓ Delivery method: Secure electronic portal",
+        "✓ Client confirmed file access (timestamps above)",
+        f"✓ Service Provider: {LEGAL_ENTITY_NAME}",
+        "✓ Service category: Custom digital video production",
+        "✓ No shipping / tracking (electronic delivery only)",
+        "",
+        "This certificate serves as proof of service delivery",
+        "for dispute resolution and compliance purposes.",
+        "",
+        sep,
+        "",
+        f"Legal Entity: {LEGAL_ENTITY_NAME}",
+        f"Tax ID: {TAX_ID} | {COUNTRY_OF_REGISTRATION}",
+        f"Brand: {BRAND_NAME}",
+        "",
+        f"Contact: {CONTACT_EMAIL} | {CONTACT_PHONE}",
+        LOCATION,
+        "",
+        sep,
+    ])
+    return "\n".join(lines)
+
+
+
+
 def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> str:
     p = project
     name = p.get("user_name", "Client")
@@ -454,12 +720,7 @@ def _generate_document_html(doc_type: str, project: dict, doc_number: str) -> st
             <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
             </body></html>""",
 
-        "certificate_delivery": f"""<html><head>{base_css}</head><body>
-            <div class="header"><span class="doc-number">{doc_number}</span><h1>CERTIFICATE OF DELIVERY</h1><div class="brand">{BRAND_NAME}</div></div>
-            <div class="section"><p>This certifies that deliverables for project <strong>{pn}</strong> have been delivered to the client.</p>
-            <table><tr><th>Client</th><td>{name}</td></tr><tr><th>Project</th><td>{title}</td></tr><tr><th>Date</th><td>{date_created}</td></tr></table></div>
-            <div class="footer"><p>{LEGAL_ENTITY_NAME} | Tax ID: {TAX_ID} | {LOCATION}</p><p>{CONTACT_EMAIL} | {CONTACT_PHONE}</p></div>
-            </body></html>""",
+        "certificate_delivery": _build_certificate_delivery_html(p, doc_number, base_css, name, email, pn, title, service_type_label, date_created),
 
         "acceptance_act": f"""<html><head>{base_css}</head><body>
             <div class="header"><span class="doc-number">{doc_number}</span><h1>ACCEPTANCE ACT</h1><div class="brand">{BRAND_NAME}</div></div>
@@ -727,6 +988,10 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         ]
         )
         return "\n".join(lines)
+
+    # Rich template for certificate_delivery (PayPal-compliant)
+    if doc_type == "certificate_delivery":
+        return _build_certificate_delivery_txt(p, doc_number)
 
     # Special rich template for invoice (matches Marcos's format)
     if doc_type == "invoice":
