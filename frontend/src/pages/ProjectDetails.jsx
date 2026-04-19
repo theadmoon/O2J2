@@ -138,23 +138,29 @@ export default function ProjectDetails() {
           {project.script_file && (
             <div className="mt-4 border-t border-gray-100 pt-4" data-testid="project-script-attachment">
               <p className="text-xs uppercase tracking-wider text-gray-500 mb-2">Script / Reference File</p>
-              <button
-                type="button"
-                onClick={handleScriptDownload}
-                className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
-                data-testid="script-download-button"
-              >
-                <Paperclip className="w-4 h-4" />
-                <span className="truncate max-w-xs">
-                  {project.script_filename
-                    ? project.script_filename
-                    : (() => {
-                        const ext = (project.script_file.split('.').pop() || '').toUpperCase();
-                        return ext ? `Attached file (.${ext.toLowerCase()})` : 'Attached file';
-                      })()}
-                </span>
-                <Download className="w-3.5 h-3.5" />
-              </button>
+              {project.script_filename ? (
+                <button
+                  type="button"
+                  onClick={handleScriptDownload}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                  data-testid="script-download-button"
+                >
+                  <Paperclip className="w-4 h-4" />
+                  <span className="truncate max-w-xs">{project.script_filename}</span>
+                  <Download className="w-3.5 h-3.5" />
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={handleScriptDownload}
+                  className="inline-flex items-center gap-2 px-3 py-2 bg-sky-50 border border-sky-200 rounded-lg text-sm text-sky-700 hover:bg-sky-100 transition"
+                  data-testid="script-download-button"
+                >
+                  <Paperclip className="w-4 h-4" />
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Download</span>
+                </button>
+              )}
             </div>
           )}
 
