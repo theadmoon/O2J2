@@ -127,24 +127,29 @@ export default function StageActions({ project, user, onUpdated }) {
   const openMarkPaymentSent = () => setDialog({
     key: 'mark-payment-sent',
     title: 'I Have Sent the Payment',
-    description: 'Confirm you have sent the payment. Optionally include your PayPal transaction ID.',
+    description: 'Please provide the transaction ID so we can record it in the closing document. You can either type the ID as text OR upload a screenshot of the payment confirmation — at least one is required. If you upload only a screenshot, the manager will transcribe the ID at the next stage.',
     submit: 'Confirm Payment Sent',
     icon: HandCoins,
     fields: [
-      { name: 'paypal_transaction_id', label: 'PayPal Transaction ID (optional)', type: 'text', placeholder: 'e.g. 9XA1234567B890123' },
+      { name: 'paypal_transaction_id', label: 'Transaction ID (text)', type: 'text', placeholder: 'e.g. 9XA1234567B890123' },
+      { name: 'file', label: 'Payment Screenshot (PDF / PNG / JPG)', type: 'file', accept: '.pdf,.png,.jpg,.jpeg' },
     ],
     endpoint: `/projects/${project.id}/client/mark-payment-sent`,
+    multipart: true,
     defaultValues: { paypal_transaction_id: '' },
   });
 
+  const needsTxIdFromAdmin = !project.paypal_transaction_id;
   const openConfirmPayment = () => setDialog({
     key: 'confirm-payment',
     title: 'Confirm Payment Received',
-    description: 'Confirm that the payment has arrived. You can log the transaction ID.',
+    description: needsTxIdFromAdmin
+      ? 'The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here. The ID is mandatory because it is printed on the final closing document.'
+      : 'Confirm that the payment has arrived. You may correct the transaction ID if needed.',
     submit: 'Confirm Received',
     icon: DollarSign,
     fields: [
-      { name: 'paypal_transaction_id', label: 'Transaction ID (optional)', type: 'text', placeholder: 'Bank reference or PayPal ID' },
+      { name: 'paypal_transaction_id', label: 'Transaction ID', type: 'text', required: needsTxIdFromAdmin, placeholder: 'Bank reference or PayPal ID' },
     ],
     endpoint: `/projects/${project.id}/admin/confirm-payment`,
     defaultValues: { paypal_transaction_id: project.paypal_transaction_id || '' },

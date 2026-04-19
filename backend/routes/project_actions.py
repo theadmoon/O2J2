@@ -432,25 +432,86 @@ async def download_signed_acceptance_act(project_id: str, request: Request):
     return FileResponse(abs_path, filename=download_name)
 
 
-class MarkPaymentSentBody(BaseModel):
-    paypal_transaction_id: Optional[str] = None
-
-
 @router.post("/{project_id}/client/mark-payment-sent")
-async def client_mark_payment_sent(project_id: str, body: MarkPaymentSentBody, request: Request):
-    """Stage 9 → 10. Client marks that they have sent payment (via PayPal or bank transfer)."""
+async def client_mark_payment_sent(
+    project_id: str,
+    request: Request,
+    paypal_transaction_id: str = Form(""),
+    file: Optional[UploadFile] = File(None),
+):
+    """Stage 9 → 10. Client confirms payment has been sent.
+
+    At least ONE of `paypal_transaction_id` (text) or `file` (screenshot) must be provided.
+    The transaction ID is required for the final closing document; if the client uploads only a
+    screenshot, the manager will transcribe the ID on the next stage.
+    """
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "work_accepted_at", "work_accepted")
     _require_not_set(project, "payment_marked_by_client_at", "mark-payment-sent")
 
+    txid = (paypal_transaction_id or "").strip()
+    has_file = bool(file and file.filename)
+    if not txid and not has_file:
+        raise HTTPException(
+            status_code=400,
+            detail="Please provide either the transaction ID or upload a screenshot of the payment confirmation.",
+        )
+
     updates = {"payment_marked_by_client_at": datetime.now(timezone.utc).isoformat()}
-    if body.paypal_transaction_id:
-        updates["paypal_transaction_id"] = body.paypal_transaction_id
+    if txid:
+        updates["paypal_transaction_id"] = txid
+
+    if has_file:
+        allowed_ext = {".pdf", ".png", ".jpg", ".jpeg"}
+        ext = os.path.splitext(file.filename)[1].lower()
+        if ext not in allowed_ext:
+            raise HTTPException(status_code=400, detail=f"File type {ext} not allowed. Use PDF, PNG or JPG.")
+
+        screenshot_root = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "uploads",
+            "payment_proof",
+        )
+        os.makedirs(screenshot_root, exist_ok=True)
+        project_dir = os.path.join(screenshot_root, project_id)
+        os.makedirs(project_dir, exist_ok=True)
+
+        stored_name = f"payment_proof{ext}"
+        file_path = os.path.join(project_dir, stored_name)
+
+        size = 0
+        async with aiofiles.open(file_path, "wb") as out:
+            while True:
+                chunk = await file.read(1024 * 1024)
+                if not chunk:
+                    break
+                size += len(chunk)
+                await out.write(chunk)
+
+        updates["payment_proof_file"] = os.path.join("uploads", "payment_proof", project_id, stored_name)
+        updates["payment_proof_filename"] = file.filename
+        updates["payment_proof_size"] = size
 
     updated = await _set_timestamp_and_return(db, project_id, updates)
-    await get_or_generate_document_number(db, updated, "payment_instructions")
     await get_or_generate_document_number(db, updated, "receipt")
     return await _set_timestamp_and_return(db, project_id, {})
+
+
+@router.get("/{project_id}/payment-proof")
+async def download_payment_proof(project_id: str, request: Request):
+    """Owner client or admin downloads the payment proof screenshot uploaded by the client."""
+    db, _, project = await _get_project_for_client(project_id, request)
+    rel = project.get("payment_proof_file")
+    if not rel:
+        raise HTTPException(status_code=404, detail="No payment proof uploaded")
+    abs_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        rel,
+    )
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Payment proof file not found on disk")
+    download_name = project.get("payment_proof_filename") or os.path.basename(abs_path)
+    return FileResponse(abs_path, filename=download_name)
 
 
 # =================================================================
