@@ -64,15 +64,18 @@ class TestPaymentSettings:
         assert response.status_code == 200
         data = response.json()
         
-        # Verify nested bank_transfer structure
-        assert "bank_transfer" in data
-        assert "beneficiary_name" in data["bank_transfer"]
-        assert data["bank_transfer"]["beneficiary_name"] == "Individual Entrepreneur Vera Iambaeva"
+        # Verify methods list contains paypal, bank_transfer, crypto
+        methods = data.get("methods", [])
+        method_codes = [m["code"] for m in methods]
+        assert "paypal" in method_codes, "PayPal method missing"
+        assert "bank_transfer" in method_codes, "Bank transfer method missing"
+        assert "crypto" in method_codes, "Crypto method missing"
         
-        # CRITICAL: PayPal email must be 302335809@postbox.ge, NOT ocean2joy@gmail.com
-        assert data["paypal_email"] == "302335809@postbox.ge"
-        assert data["paypal_email"] != "ocean2joy@gmail.com"
-        print(f"✓ Payment settings correct: PayPal={data['paypal_email']}")
+        # CRITICAL: PayPal public_account must be 302335809@postbox.ge
+        paypal_method = next((m for m in methods if m["code"] == "paypal"), None)
+        assert paypal_method is not None
+        assert paypal_method["public_account"] == "302335809@postbox.ge"
+        print(f"✓ Payment settings correct: PayPal={paypal_method['public_account']}")
 
 
 class TestProjectCreation:
@@ -84,7 +87,8 @@ class TestProjectCreation:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "custom_video",
-                "brief": "TEST_E2E: Test project for number format verification"
+                "brief": "TEST_E2E: Test project for number format verification",
+                "payment_method": "paypal"
             }
         )
         assert response.status_code == 200
@@ -95,8 +99,7 @@ class TestProjectCreation:
         assert pn.startswith("VAPP-"), f"Project number should start with VAPP-: {pn}"
         parts = pn.split("-")
         assert len(parts) >= 4, f"Project number should have at least 4 parts: {pn}"
-        assert "Custom" in pn, f"Project number should contain service label 'Custom': {pn}"
-        assert "USD" in pn, f"Project number should contain 'USD': {pn}"
+        assert "CUSTOM" in pn.upper(), f"Project number should contain service label 'CUSTOM': {pn}"
         print(f"✓ Project number format correct: {pn}")
 
 
@@ -110,7 +113,8 @@ class TestRoleValidation:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "video_editing",
-                "brief": "TEST_RoleValidation: Test project for role checks"
+                "brief": "TEST_RoleValidation: Test project for role checks",
+                "payment_method": "paypal"
             }
         )
         return response.json()
@@ -147,7 +151,8 @@ class TestRoleValidation:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "ai_video",
-                "brief": "TEST_AdminClientAccess: Test project for admin access check"
+                "brief": "TEST_AdminClientAccess: Test project for admin access check",
+                "payment_method": "paypal"
             }
         )
         project_id = create_resp.json()["id"]
@@ -176,7 +181,8 @@ class TestStageGating:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "custom_video",
-                "brief": "TEST_StageGating: Test project for stage gating"
+                "brief": "TEST_StageGating: Test project for stage gating",
+                "payment_method": "paypal"
             }
         )
         return response.json()
@@ -194,8 +200,12 @@ class TestStageGating:
         """Client cannot sign invoice before admin sends it"""
         project_id = test_project["id"]
         
-        # Try to sign invoice without it being sent
-        resp = client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice")
+        # Try to sign invoice without it being sent (still need to send a file)
+        files = {"file": ("signed_invoice.pdf", b"TEST PDF", "application/pdf")}
+        resp = client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice",
+            files=files
+        )
         assert resp.status_code == 400
         assert "invoice_sent" in resp.json()["detail"].lower()
         print(f"✓ Cannot sign invoice before invoice sent (400)")
@@ -227,7 +237,8 @@ class TestStageGating:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "video_editing",
-                "brief": "TEST_DeliverableRequired: Test project for deliverable check"
+                "brief": "TEST_DeliverableRequired: Test project for deliverable check",
+                "payment_method": "paypal"
             }
         )
         project_id = create_resp.json()["id"]
@@ -238,7 +249,11 @@ class TestStageGating:
             json={"quote_amount": 200, "quote_details": "Test"}
         )
         admin_session.post(f"{BASE_URL}/api/projects/{project_id}/admin/send-invoice")
-        client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice")
+        sign_files = {"file": ("signed_invoice.pdf", b"TEST PDF", "application/pdf")}
+        client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice",
+            files=sign_files
+        )
         admin_session.post(
             f"{BASE_URL}/api/projects/{project_id}/admin/start-production",
             json={"production_notes": "Starting production"}
@@ -263,7 +278,8 @@ class TestFullOperationalChain:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "custom_video",
-                "brief": "TEST_Full12Stage: Complete e2e test of operational chain"
+                "brief": "TEST_Full12Stage: Complete e2e test of operational chain",
+                "payment_method": "paypal"
             }
         )
         assert create_resp.status_code == 200
@@ -316,7 +332,11 @@ class TestFullOperationalChain:
         
         # Stage 4: Client signs invoice
         print("\n=== Stage 4: Invoice Signed ===")
-        resp = client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice")
+        files = {"file": ("signed_invoice.pdf", b"SIGNED INVOICE PDF CONTENT", "application/pdf")}
+        resp = client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice",
+            files=files
+        )
         assert resp.status_code == 200
         project = resp.json()
         assert project["status"] == "invoice_signed"
@@ -342,14 +362,15 @@ class TestFullOperationalChain:
         assert prd_doc["document_number"] is not None
         print(f"✓ PRD document generated: {prd_doc['document_number']}")
         
-        # Upload deliverable (required before marking delivered)
+        # Upload deliverable (cloud URL - required before marking delivered)
         print("\n=== Uploading Deliverable ===")
-        test_file_content = b"TEST VIDEO FILE CONTENT - This is a mock video file for testing"
-        files = {"file": ("test_video.mp4", test_file_content, "video/mp4")}
         resp = admin_session.post(
             f"{BASE_URL}/api/projects/{project_id}/deliverables",
-            files=files,
-            data={"description": "Final cut v1"}
+            json={
+                "filename": "test_video.mp4",
+                "cloud_url": "https://drive.google.com/file/d/test123/view",
+                "description": "Final cut v1"
+            }
         )
         assert resp.status_code == 200
         deliverable = resp.json()
@@ -366,25 +387,24 @@ class TestFullOperationalChain:
         assert project["delivered_at"] is not None
         print(f"✓ Stage 6 (delivered)")
         
-        # Verify DEL document generated
+        # Verify DEL document is available (document_number generated on first access)
         docs_resp = admin_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
         docs = docs_resp.json()
         del_doc = next((d for d in docs if d["type"] == "certificate_delivery"), None)
-        assert del_doc["document_number"] is not None
-        print(f"✓ DEL document generated: {del_doc['document_number']}")
+        assert del_doc is not None, "certificate_delivery document should be available"
+        print(f"✓ DEL document available (number generated on first access)")
         
-        # Stage 7: Client downloads file (auto-sets files_accessed_at)
+        # Stage 7: Client accesses deliverable (beacon - auto-sets files_accessed_at)
         print("\n=== Stage 7: Files Accessed ===")
-        resp = client_session.get(f"{BASE_URL}/api/projects/{project_id}/deliverables/{deliverable_id}")
+        resp = client_session.post(f"{BASE_URL}/api/projects/{project_id}/deliverables/{deliverable_id}/access")
         assert resp.status_code == 200
-        assert len(resp.content) > 0
         
         # Verify files_accessed_at was set
         project_resp = client_session.get(f"{BASE_URL}/api/projects/{project_id}")
         project = project_resp.json()
         assert project["status"] == "files_accessed"
         assert project["files_accessed_at"] is not None
-        print(f"✓ Stage 7 (files_accessed) - auto-set on first download")
+        print(f"✓ Stage 7 (files_accessed) - auto-set on first access")
         
         # Verify DWN document generated
         docs_resp = client_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -393,18 +413,26 @@ class TestFullOperationalChain:
         assert dwn_doc["document_number"] is not None
         print(f"✓ DWN document generated: {dwn_doc['document_number']}")
         
-        # Stage 8: Client confirms delivery
+        # Stage 8: Client confirms delivery (uploads signed delivery certificate)
         print("\n=== Stage 8: Delivery Confirmed ===")
-        resp = client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/confirm-delivery")
+        delivery_cert_files = {"file": ("signed_delivery_cert.pdf", b"SIGNED DELIVERY CERTIFICATE", "application/pdf")}
+        resp = client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/confirm-delivery",
+            files=delivery_cert_files
+        )
         assert resp.status_code == 200
         project = resp.json()
         assert project["status"] == "delivery_confirmed"
         assert project["delivery_confirmed_at"] is not None
         print(f"✓ Stage 8 (delivery_confirmed)")
         
-        # Stage 9: Client accepts work
+        # Stage 9: Client accepts work (uploads signed acceptance act)
         print("\n=== Stage 9: Work Accepted ===")
-        resp = client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/accept-work")
+        acceptance_files = {"file": ("signed_acceptance_act.pdf", b"SIGNED ACCEPTANCE ACT", "application/pdf")}
+        resp = client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/accept-work",
+            files=acceptance_files
+        )
         assert resp.status_code == 200
         project = resp.json()
         assert project["status"] == "work_accepted"
@@ -418,12 +446,12 @@ class TestFullOperationalChain:
         assert acc_doc["document_number"] is not None
         print(f"✓ ACC document generated: {acc_doc['document_number']}")
         
-        # Stage 10: Client marks payment sent
+        # Stage 10: Client marks payment sent (with transaction ID)
         print("\n=== Stage 10: Payment Sent ===")
         paypal_txn_id = "9XA1234567B890123"
         resp = client_session.post(
             f"{BASE_URL}/api/projects/{project_id}/client/mark-payment-sent",
-            json={"paypal_transaction_id": paypal_txn_id}
+            data={"paypal_transaction_id": paypal_txn_id}
         )
         assert resp.status_code == 200
         project = resp.json()
@@ -432,15 +460,12 @@ class TestFullOperationalChain:
         assert project["paypal_transaction_id"] == paypal_txn_id
         print(f"✓ Stage 10 (payment_sent): txn_id={paypal_txn_id}")
         
-        # Verify INS and RCP documents generated
+        # Verify INS document generated (RCP generated after payment confirmed)
         docs_resp = client_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
         docs = docs_resp.json()
         ins_doc = next((d for d in docs if d["type"] == "payment_instructions"), None)
-        rcp_doc = next((d for d in docs if d["type"] == "receipt"), None)
         assert ins_doc["document_number"] is not None
-        assert rcp_doc["document_number"] is not None
         print(f"✓ INS document generated: {ins_doc['document_number']}")
-        print(f"✓ RCP document generated: {rcp_doc['document_number']}")
         
         # Stage 11: Admin confirms payment
         print("\n=== Stage 11: Payment Received ===")
@@ -492,7 +517,8 @@ class TestDeliverables:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "video_editing",
-                "brief": "TEST_Deliverables: Test project for deliverable tests"
+                "brief": "TEST_Deliverables: Test project for deliverable tests",
+                "payment_method": "paypal"
             }
         )
         project_id = create_resp.json()["id"]
@@ -503,7 +529,11 @@ class TestDeliverables:
             json={"quote_amount": 150, "quote_details": "Test"}
         )
         admin_session.post(f"{BASE_URL}/api/projects/{project_id}/admin/send-invoice")
-        client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice")
+        sign_files = {"file": ("signed_invoice.pdf", b"TEST PDF", "application/pdf")}
+        client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice",
+            files=sign_files
+        )
         admin_session.post(
             f"{BASE_URL}/api/projects/{project_id}/admin/start-production",
             json={"production_notes": "Test production"}
@@ -516,11 +546,12 @@ class TestDeliverables:
         """Client should not be able to upload deliverables (admin only)"""
         project_id = production_project["id"]
         
-        test_file = b"TEST FILE CONTENT"
-        files = {"file": ("test.mp4", test_file, "video/mp4")}
         resp = client_session.post(
             f"{BASE_URL}/api/projects/{project_id}/deliverables",
-            files=files
+            json={
+                "filename": "test.mp4",
+                "cloud_url": "https://drive.google.com/test"
+            }
         )
         assert resp.status_code == 403
         print(f"✓ Client cannot upload deliverables (403)")
@@ -529,12 +560,13 @@ class TestDeliverables:
         """Admin can upload deliverables after production started"""
         project_id = production_project["id"]
         
-        test_file = b"TEST VIDEO FILE CONTENT FOR UPLOAD TEST"
-        files = {"file": ("final_video.mov", test_file, "video/quicktime")}
         resp = admin_session.post(
             f"{BASE_URL}/api/projects/{project_id}/deliverables",
-            files=files,
-            data={"description": "Final render"}
+            json={
+                "filename": "final_video.mov",
+                "cloud_url": "https://drive.google.com/file/d/final123/view",
+                "description": "Final render"
+            }
         )
         assert resp.status_code == 200
         data = resp.json()
@@ -551,7 +583,8 @@ class TestDeliverables:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "ai_video",
-                "brief": "TEST_DeleteAfterDelivered: Test deliverable delete restriction"
+                "brief": "TEST_DeleteAfterDelivered: Test deliverable delete restriction",
+                "payment_method": "paypal"
             }
         )
         project_id = create_resp.json()["id"]
@@ -562,18 +595,23 @@ class TestDeliverables:
             json={"quote_amount": 100, "quote_details": "Test"}
         )
         admin_session.post(f"{BASE_URL}/api/projects/{project_id}/admin/send-invoice")
-        client_session.post(f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice")
+        sign_files = {"file": ("signed_invoice.pdf", b"TEST PDF", "application/pdf")}
+        client_session.post(
+            f"{BASE_URL}/api/projects/{project_id}/client/sign-invoice",
+            files=sign_files
+        )
         admin_session.post(
             f"{BASE_URL}/api/projects/{project_id}/admin/start-production",
             json={"production_notes": "Test"}
         )
         
         # Upload deliverable
-        test_file = b"TEST FILE"
-        files = {"file": ("test.mp4", test_file, "video/mp4")}
         upload_resp = admin_session.post(
             f"{BASE_URL}/api/projects/{project_id}/deliverables",
-            files=files
+            json={
+                "filename": "test.mp4",
+                "cloud_url": "https://drive.google.com/file/d/delete_test/view"
+            }
         )
         deliverable_id = upload_resp.json()["id"]
         
@@ -597,7 +635,8 @@ class TestDocumentGeneration:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "custom_video",
-                "brief": "TEST_DocFormat: Test document number format"
+                "brief": "TEST_DocFormat: Test document number format",
+                "payment_method": "paypal"
             }
         )
         project_id = create_resp.json()["id"]
@@ -631,7 +670,8 @@ class TestDocumentGeneration:
             f"{BASE_URL}/api/projects",
             data={
                 "service_type": "video_editing",
-                "brief": "TEST_PDFGen: Test PDF document generation"
+                "brief": "TEST_PDFGen: Test PDF document generation",
+                "payment_method": "paypal"
             }
         )
         project_id = create_resp.json()["id"]
@@ -659,13 +699,13 @@ class TestChatMessages:
         # Create two projects
         proj1_resp = client_session.post(
             f"{BASE_URL}/api/projects",
-            data={"service_type": "custom_video", "brief": "TEST_Chat1: Project 1"}
+            data={"service_type": "custom_video", "brief": "TEST_Chat1: Project 1", "payment_method": "paypal"}
         )
         proj1_id = proj1_resp.json()["id"]
         
         proj2_resp = client_session.post(
             f"{BASE_URL}/api/projects",
-            data={"service_type": "video_editing", "brief": "TEST_Chat2: Project 2"}
+            data={"service_type": "video_editing", "brief": "TEST_Chat2: Project 2", "payment_method": "paypal"}
         )
         proj2_id = proj2_resp.json()["id"]
         
@@ -704,7 +744,7 @@ class TestDuplicateActionPrevention:
         """Cannot activate order twice"""
         create_resp = client_session.post(
             f"{BASE_URL}/api/projects",
-            data={"service_type": "custom_video", "brief": "TEST_DuplicateActivate: Test"}
+            data={"service_type": "custom_video", "brief": "TEST_DuplicateActivate: Test", "payment_method": "paypal"}
         )
         project_id = create_resp.json()["id"]
         
