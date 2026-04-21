@@ -391,3 +391,51 @@ async def update_project(project_id: str, request: Request):
     updated = await db.projects.find_one({"id": project_id}, {"_id": 0})
     updated["status"] = calculate_current_status(updated)
     return updated
+
+
+
+@router.delete("/{project_id}")
+async def delete_project(project_id: str, request: Request):
+    """Admin-only. Hard-delete a project and cascade-clean its artifacts.
+
+    Cleans: project doc, its messages, its notifications (if collection exists),
+    and any uploaded files on disk under /app/backend/uploads for that project_id.
+    """
+    import shutil
+    db = get_db()
+    user = await get_current_user(request, db)
+    if user["role"] != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+
+    project = await db.projects.find_one({"id": project_id}, {"_id": 0})
+    if not project:
+        raise HTTPException(status_code=404, detail="Project not found")
+
+    uploads_root = os.path.join(os.path.dirname(os.path.dirname(__file__)), "uploads")
+    per_project_dirs = [
+        "signed_invoices", "signed_delivery_certs", "signed_acceptance_acts",
+        "payment_proof", "reference_files", "deliverables",
+    ]
+    for sub in per_project_dirs:
+        path = os.path.join(uploads_root, sub, project_id)
+        if os.path.isdir(path):
+            shutil.rmtree(path, ignore_errors=True)
+
+    # Script file (stored as uploads/scripts/<project_id>.<ext>)
+    scripts_dir = os.path.join(uploads_root, "scripts")
+    if os.path.isdir(scripts_dir):
+        for fname in os.listdir(scripts_dir):
+            if fname.startswith(f"{project_id}."):
+                try:
+                    os.remove(os.path.join(scripts_dir, fname))
+                except OSError:
+                    pass
+
+    await db.messages.delete_many({"project_id": project_id})
+    try:
+        await db.notifications.delete_many({"project_id": project_id})
+    except Exception:
+        pass
+
+    await db.projects.delete_one({"id": project_id})
+    return {"deleted": True, "project_id": project_id}

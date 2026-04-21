@@ -5,7 +5,7 @@ import api from '../utils/api';
 import { formatDate } from '../utils/formatters';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
-import { Plus, FolderOpen, Clock, ArrowRight, Filter, ShieldCheck } from 'lucide-react';
+import { Plus, FolderOpen, Clock, ArrowRight, Filter, ShieldCheck, Trash2 } from 'lucide-react';
 
 const STATUS_COLORS = {
   submitted: 'bg-blue-100 text-blue-700',
@@ -33,6 +33,28 @@ export default function ClientDashboard() {
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const [deletingId, setDeletingId] = useState(null);
+
+  const handleDelete = async (e, project) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const ok = window.confirm(
+      `Delete project ${project.project_number}?\n\n` +
+      `Title: ${project.project_title}\n` +
+      `Client: ${project.user_email}\n\n` +
+      `This will permanently remove the project, its messages, uploaded files and signed artifacts. This cannot be undone.`
+    );
+    if (!ok) return;
+    setDeletingId(project.id);
+    try {
+      await api.delete(`/projects/${project.id}`);
+      setProjects((prev) => prev.filter((p) => p.id !== project.id));
+    } catch (err) {
+      alert(`Failed to delete: ${err.response?.data?.detail || err.message}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     api.get('/projects').then(({ data }) => {
@@ -118,10 +140,23 @@ export default function ClientDashboard() {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {filtered.map((p) => (
-              <Link key={p.id} to={`/projects/${p.id}`} className="block border border-gray-200 bg-white hover:shadow-lg rounded-lg p-6 transition-all group" data-testid={`project-card-${p.id}`}>
+              <Link key={p.id} to={`/projects/${p.id}`} className="relative block border border-gray-200 bg-white hover:shadow-lg rounded-lg p-6 transition-all group" data-testid={`project-card-${p.id}`}>
+                {isAdmin && (
+                  <button
+                    type="button"
+                    onClick={(e) => handleDelete(e, p)}
+                    disabled={deletingId === p.id}
+                    className="absolute top-3 right-3 p-1.5 rounded text-gray-300 hover:text-red-600 hover:bg-red-50 border border-transparent hover:border-red-200 transition disabled:opacity-40"
+                    aria-label="Delete project"
+                    title="Delete project"
+                    data-testid={`delete-project-${p.id}`}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                )}
                 <div className="flex items-start justify-between mb-3">
                   <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${STATUS_COLORS[p.status] || 'bg-gray-100 text-gray-600'}`}>{p.status?.replace(/_/g, ' ')}</span>
-                  <ArrowRight className="w-4 h-4 text-gray-300 group-hover:text-sky-500 transition-colors" />
+                  <ArrowRight className={`w-4 h-4 text-gray-300 group-hover:text-sky-500 transition-colors ${isAdmin ? 'mr-6' : ''}`} />
                 </div>
                 <h3 className="text-gray-900 text-sm font-semibold mb-1 line-clamp-1">{p.project_title}</h3>
                 <p className="text-xs text-gray-400 font-mono mb-2">{p.project_number}</p>
