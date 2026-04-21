@@ -1,160 +1,62 @@
-# Ocean2Joy v2.0 (O2J2) - Product Requirements Document
+# Ocean2Joy v2.0 (O2J2) — Product Requirements
 
-## Original Problem Statement
-Build a clean, modular web platform for digital video production (Ocean2Joy).
-Platform for Individual Entrepreneur Vera Iambaeva (Georgia, Tax ID: 302335809).
-Features: Homepage, Auth, Project Management, 12-stage Operational Chain, 11 document types (PDF+TXT), project-isolated Chat.
+## Original problem statement
+Build a clean, modular web platform for digital video production using Marcos prototype as reference.
+- Backend: FastAPI + Async MongoDB (Motor) + JWT Auth + WeasyPrint (PDF)
+- Frontend: React 18.2 + TailwindCSS + shadcn/ui
+- Key features: 12-stage Operational Chain, 11 document types (PDF + TXT), isolated project chat
+- IMMUTABLE params: Legal entity "Individual Entrepreneur Vera Iambaeva", Tax ID 302335809
+- Language: Russian UI copy for the user-facing assistant, English for all legal/PDF docs
 
-## Architecture
-- **Frontend**: React 18 + TailwindCSS + shadcn/ui + Framer Motion
-- **Backend**: FastAPI + Motor (Async MongoDB)
-- **PDF Generation**: WeasyPrint
-- **Auth**: JWT (bcrypt) with httpOnly cookies
-- **Database**: MongoDB (ocean2joy_v2)
+## Implementation status (as of 21 Apr 2026)
 
-## User Personas
-1. **Client**: Creates video projects, tracks progress, downloads documents, chats with manager
-2. **Admin**: Manages projects, advances stages, views all projects/chats
+### Completed
+- Auth: JWT cookie auth, register/login/logout, role-based (admin/client)
+- **Client isolation (verified)**: backend GET /api/projects filters by `user_id` for non-admin; 403 on any cross-user access
+- 12-stage operational chain (client ↔ admin handshake) — all 12 stages wired
+- 11 PDF + TXT document templates (Marcos-compliant): Order Confirmation, Invoice, Signed Invoice, Production Notes, Delivery Notes, Certificate of Delivery, Signed Certificate of Delivery, Acceptance Act, Signed Acceptance Act, Payment Instructions, Receipt/Payment Confirmation, Certificate of Completion
+- Multipart signed-doc uploads (Invoice, Delivery Cert, Acceptance Act)
+- Cloud deliverables with first-access beacon (UTC timestamp)
+- Payment proof flow (Transaction ID + screenshot) on stage 10
+- Admin side: payment reference panel (PayPal, SWIFT, USDT-TRC20)
+- **Admin project deletion** (21 Apr): DELETE /api/projects/{id} + Trash icon on dashboard, cascades files/messages/notifications
+- **Demo videos on Homepage** (21 Apr): 2 MP4s hosted on Emergent CDN, custom posters at 0:38 / 0:16, SKU-accurate copy
+- **Resend transactional email** (21 Apr): admin notifications on 5 client events
 
-## Core Requirements (Static)
-- 12-stage Operational Chain (immutable stages)
-- 11 document types (immutable codes: INV, CRT, DEL, ACC, PAY, ORD, QUO, PRD, INS, DWN, RCP)
-- Legal entity: Individual Entrepreneur Vera Iambaeva, Tax ID 302335809, Georgia
-- Document number format: {PROJECT_SHORT}-{DOC_CODE}-{SEQ}-{YYMMDD}
+### Integrations
+- **Resend** (transactional email). API key in `.env`. Sender `onboarding@resend.dev`. Recipient `aaaaantipov@gmail.com` (testing-mode restriction).
+  - Triggers: project_submitted, invoice_signed, delivery_confirmed, work_accepted, payment_sent
+  - Fire-and-forget via `asyncio.create_task`. Non-blocking, safe to Resend downtime.
+  - Implementation: `/app/backend/services/notification_service.py`
+- WeasyPrint (PDF generation, all document templates)
 
-## What's Been Implemented (April 18, 2026)
-### Backend
-- [x] FastAPI modular architecture (server.py + routes/ + services/ + utils/)
-- [x] JWT auth (register, login, logout, /me) with httpOnly cookies
-- [x] Project CRUD with multipart file upload
-- [x] 12-stage Operational Chain with stage advancement
-- [x] 11 document types - HTML, TXT, PDF generation (WeasyPrint)
-- [x] Project-isolated chat (messages per project)
-- [x] Admin seeding + test client
-- [x] MongoDB indexes
+### Database state (prod-ready snapshot)
+- Collections: users (10), projects (1 — only John kept), messages, counters
+- Only client John (`john@gmail.com`) has a project (VAPP-51, completed, $660)
+- Admin: `admin@ocean2joy.com` / `admin123`
 
-### Frontend
-- [x] Homepage: Hero section, Demo Videos, Service Tiers, Legal Footer
-- [x] Auth: Login/Register with split-screen ocean background
-- [x] Client Dashboard: Project cards with status badges
-- [x] New Project: Form with service type select, brief, file upload
-- [x] Project Details: Operational Chain timeline + Chat
-- [x] Dark theme (Abyssal Navy #050A14 + Luminous Coral #FF6B6B)
-- [x] Cormorant Garamond / Outfit / JetBrains Mono typography
+## Files of reference
+- `/app/backend/routes/documents.py` — all 11 HTML/TXT templates (~2100 lines)
+- `/app/backend/routes/project_actions.py` — stage transitions, multipart uploads, **email triggers**
+- `/app/backend/routes/projects.py` — CRUD, **DELETE endpoint**, list isolation
+- `/app/backend/services/notification_service.py` — Resend integration (NEW)
+- `/app/backend/routes/public.py` — demo videos, services, payment settings
+- `/app/frontend/src/pages/ClientDashboard.jsx` — list + **admin delete button**
+- `/app/frontend/src/pages/Homepage.jsx` — lander + demo video section
+- `/app/frontend/src/components/OperationalChain/*` — chain UI
 
-## Testing Results
-- Backend: 22/22 tests passed (100%)
-- Frontend: All flows working (100%)
+## P0 — awaiting user action
+- **E2E manual walkthrough** by Artem with a fresh client account (all 12 stages) before Deploy
 
-## Prioritized Backlog
-### P0 (Critical)
-- All implemented
+## P1 — Before / after Deploy
+- Change admin password from `admin123` to strong one in `backend/.env` before prod Deploy
+- Verify Resend domain (ocean2joy.com) to unlock arbitrary recipients — needed to properly route notifications to `ocean2joy@gmail.com` (currently: `aaaaantipov@gmail.com` + Artem forwards manually or accepts as-is per decision 21 Apr)
 
-### P1 (Important)
-- Admin dashboard (separate view for managing all projects)
-- Client signature upload for invoice/acceptance_act
-- Demo video placeholders replaced with real videos
-- PayPal transaction ID tracking
+## P2 — Backlog
+- Replace demo videos with final higher-bitrate versions (currently 720p for page-load perf)
+- Extract WeasyPrint templates from `documents.py` string literals into Jinja2 files
+- Server-side pagination on admin dashboard (once project count grows)
 
-### P2 (Nice to Have)
-- Email notifications on stage changes
-- Real-time chat (WebSocket)
-- Export package (o2j2-export.zip)
-- Password reset flow
-- File size limits and validation
-
-## Next Tasks
-1. Admin dashboard for managing projects
-2. Upload real demo videos
-3. Client-side signature/payment proof upload
-4. Export zip package for local hosting
-
-## Task #001: Design Fix (April 18, 2026)
-- Changed frontend from dark cinematic theme (#050A14 + #FF6B6B) to light ocean theme (#0ea5e9 + #f59e0b)
-- Files changed: index.css, Homepage.jsx, Navbar.jsx, Footer.jsx, Logo.jsx, App.css, tailwind.config.js
-- Deleted: design_guidelines.json
-- Backend: NOT touched (remains perfect)
-- Hero: Ocean gradient + SVG waves + "Dive Into an Ocean of Video Possibilities"
-- Note: Login, Register, Dashboard, ProjectDetails pages still have dark styles (separate task needed)
-
-## Task #002: Full Light Theme Migration (April 18, 2026)
-- Updated ALL remaining pages: Login, Register, ClientDashboard, NewProject, ProjectDetails
-- Updated components: ChainTimeline, ChatContainer
-- Updated App.js loading spinners
-- Color mapping: #050A14 → bg-white/bg-gray-50, #FF6B6B → sky-500/sky-600, #0B1325 → bg-white
-- Zero dark theme references remaining (verified via grep)
-- Testing: 22/22 backend + all frontend flows = 100%
-- Backend: NOT touched (all APIs working)
-
-## Task #004: Visual Calibration to 99% (April 18, 2026)
-- Applied 30+ visual calibrations to Homepage.jsx (388 -> 423 lines)
-- All headings: text-4xl md:text-5xl (was text-3xl md:text-4xl)
-- All containers: max-w-7xl (was max-w-6xl), Payments max-w-5xl, CTA max-w-4xl
-- Services: aspect-video hover zoom, text-2xl prices, gradient "Learn More" buttons
-- Payments: emoji icons (🏦💳), bg-sky-50 structured blocks, Intermediary Banks, QR code conditional
-- Demo Videos: tags (Drama, Professional, HD Quality etc.), italic footnote
-- CTA: text-xl button, "Quick request form takes less than 2 minutes"
-- Backend: added bank_location, beneficiary, qr_code_url to /api/payment-settings
-
-
-## Task #006: PayPal Email Correction (Feb 18, 2026)
-- The REAL "серьёзная ошибка": Homepage Payments блок показывал PayPal account `ocean2joy@gmail.com` (это contact email), а правильный PayPal аккаунт бизнеса — `302335809@postbox.ge` (подтверждено в прототипе `LegalInformation.js` строка 238)
-- Added `PAYPAL_EMAIL = "302335809@postbox.ge"` в `backend/utils/constants.py`
-- Updated `routes/public.py` `/api/payment-settings` → `"paypal_email": PAYPAL_EMAIL`
-- Verified via curl: `PayPal: 302335809@postbox.ge`
-
-## Task #005: Deep Text Audit Homepage vs Prototype (Feb 18, 2026)
-- Found and fixed "серьёзная ошибка в тексте": /api/payment-settings returned FLAT schema while Homepage prototype expected NESTED `bank_transfer` object
-- Backend public.py: flat payment-settings → nested `bank_transfer.{beneficiary_bank_name, beneficiary_bank_location, beneficiary_bank_swift, beneficiary_iban, beneficiary_name, intermediary_bank_1.{name,swift}, intermediary_bank_2.{name,swift}, qr_code_url}`
-- Frontend Homepage.jsx Payments block rewritten to use nested schema (prototype-identical)
-- All 5 H2 headings normalized to `text-4xl md:text-5xl` (Services, Why Choose Us, Demo Videos, Payments, CTA)
-- Demo Videos grid: added `max-w-5xl mx-auto` 
-- Demo video tags: added `flex-wrap` for proper wrapping
-- Verified via curl + screenshot: Bank of Georgia, IBAN GE29BG0000000541827200, SWIFT BAGAGE22, Citibank/JPMorgan intermediaries, PayPal ocean2joy@gmail.com — all render correctly
-- P2 (renderVideoPlayer Yandex/GDrive wrapper fix) skipped per user: "мы не будем использовать ссылки, только грузить физически видео"
-
-## Task #007: E2E 12-Stage Operational Chain with Role-Based Actions (Feb 18, 2026)
-**Context:** Prototype used Marcos case with hardcoded timestamps for demo. O2J2 implements the same flow but with REAL `datetime.now(timezone.utc)` timestamps captured at each action — for real new clients.
-
-### Backend (/app/backend/routes/project_actions.py — NEW)
-**11 role-specific action endpoints** replacing generic /advance:
-- Admin: activate-order (quote + details), send-invoice, start-production (notes), mark-delivered, confirm-payment (txn_id), complete
-- Client: sign-invoice, confirm-delivery, accept-work, mark-payment-sent (txn_id)
-
-**Deliverables subsystem:**
-- `POST /api/projects/{id}/deliverables` (admin, multipart) — chunked upload saves to `/app/backend/uploads/deliverables/{project_id}/`
-- `GET /api/projects/{id}/deliverables/{file_id}` — first client download auto-sets `files_accessed_at` (stage 7) + generates DWN doc
-- `DELETE /api/projects/{id}/deliverables/{file_id}` (admin, pre-delivery only)
-
-**Enforcement:** role checks (403), stage-gating (400 if previous stage missing), idempotency (400 if action already done).
-
-### Frontend
-- `StageActions.jsx` — contextual action buttons + modal dialogs based on (status, role). Handles numeric conversion for quote_amount.
-- `Deliverables.jsx` — upload button (admin), file list with download (blob download to preserve cookies) + delete (admin pre-delivery).
-- `ProjectDetails.jsx` — rewritten with quote block, paypal transaction ID badge, StageActions banner, Deliverables section, admin "Manual override" toggle (hidden generic /advance for QA).
-- `ClientDashboard.jsx` — status filter bar (13 chips), admin-variant heading ("All Projects" + awaiting-action counter), client name/email on cards for admin.
-
-### Documents (already worked, now auto-generated at each action)
-All 11 types (QUO/ORD/INV/PRD/DEL/DWN/ACC/INS/RCP/PAY/CRT) auto-generated with immutable numbers `{PROJECT_SHORT}-{DOC_CODE}-{SEQ:04d}-{YYMMDD}` — format preserved from prototype.
-
-### Testing
-- curl e2e: 16 steps from register → complete, all pass, PDF Invoice 13KB generated.
-- testing_agent_v3_fork iteration_3: backend 16/16, frontend all flows PASS, zero issues.
-
-### Next ideas
-- Email notifications on stage changes (SendGrid/Resend)
-- PayPal/Stripe checkout integration for stage 10 (now external)
-- Multi-deliverable ZIP bundle download
-
-## Task #008: Invoice Template Final Polish (Feb 19, 2026)
-- Replaced full `{brief}` block on the Invoice with a standard reference string:
-  `Customer film production according to client's script — {service_type_label} (Project {project_number})`
-  (applied to both HTML and TXT templates in `/app/backend/routes/documents.py`)
-- Removed legal clause "No handwritten signature is required." — client will upload a signed invoice scan in a subsequent stage
-- Verified that invoice amount pulls strictly from `project.quote_amount` (no hardcoded value)
-- Fixed pre-existing bug: `_invoice_dates` function was missing its `def` line → caused 500 error on `/api/projects/{id}/documents/invoice/txt`
-- Verified via curl on project VAPP-51-JOHN-CUSTOM-260419: 3-page PDF, 31KB, correct content, all 3 $1,200.00 amounts render correctly
-
-### Upcoming (P1)
-- Client upload flow for signed Invoice scan (post Sign Invoice stage)
-- Replace demo video placeholders with final MP4 files (12-35MB)
+## Known non-issues
+- Test users `client@test.com` and `john@gmail.com` intentionally kept in DB — visible only to admin (verified by isolation rules)
+- `resend.dev` sender may land in Gmail Promotions/Spam on first contact; marking as "not spam" once trains Gmail
