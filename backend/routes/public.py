@@ -249,7 +249,7 @@ Every order follows a fixed 12-stage workflow inside the client portal. Each sta
 ## 4. Payment Model — Pay-After-Acceptance
 Unlike conventional prepayment models, **actual payment is transferred only after** the client has inspected the deliverables and signed the Acceptance Act (Stage 9). The Invoice signature at Stage 4 is a contractual commitment, not a payment.
 
-Payment is currently processed **manually** via PayPal or SWIFT bank transfer. Full payment details are provided inside the client portal after the quote is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
+Payment is currently processed **manually** via one of three channels: **PayPal**, **SWIFT bank transfer**, or **USDT-TRC20** cryptocurrency. Full payment details for the channel you choose are provided inside the client portal after the quote is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
 
 ## 5. Revisions
 Revisions are handled inside the project chat before the Certificate of Delivery is signed (Stage 8). When changes are requested, we upload a new deliverable URL — previous versions remain visible in the deliverables history. See our **Revision Policy** for scope and limits.
@@ -359,7 +359,7 @@ If the delivered content materially deviates from the agreed brief (e.g. wrong f
 
 ## 4. Refunds After Payment (Post-Stage 10)
 Once funds have been transferred and payment is confirmed by our team (Stage 11), a refund is possible only in the following limited cases:
-- **Overpayment** or **duplicate transfer** — refunded to the original PayPal or bank account within 10 business days.
+- **Overpayment** or **duplicate transfer** — refunded to the original PayPal account, SWIFT bank account, or TRC20 crypto wallet (depending on the channel used for the original payment) within 10 business days. Crypto refunds are made in the same asset (USDT-TRC20) to the sending wallet.
 - **Proven material breach** by us of the signed Acceptance Act (e.g. our final deliverable differs from the Acceptance Act description) — refunded in whole or in part at our discretion.
 
 No refund is due after Stage 12 (Project completed and Certificate of Completion issued), save for statutory rights the client has under their local consumer-protection law.
@@ -368,7 +368,7 @@ No refund is due after Stage 12 (Project completed and Certificate of Completion
 Post the request in the project chat, including:
 1. A clear statement that this is a cancellation or refund request.
 2. The reason.
-3. If a refund is owed, the destination account (PayPal email or SWIFT/IBAN).
+3. If a refund is owed, the destination account (PayPal email, SWIFT/IBAN, or TRC20 wallet address).
 
 We respond within **5 business days**. Refunds are processed within **10 business days** of approval.
 
@@ -440,10 +440,10 @@ For anything revision-related, use the project chat. For out-of-portal issues, e
 - **Account data:** full name, email address, hashed password.
 - **Optional PayPal account** (separate email, if different from account email) — used only to reconcile incoming PayPal payments.
 - **Project data:** brief, uploaded scripts/reference files, deliverable downloads.
-- **Payment data:** PayPal transaction ID (only if you voluntarily provide it), SWIFT transfer references.
+- **Payment data:** PayPal transaction ID (only if you voluntarily provide it), SWIFT transfer references, USDT-TRC20 transaction hashes. Cryptocurrency transactions are recorded on a public blockchain (TRON) — we have no control over that public record and do not collect or store your wallet seed, keys or balance.
 - **Technical data:** IP address and session cookies strictly necessary for authentication.
 
-We do **not** collect payment card details — all payments are handled by external providers (PayPal, your bank).
+We do **not** collect payment card details — all payments are handled by external channels (PayPal, your bank, or the TRON blockchain).
 
 ## 3. Why and On What Legal Basis
 | Purpose | Legal basis (GDPR Art. 6) |
@@ -491,9 +491,9 @@ We do **not** send marketing, newsletter, or notification emails. We do **not** 
 
 ## 10. Payments (Currently Manual)
 At this time, **payment systems are not integrated into the portal**. Payments are processed in semi-manual mode:
-- You receive payment details (PayPal account or SWIFT/IBAN) in the portal after accepting the quote.
-- You transfer funds via your preferred method.
-- You mark the payment as sent in the portal (optionally providing a PayPal transaction ID), and we verify receipt manually before advancing the project.
+- You receive payment details (PayPal account, SWIFT/IBAN, or USDT-TRC20 wallet address) in the portal after accepting the quote.
+- You transfer funds via your preferred channel.
+- You mark the payment as sent in the portal (optionally providing a PayPal transaction ID, SWIFT reference, or TRC20 transaction hash), and we verify receipt manually before advancing the project.
 
 We plan to integrate automated payment providers (PayPal Checkout / Stripe) in a future release. When that happens, this Policy will be updated to disclose the processors, data transfer destinations, and legal bases involved.
 

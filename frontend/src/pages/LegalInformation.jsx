@@ -265,6 +265,14 @@ function LegalInformation() {
             </p>
           </div>
 
+          {/* Crypto Section */}
+          <div className="bg-gray-50 rounded-lg p-6 mb-4">
+            <h3 className="text-lg font-bold text-gray-900 mb-2">Cryptocurrency (USDT-TRC20)</h3>
+            <p className="text-sm text-gray-600">
+              We accept stablecoin payments in <strong>USDT on the TRON network (TRC20)</strong>. The wallet address is shared privately inside your project portal after the quote is activated. Please send only USDT-TRC20 — tokens on other networks (ERC20, BEP20, etc.) will not be credited.
+            </p>
+          </div>
+
           <p className="text-sm text-gray-600 text-left">
             For detailed payment information, please visit our{' '}
             <Link to="/" className="text-sky-600 hover:text-sky-700 font-semibold">
