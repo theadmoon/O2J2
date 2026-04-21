@@ -78,8 +78,8 @@ function ServiceDetails() {
             <div className="card-ocean p-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-6">What You Get</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {service.features.map((feature, index) => (
-                  <div key={index} className="flex items-start">
+                {service.features.map((feature) => (
+                  <div key={feature} className="flex items-start">
                     <FaCheckCircle className="text-teal-500 mt-1 mr-3 flex-shrink-0" />
                     <span className="text-gray-700">{feature}</span>
                   </div>
@@ -98,8 +98,8 @@ function ServiceDetails() {
                 <div>
                   <h3 className="font-semibold text-gray-900 mb-2">Output Formats:</h3>
                   <div className="flex flex-wrap gap-2">
-                    {service.output_format.map((format, index) => (
-                      <span key={index} className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm font-medium">
+                    {service.output_format.map((format) => (
+                      <span key={format} className="bg-sky-100 text-sky-800 px-3 py-1 rounded-full text-sm font-medium">
                         {format}
                       </span>
                     ))}
@@ -122,8 +122,8 @@ function ServiceDetails() {
               <div className="card-ocean p-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Genres</h2>
                 <div className="flex flex-wrap gap-3">
-                  {service.genres.map((genre, index) => (
-                    <span key={index} className="bg-gradient-to-r from-sky-100 to-teal-100 text-gray-800 px-4 py-2 rounded-lg font-medium">
+                  {service.genres.map((genre) => (
+                    <span key={genre} className="bg-gradient-to-r from-sky-100 to-teal-100 text-gray-800 px-4 py-2 rounded-lg font-medium">
                       {genre}
                     </span>
                   ))}

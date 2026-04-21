@@ -37,20 +37,6 @@ export function AuthProvider({ children }) {
     setUser(false);
   };
 
-  const quickSwitch = async (role) => {
-    try {
-      if (role === 'admin') {
-        const { data } = await api.post('/auth/login', { email: 'admin@ocean2joy.com', password: 'admin123' });
-        setUser(data);
-      } else {
-        const { data } = await api.post('/auth/login', { email: 'client@test.com', password: 'client123' });
-        setUser(data);
-      }
-    } catch (e) {
-      console.error('Quick switch failed:', e);
-    }
-  };
-
   const refreshUser = async (payload) => {
     if (payload) {
       setUser(payload);
@@ -62,7 +48,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, quickSwitch, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );

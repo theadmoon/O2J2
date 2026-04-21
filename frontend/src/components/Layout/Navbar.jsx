@@ -6,19 +6,13 @@ import Logo from './Logo';
 import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
-  const { user, logout, quickSwitch } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate('/');
-  };
-
-  const handleQuickSwitch = async (role) => {
-    await quickSwitch(role);
-    navigate('/');
-    window.location.reload();
   };
 
   return (
@@ -54,33 +48,6 @@ export default function Navbar() {
                   </Link>
                 ) : null}
 
-                {/* Quick Switch Buttons (TEMPORARY - for testing) */}
-                <div className="flex items-center gap-2 px-4 border-l border-r border-gray-300">
-                  <span className="text-xs text-gray-500">Quick Switch:</span>
-                  <button
-                    onClick={() => handleQuickSwitch('admin')}
-                    className={`text-xs px-3 py-1 rounded ${
-                      user?.role === 'admin'
-                        ? 'bg-sky-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    title="Switch to Admin"
-                  >
-                    👤 Admin
-                  </button>
-                  <button
-                    onClick={() => handleQuickSwitch('client')}
-                    className={`text-xs px-3 py-1 rounded ${
-                      user?.email === 'mek110@yahoo.com'
-                        ? 'bg-teal-600 text-white'
-                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                    title="Switch to Client (Marcos Knight)"
-                  >
-                    👥 Client
-                  </button>
-                </div>
-
                 <NotificationBell />
 
                 <button
@@ -105,7 +72,7 @@ export default function Navbar() {
                 <Link to="/login" className="text-gray-700 hover:text-sky-600 font-medium transition">
                   Login
                 </Link>
-                <Link to="/request" className="btn-ocean text-sm">
+                <Link to="/start" className="btn-ocean text-sm">
                   Start Project
                 </Link>
               </>
@@ -168,39 +135,6 @@ export default function Navbar() {
                 </Link>
               ) : null}
 
-              {/* Quick Switch for Mobile */}
-              <div className="px-4 py-2 border-t border-b border-gray-200 my-2">
-                <p className="text-xs text-gray-500 mb-2">Quick Switch:</p>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => {
-                      handleQuickSwitch('admin');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`flex-1 text-xs px-3 py-2 rounded ${
-                      user?.role === 'admin'
-                        ? 'bg-sky-600 text-white'
-                        : 'bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    👤 Admin
-                  </button>
-                  <button
-                    onClick={() => {
-                      handleQuickSwitch('client');
-                      setMobileMenuOpen(false);
-                    }}
-                    className={`flex-1 text-xs px-3 py-2 rounded ${
-                      user?.email === 'mek110@yahoo.com'
-                        ? 'bg-teal-600 text-white'
-                        : 'bg-gray-200 text-gray-700'
-                    }`}
-                  >
-                    👥 Client
-                  </button>
-                </div>
-              </div>
-
               <button
                 onClick={() => {
                   handleLogout();
@@ -221,7 +155,7 @@ export default function Navbar() {
                 Login
               </Link>
               <Link
-                to="/request"
+                to="/start"
                 className="block px-4 py-2 bg-gradient-to-r from-sky-500 to-teal-500 text-white rounded font-semibold text-center"
                 onClick={() => setMobileMenuOpen(false)}
               >

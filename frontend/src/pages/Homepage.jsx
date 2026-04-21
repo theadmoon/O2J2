@@ -242,7 +242,7 @@ export default function Homepage() {
                             'bg-purple-100 text-purple-800',
                           ];
                           return (
-                            <span key={idx} className={`${palette[idx % palette.length]} text-xs px-2 py-1 rounded`}>{tag}</span>
+                            <span key={tag} className={`${palette[idx % palette.length]} text-xs px-2 py-1 rounded`}>{tag}</span>
                           );
                         })}
                       </div>

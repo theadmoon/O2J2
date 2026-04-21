@@ -89,8 +89,8 @@ function Services() {
                   <div className="mb-6">
                     <h3 className="font-semibold text-gray-900 mb-3">What's Included:</h3>
                     <ul className="space-y-2">
-                      {service.features.slice(0, 4).map((feature, idx) => (
-                        <li key={idx} className="flex items-start">
+                      {service.features.slice(0, 4).map((feature) => (
+                        <li key={feature} className="flex items-start">
                           <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
                           <span className="text-gray-700">{feature}</span>
                         </li>
