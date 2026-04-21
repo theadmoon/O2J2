@@ -222,9 +222,7 @@ POLICIES = {
     "terms": {
         "title": "Terms of Service",
         "updated_at": "2026-04-21T00:00:00Z",
-        "content": """_Last updated: 21 April 2026_
-
-## 1. General
+        "content": """## 1. General
 These Terms govern the use of services provided by **Individual Entrepreneur Vera Iambaeva** (Tax ID: **302335809**, Tbilisi, Georgia), operating under the brand name **Ocean2Joy Digital Video Production** ("we", "us", "the Company").
 
 By creating an account and submitting a project, you agree to these Terms.
@@ -291,9 +289,7 @@ We may update these Terms. The "Last updated" date above reflects the latest rev
     "digital_delivery": {
         "title": "Digital Delivery Policy",
         "updated_at": "2026-04-21T00:00:00Z",
-        "content": """_Last updated: 21 April 2026_
-
-## 1. Electronic Delivery Only
+        "content": """## 1. Electronic Delivery Only
 All Ocean2Joy services are delivered **exclusively in electronic form**. No physical media (DVD, USB, hard drive) is ever shipped.
 
 ## 2. How Delivery Works
@@ -336,9 +332,7 @@ If a deliverable URL is unavailable or corrupted, please report it in the projec
     "refund": {
         "title": "Refund & Cancellation Policy",
         "updated_at": "2026-04-21T00:00:00Z",
-        "content": """_Last updated: 21 April 2026_
-
-## 1. Overview
+        "content": """## 1. Overview
 Because our payment model is **pay-after-acceptance** (actual funds are transferred at Stage 10, after the client has inspected and accepted the work at Stage 9), most cancellations do not involve a refund at all — they are simply the termination of an unpaid order.
 
 This policy describes what happens when a project is cancelled at each stage.
@@ -389,9 +383,7 @@ If you disagree with a refund decision, you may escalate by email to **ocean2joy
     "revision": {
         "title": "Revision Policy",
         "updated_at": "2026-04-21T00:00:00Z",
-        "content": """_Last updated: 21 April 2026_
-
-## 1. Where Revisions Happen
+        "content": """## 1. Where Revisions Happen
 Revisions are an integral part of our 12-stage operational chain. They take place **inside the project chat and the deliverables list**, between:
 
 - **Stage 5 (Production started)** — the client can refine the brief and react to work-in-progress previews the team shares, and
@@ -436,9 +428,7 @@ For anything revision-related, use the project chat. For out-of-portal issues, e
     "privacy": {
         "title": "Privacy Policy",
         "updated_at": "2026-02-18T00:00:00Z",
-        "content": """_Last updated: February 18, 2026_
-
-This Privacy Policy explains how **Individual Entrepreneur Vera Iambaeva** (Tax ID: 302335809, Tbilisi, Georgia), operating the Ocean2Joy Digital Video Production brand ("we", "us", "the Controller"), collects and processes personal data in accordance with the **EU General Data Protection Regulation (GDPR)** and the **Law of Georgia on Personal Data Protection**.
+        "content": """This Privacy Policy explains how **Individual Entrepreneur Vera Iambaeva** (Tax ID: 302335809, Tbilisi, Georgia), operating the Ocean2Joy Digital Video Production brand ("we", "us", "the Controller"), collects and processes personal data in accordance with the **EU General Data Protection Regulation (GDPR)** and the **Law of Georgia on Personal Data Protection**.
 
 ## 1. Data Controller
 - **Name:** Individual Entrepreneur Vera Iambaeva
