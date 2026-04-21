@@ -130,11 +130,11 @@ export default function Homepage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
             {services.map((service, index) => (
               <div
                 key={service.id || index}
-                className="card-ocean group hover:scale-105 transition-transform duration-300"
+                className="card-ocean group hover:scale-105 transition-transform duration-300 flex flex-col h-full"
                 style={{ animationDelay: `${index * 100}ms` }}
               >
                 <div className="aspect-video overflow-hidden">
@@ -144,14 +144,14 @@ export default function Homepage() {
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                   />
                 </div>
-                <div className="p-6">
+                <div className="p-6 flex flex-col flex-1">
                   <h3 className="text-2xl font-bold text-gray-900 mb-3 group-hover:text-sky-600 transition">
                     {service.title}
                   </h3>
                   <p className="text-gray-600 mb-4 line-clamp-3">
                     {service.description}
                   </p>
-                  <div className="mb-4">
+                  <div className="mb-4 mt-auto">
                     <span className="text-2xl font-bold text-sky-600">
                       {service.pricing_model === 'per_minute' ? `From $${service.base_price}/min` : service.pricing_model === 'custom' ? `From $${service.base_price}/min` : `From $${service.base_price}`}
                     </span>
