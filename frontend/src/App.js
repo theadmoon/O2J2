@@ -13,7 +13,6 @@ import Services from "./pages/Services";
 import ServiceDetails from "./pages/ServiceDetails";
 import HowItWorks from "./pages/HowItWorks";
 import Contact from "./pages/Contact";
-import QuickRequest from "./pages/QuickRequest";
 import LegalInformation from "./pages/LegalInformation";
 import Policies from "./pages/Policies";
 import Profile from "./pages/Profile";
@@ -21,6 +20,7 @@ import AdminPanel from "./pages/AdminPanel";
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -28,12 +28,16 @@ function ProtectedRoute({ children }) {
       </div>
     );
   }
-  if (!user || !user.id) return <Navigate to="/login" replace />;
+  if (!user || !user.id) {
+    const next = encodeURIComponent(location.pathname + location.search);
+    return <Navigate to={`/login?next=${next}`} replace />;
+  }
   return children;
 }
 
 function PublicRoute({ children }) {
   const { user, loading } = useAuth();
+  const location = useLocation();
   if (loading) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center">
@@ -41,7 +45,11 @@ function PublicRoute({ children }) {
       </div>
     );
   }
-  if (user && user.id) return <Navigate to="/dashboard" replace />;
+  if (user && user.id) {
+    const params = new URLSearchParams(location.search);
+    const next = params.get('next') || '/dashboard';
+    return <Navigate to={next} replace />;
+  }
   return children;
 }
 
@@ -51,6 +59,25 @@ function ScrollToTop() {
     window.scrollTo(0, 0);
   }, [pathname]);
   return null;
+}
+
+// Routes any visitor clicking "Start a project" to the right place:
+// - authenticated clients → new-project form
+// - authenticated admin   → dashboard (admins don't create projects themselves)
+// - guests                → register, with a round-trip back to new-project form
+function StartRedirect() {
+  const { user, loading } = useAuth();
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-white flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-sky-500 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+  if (user?.id) {
+    return <Navigate to={user.role === 'admin' ? '/dashboard' : '/projects/new'} replace />;
+  }
+  return <Navigate to="/register?next=/projects/new" replace />;
 }
 
 function AppRoutes() {
@@ -63,7 +90,8 @@ function AppRoutes() {
         <Route path="/services/:serviceId" element={<><Navbar /><ServiceDetails /></>} />
         <Route path="/how-it-works" element={<><Navbar /><HowItWorks /></>} />
         <Route path="/contact" element={<><Navbar /><Contact /></>} />
-        <Route path="/request" element={<><Navbar /><QuickRequest /></>} />
+        <Route path="/request" element={<Navigate to="/start" replace />} />
+        <Route path="/start" element={<StartRedirect />} />
         <Route path="/legal" element={<><Navbar /><LegalInformation /></>} />
         <Route path="/policies/:type" element={<><Navbar /><Policies /></>} />
         <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />

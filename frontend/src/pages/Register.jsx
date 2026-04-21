@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth, formatApiError } from '../context/AuthContext';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -11,6 +11,8 @@ const OCEAN_BG = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?a
 export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const nextPath = searchParams.get('next') || '/dashboard';
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [paypalEmail, setPaypalEmail] = useState('');
@@ -25,7 +27,7 @@ export default function Register() {
     setLoading(true);
     try {
       await register(email, password, name, paypalEmail);
-      navigate('/dashboard');
+      navigate(nextPath);
     } catch (err) {
       setError(formatApiError(err.response?.data?.detail) || err.message);
     } finally {
