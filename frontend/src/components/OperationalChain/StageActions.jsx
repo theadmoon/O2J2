@@ -143,14 +143,40 @@ export default function StageActions({ project, user, onUpdated }) {
   const clientPaypalInfo = project.user_paypal_email
     ? `Client paid from PayPal account: ${project.user_paypal_email}. `
     : 'Client has not set a PayPal account on file. ';
+
+  const confirmPaymentPreForm = (
+    <div className="bg-sky-50 border border-sky-200 rounded-lg p-3 text-xs mt-2" data-testid="confirm-payment-client-submitted">
+      <p className="font-semibold text-sky-900 uppercase tracking-wider text-[10px] mb-1.5">Client-submitted proof for this project</p>
+      <div className="space-y-1 text-gray-800">
+        <div className="flex items-start gap-2">
+          <span className="font-medium text-gray-500 min-w-[110px]">Transaction ID:</span>
+          {project.paypal_transaction_id
+            ? <span className="font-mono">{project.paypal_transaction_id}</span>
+            : <span className="italic text-amber-700">not provided — please read it from the screenshot and type below</span>}
+        </div>
+        <div className="flex items-start gap-2">
+          <span className="font-medium text-gray-500 min-w-[110px]">Screenshot:</span>
+          {project.payment_proof_file
+            ? <span className="text-emerald-700 truncate">{project.payment_proof_filename || 'uploaded'}</span>
+            : <span className="italic text-gray-500">not uploaded</span>}
+        </div>
+        <div className="flex items-start gap-2">
+          <span className="font-medium text-gray-500 min-w-[110px]">Project:</span>
+          <span className="font-mono text-gray-700">{project.project_number} · {project.user_name}</span>
+        </div>
+      </div>
+    </div>
+  );
+
   const openConfirmPayment = () => setDialog({
-    key: 'confirm-payment',
+    key: `confirm-payment-${project.id}`,
     title: 'Confirm Payment Received',
     description: needsTxIdFromAdmin
       ? `${clientPaypalInfo}The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here along with the exact payment time in UTC from your PayPal dashboard. Both fields go into the final closing document.`
       : `${clientPaypalInfo}Confirm that the payment has arrived. Enter the exact payment time in UTC from your PayPal dashboard. You may also correct the transaction ID if needed.`,
     submit: 'Confirm Received',
     icon: DollarSign,
+    preFormContent: confirmPaymentPreForm,
     fields: [
       { name: 'paypal_transaction_id', label: 'Transaction ID', type: 'text', required: needsTxIdFromAdmin, placeholder: 'Bank reference or PayPal ID' },
       { name: 'paypal_transaction_time_utc', label: 'Transaction Time (UTC, from PayPal)', type: 'datetime-local', required: true, placeholder: 'YYYY-MM-DDTHH:MM', hint: 'Copy the exact completion time from your PayPal business dashboard — this value must be in UTC and will be printed on the Certificate of Completion.' },
@@ -328,8 +354,15 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
           <DialogTitle className="flex items-center gap-2 text-gray-900"><Icon className="w-5 h-5 text-sky-500" /> {dialog.title}</DialogTitle>
           <DialogDescription>{dialog.description}</DialogDescription>
         </DialogHeader>
-        <form onSubmit={submit} className="space-y-4 mt-2">
-          {dialog.fields.map((f) => (
+        {dialog.preFormContent}
+        <form onSubmit={submit} className="space-y-4 mt-2" autoComplete="off" data-testid={`dialog-form-${dialog.key}`}>
+          {/* Chrome ignores autoComplete="off" without a dummy input to distract it */}
+          <input type="text" name="_nope" autoComplete="username" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" />
+          <input type="password" name="_nope2" autoComplete="new-password" style={{ display: 'none' }} tabIndex={-1} aria-hidden="true" />
+          {dialog.fields.map((f) => {
+            // Unique field name per-dialog to defeat cross-project autofill
+            const uniqueName = `${dialog.key}_${f.name}_${Math.random().toString(36).slice(2, 8)}`;
+            return (
             <div key={f.name}>
               <Label className="text-xs uppercase tracking-wider text-gray-600">{f.label}</Label>
               {f.type === 'textarea' ? (
@@ -340,6 +373,7 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
                   placeholder={f.placeholder}
                   className="mt-1.5 resize-none"
+                  autoComplete="off"
                   data-testid={`dialog-input-${f.name}`}
                 />
               ) : f.type === 'file' ? (
@@ -354,17 +388,27 @@ function ActionDialog({ dialog, onClose, onSubmit, loading, error }) {
               ) : (
                 <Input
                   type={f.type}
+                  name={uniqueName}
+                  id={uniqueName}
                   required={f.required}
                   value={values[f.name] ?? ''}
                   onChange={(e) => setValues((v) => ({ ...v, [f.name]: e.target.value }))}
                   placeholder={f.placeholder}
                   className="mt-1.5"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                  spellCheck={false}
+                  data-lpignore="true"
+                  data-form-type="other"
+                  data-1p-ignore
+                  data-bwignore
                   data-testid={`dialog-input-${f.name}`}
                 />
               )}
               {f.hint && <p className="text-xs text-gray-500 mt-1">{f.hint}</p>}
             </div>
-          ))}
+          );})}
           {error && <div className="bg-red-50 border border-red-200 text-red-700 text-xs px-3 py-2 rounded" data-testid={`dialog-error-${dialog.key}`}>{error}</div>}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose} data-testid={`dialog-cancel-${dialog.key}`}>Cancel</Button>
