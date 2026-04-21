@@ -414,3 +414,6 @@ credentials.json
 *.pem
 *.key
 .credentials
+
+# Allow deployment env template (safe placeholder values only)
+!deploy/.env.example
