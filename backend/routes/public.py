@@ -221,23 +221,217 @@ async def submit_quick_request(data: QuickRequestInput):
 POLICIES = {
     "terms": {
         "title": "Terms of Service",
-        "updated_at": "2025-02-17T00:00:00Z",
-        "content": """# Terms of Service\n\n## 1. General\nThese terms govern the use of services provided by Individual Entrepreneur Vera Iambaeva (Tax ID: 302335809), operating under the brand name Ocean2Joy Digital Video Production.\n\n## 2. Services\nAll services are delivered electronically. No physical products are shipped.\n\n## 3. Payment\nPayment is due upon acceptance of quote. We accept PayPal and SWIFT bank transfers.\n\n## 4. Delivery\nAll deliverables are provided through our secure digital client portal.\n\n## 5. Revisions\nRevision rounds are included as specified in each service package.\n\n## 6. Intellectual Property\nUpon full payment, the client receives full usage rights to the delivered content.\n\n## 7. Jurisdiction\nThese terms are governed by the laws of Georgia.""",
+        "updated_at": "2026-04-21T00:00:00Z",
+        "content": """_Last updated: 21 April 2026_
+
+## 1. General
+These Terms govern the use of services provided by **Individual Entrepreneur Vera Iambaeva** (Tax ID: **302335809**, Tbilisi, Georgia), operating under the brand name **Ocean2Joy Digital Video Production** ("we", "us", "the Company").
+
+By creating an account and submitting a project, you agree to these Terms.
+
+## 2. Services
+We design and produce custom digital video content (live-action, post-production & VFX, AI-assisted creation). All services are delivered **electronically only** — no physical media is shipped.
+
+## 3. The 12-Stage Operational Chain
+Every order follows a fixed 12-stage workflow inside the client portal. Each stage is time-stamped in UTC and produces auditable PDF + TXT records:
+
+1. **Project submitted** by the client.
+2. **Quote activated** by our team.
+3. **Invoice issued** by our team.
+4. **Invoice signed** and uploaded by the client — this is the moment the client contractually commits to the order.
+5. **Production started** by our team.
+6. **Deliverables released** as secure cloud URLs.
+7. **Deliverables accessed** — client access times are recorded via a server-side beacon.
+8. **Certificate of Delivery** signed by the client.
+9. **Acceptance Act** signed by the client — the moment the client confirms the work meets the brief.
+10. **Payment sent** by the client (transaction ID and/or screenshot uploaded).
+11. **Payment confirmed** by our team.
+12. **Project completed** — Certificate of Completion issued.
+
+## 4. Payment Model — Pay-After-Acceptance
+Unlike conventional prepayment models, **actual payment is transferred only after** the client has inspected the deliverables and signed the Acceptance Act (Stage 9). The Invoice signature at Stage 4 is a contractual commitment, not a payment.
+
+Payment is currently processed **manually** via PayPal or SWIFT bank transfer. Full payment details are provided inside the client portal after the quote is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
+
+## 5. Revisions
+Revisions are handled inside the project chat before the Certificate of Delivery is signed (Stage 8). When changes are requested, we upload a new deliverable URL — previous versions remain visible in the deliverables history. See our **Revision Policy** for scope and limits.
+
+## 6. Cancellation & Refunds
+Refund entitlement depends on the stage reached at the time of cancellation. Full rules are described in our **Refund & Cancellation Policy**.
+
+## 7. Intellectual Property
+Upon full payment (confirmed at Stage 11), the client receives full commercial usage rights to the final delivered content. Until full payment is confirmed, the deliverables remain the property of the Company and may not be used commercially.
+
+Source files, project files, and working assets are not included by default; they may be delivered under a separate agreement.
+
+## 8. Content Responsibility
+The client is solely responsible for the legality of any content, brand, trademark, face, voice or other material provided to us. We may refuse or terminate a project that would require us to produce content that is illegal, infringing, or contrary to platform or payment-provider policies.
+
+## 9. Communication
+All order communication takes place inside the client portal:
+- **Chat** for questions and revisions.
+- **Timeline** for stage status (UTC-stamped).
+- **Documents** downloadable as PDF/TXT.
+
+We do **not** send marketing or notification emails. See our **Privacy Policy** for details.
+
+## 10. Limitation of Liability
+To the maximum extent permitted by law, our aggregate liability for any claim arising out of the services is limited to the fees actually paid for the specific project giving rise to the claim. We are not liable for consequential, indirect or lost-profit damages.
+
+## 11. Jurisdiction & Governing Law
+These Terms are governed by the laws of **Georgia**. Disputes will be heard before the competent courts of Tbilisi, Georgia, unless mandatory consumer-protection rules of the client's country require otherwise.
+
+## 12. Changes to Terms
+We may update these Terms. The "Last updated" date above reflects the latest revision. Material changes are announced in the client portal.
+
+## 13. Contact
+**ocean2joy@gmail.com** — Individual Entrepreneur Vera Iambaeva, Tax ID 302335809, Tbilisi, Georgia.
+""",
     },
     "digital_delivery": {
         "title": "Digital Delivery Policy",
-        "updated_at": "2025-02-17T00:00:00Z",
-        "content": """# Digital Delivery Policy\n\n## Electronic Delivery Only\nAll Ocean2Joy services are delivered exclusively in electronic form. No physical media is shipped.\n\n## Delivery Method\nFiles are delivered through our secure client portal. Clients receive notification when files are ready for download.\n\n## File Formats\nStandard formats: MP4, MOV, AVI, WebM. Custom formats available on request.\n\n## File Retention\nFiles remain accessible in the client portal for 90 days. Extended retention available on request.""",
+        "updated_at": "2026-04-21T00:00:00Z",
+        "content": """_Last updated: 21 April 2026_
+
+## 1. Electronic Delivery Only
+All Ocean2Joy services are delivered **exclusively in electronic form**. No physical media (DVD, USB, hard drive) is ever shipped.
+
+## 2. How Delivery Works
+1. Once production is complete, our team uploads the final video(s) to cloud storage (Google Drive, Dropbox, Yandex Disk, or similar) and posts the secure URL inside your project portal at **Stage 6 ("Delivered")**.
+2. You receive the URL inside your project — not by email.
+3. When you first open the URL, the portal records the exact access time in UTC via a server-side beacon. This timestamp appears on your **Certificate of Delivery** for transparency and PayPal-compliance purposes.
+4. You review the deliverables, request any revisions in chat (see Revision Policy), and once satisfied, download, sign, and upload the **Certificate of Delivery** (Stage 8).
+
+## 3. File Formats
+Standard output formats: **MP4 (H.264)**, **MOV (ProRes, on request)**, **WebM**. Custom formats and resolutions are available — please specify in the brief or in chat.
+
+Typical maximum resolution: **4K / UHD** for live-action productions, **1080p/4K** for AI-generated content.
+
+## 4. File Retention
+- Cloud URLs remain accessible for **at least 90 days** after delivery.
+- After 90 days, we do not guarantee that the cloud link remains available. You are responsible for downloading and archiving your deliverables locally before that window closes.
+- Extended cloud retention is available on request and may be subject to a storage fee.
+
+## 5. Revisions as Updated Deliverables
+If revisions are requested before the Certificate of Delivery is signed, we post **new** cloud URLs as additional items under the same project. Earlier versions remain visible in the deliverables history, but the latest is treated as the canonical delivery.
+
+## 6. Acceptance & Certificate of Delivery
+The Certificate of Delivery is the document that closes out the "delivery" step of our 12-stage chain. It:
+- Lists every cloud URL provided,
+- Includes the exact UTC time each URL was first accessed by the client,
+- Is signed by the client (hand-signed scan or digital signature).
+
+We **do not** proceed to the Acceptance Act (Stage 9) until a signed Certificate of Delivery is uploaded.
+
+## 7. No Email Attachments
+We do **not** attach deliverables to emails. All deliverables live in your project portal. This is a deliberate security and audit-trail measure.
+
+## 8. Failure to Deliver
+If a deliverable URL is unavailable or corrupted, please report it in the project chat immediately. Time spent replacing a broken URL is not counted against the delivery deadline.
+
+## 9. Contact
+**ocean2joy@gmail.com** — for any delivery-related question or escalation.
+""",
     },
     "refund": {
         "title": "Refund & Cancellation Policy",
-        "updated_at": "2025-02-17T00:00:00Z",
-        "content": """# Refund & Cancellation Policy\n\n## Before Production\nFull refund available if cancelled before production begins.\n\n## During Production\nPartial refund based on work completed.\n\n## After Delivery\nNo refunds after final delivery and client acceptance.""",
+        "updated_at": "2026-04-21T00:00:00Z",
+        "content": """_Last updated: 21 April 2026_
+
+## 1. Overview
+Because our payment model is **pay-after-acceptance** (actual funds are transferred at Stage 10, after the client has inspected and accepted the work at Stage 9), most cancellations do not involve a refund at all — they are simply the termination of an unpaid order.
+
+This policy describes what happens when a project is cancelled at each stage.
+
+## 2. Cancellation Before Payment (Stages 1 – 9)
+You may cancel your order at any time **before** you transfer funds (Stage 10) by sending a cancellation request in the project chat. The amount due depends on the stage:
+
+| Stage at cancellation | Amount due |
+|---|---|
+| 1 — Project submitted | **0 — no charge** |
+| 2 — Quote activated | **0 — no charge** |
+| 3 — Invoice issued (not yet signed) | **0 — no charge** |
+| 4 — Invoice signed, production not yet started | **0 — no charge** (you may withdraw your commitment at this point without penalty) |
+| 5 — Production started | **Partial fee** reflecting work actually completed, at our reasonable estimation. We will issue a pro-rata invoice with justification. |
+| 6 — Delivered | **Full fee**, because the final product already exists. You may still refuse the delivery (see §3). |
+| 7 — Files accessed | **Full fee** — see §3. |
+| 8 — Certificate of Delivery signed | **Full fee**, cancellation no longer possible — your signature on the Certificate of Delivery is your confirmation that the deliverables were received. |
+| 9 — Acceptance Act signed | **Full fee**, you have already accepted the work. |
+
+## 3. Rejecting a Delivery at Stage 6 / 7
+If the delivered content materially deviates from the agreed brief (e.g. wrong format, missing scenes, fundamentally different creative direction), you may refuse to sign the Certificate of Delivery. In that case:
+- We work with you in chat and deliverables history to fix the issue, at no extra cost, within the revision scope of your package.
+- If we cannot agree on a path to acceptance, the project is terminated. A refund is due only if payment has already been made (rare under our pay-after-acceptance model).
+
+## 4. Refunds After Payment (Post-Stage 10)
+Once funds have been transferred and payment is confirmed by our team (Stage 11), a refund is possible only in the following limited cases:
+- **Overpayment** or **duplicate transfer** — refunded to the original PayPal or bank account within 10 business days.
+- **Proven material breach** by us of the signed Acceptance Act (e.g. our final deliverable differs from the Acceptance Act description) — refunded in whole or in part at our discretion.
+
+No refund is due after Stage 12 (Project completed and Certificate of Completion issued), save for statutory rights the client has under their local consumer-protection law.
+
+## 5. How to Request a Refund or Cancellation
+Post the request in the project chat, including:
+1. A clear statement that this is a cancellation or refund request.
+2. The reason.
+3. If a refund is owed, the destination account (PayPal email or SWIFT/IBAN).
+
+We respond within **5 business days**. Refunds are processed within **10 business days** of approval.
+
+## 6. Non-Refundable Items
+- Rush / expedited delivery fees are **non-refundable** once production has started.
+- Work performed on client-supplied assets that are later found to be infringing or illegal is **non-refundable**.
+
+## 7. Disputes
+If you disagree with a refund decision, you may escalate by email to **ocean2joy@gmail.com**. For consumers in the EU, you retain your statutory rights under applicable consumer-protection law.
+""",
     },
     "revision": {
         "title": "Revision Policy",
-        "updated_at": "2025-02-17T00:00:00Z",
-        "content": """# Revision Policy\n\n## Included Revisions\nEach service package includes 2-3 revision rounds as specified.\n\n## Revision Process\n1. Review deliverables in your portal\n2. Submit feedback with specific changes\n3. Receive updated version within 3-5 business days\n\n## Additional Revisions\nExtra revision rounds available at additional cost.""",
+        "updated_at": "2026-04-21T00:00:00Z",
+        "content": """_Last updated: 21 April 2026_
+
+## 1. Where Revisions Happen
+Revisions are an integral part of our 12-stage operational chain. They take place **inside the project chat and the deliverables list**, between:
+
+- **Stage 5 (Production started)** — the client can refine the brief and react to work-in-progress previews the team shares, and
+- **Stage 8 (Certificate of Delivery signed)** — once the Certificate is signed, the project is locked for revisions.
+
+There is **no separate "revision stage"** in the operational chain — revisions are embedded in the normal production-to-delivery flow.
+
+## 2. Included Revision Rounds
+Each service package has a number of **included revision rounds**. See the service page for your package:
+- **Custom Video Production:** 2–3 rounds.
+- **Video Editing:** 2 rounds.
+- **AI-Generated Video:** 3 rounds.
+
+A **round** is one consolidated request from the client bundling all feedback on the current version, to which we respond with a new deliverable URL.
+
+## 3. How a Revision Works
+1. You review the current deliverable by opening the cloud URL posted under the project.
+2. You post your revision request in the project chat, clearly describing all changes in one message (to count as a single round).
+3. Our team implements the changes and posts a **new cloud URL** under the same project. Previous versions remain visible in the deliverables history for audit purposes.
+4. The access-time beacon re-runs for the new URL, and the Certificate of Delivery (when finally signed) lists every URL that was provided.
+
+## 4. Turnaround Time per Round
+Typical turnaround: **3 – 5 business days** per round. Complex shoots or full AI re-generations may take longer; an ETA is always provided in chat.
+
+## 5. Out-of-Scope Changes
+The following are **not** considered revisions and require a new quote:
+- Changing the fundamental creative direction, genre, or tone after production has started.
+- Adding new scenes, actors, locations, or AI sequences not in the accepted brief.
+- Changing output format, resolution, or aspect ratio after delivery at Stage 6.
+- Any edit requested after the Certificate of Delivery (Stage 8) has been signed.
+
+## 6. Additional Revision Rounds
+Beyond the included rounds, additional revisions are available at our standard hourly rate, quoted per request. We will always confirm the extra cost in chat before performing the work.
+
+## 7. Closing Revisions
+By signing the Certificate of Delivery at Stage 8, you confirm that the last-delivered URL is the final version. No further revisions are possible after that signature, except at additional cost via a new separate quote.
+
+## 8. Contact
+For anything revision-related, use the project chat. For out-of-portal issues, email **ocean2joy@gmail.com**.
+""",
     },
     "privacy": {
         "title": "Privacy Policy",

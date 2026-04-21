@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { FaEnvelope, FaPhone, FaFacebook, FaTwitter, FaInstagram, FaYoutube } from 'react-icons/fa';
+import { FaEnvelope, FaPhone } from 'react-icons/fa';
 import Logo from './Logo';
 
 function Footer() {
@@ -15,20 +15,6 @@ function Footer() {
             <p className="text-gray-400 text-base mb-6 max-w-xs leading-relaxed mt-6">
               Where video dreams come true. Professional video production services delivered digitally.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
-                <FaFacebook className="text-2xl" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
-                <FaTwitter className="text-2xl" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
-                <FaInstagram className="text-2xl" />
-              </a>
-              <a href="#" className="text-gray-400 hover:text-sky-400 transition">
-                <FaYoutube className="text-2xl" />
-              </a>
-            </div>
           </div>
 
           {/* Services */}
@@ -41,17 +27,17 @@ function Footer() {
                 </Link>
               </li>
               <li>
-                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                <Link to="/services/custom-video" className="text-gray-400 hover:text-sky-400 transition">
                   Custom Video Production
                 </Link>
               </li>
               <li>
-                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                <Link to="/services/video-editing" className="text-gray-400 hover:text-sky-400 transition">
                   Video Editing
                 </Link>
               </li>
               <li>
-                <Link to="/services" className="text-gray-400 hover:text-sky-400 transition">
+                <Link to="/services/ai-video" className="text-gray-400 hover:text-sky-400 transition">
                   AI-Generated Videos
                 </Link>
               </li>
