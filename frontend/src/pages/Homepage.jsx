@@ -338,18 +338,12 @@ export default function Homepage() {
               </ul>
               <div className="flex flex-wrap gap-3">
                 <Link
-                  to="/request"
+                  to="/start"
                   className="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white px-6 py-3 rounded-lg font-bold text-sm shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition inline-flex items-center gap-2"
                   data-testid="cta-start-consultation"
                 >
                   <FaComments />
-                  Start a free consultation
-                </Link>
-                <Link
-                  to="/contact"
-                  className="border-2 border-sky-300 text-sky-700 bg-white hover:bg-sky-50 px-6 py-3 rounded-lg font-bold text-sm transition inline-flex items-center gap-2"
-                >
-                  Send a quick message
+                  Chat with us — get a quick answer
                 </Link>
               </div>
             </div>
