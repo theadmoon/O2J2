@@ -150,19 +150,47 @@ export default function NewProject() {
 
           <div>
             <Label className="text-gray-600 text-xs uppercase tracking-wider">Script / Reference File (optional)</Label>
-            <div className="mt-1.5 border-2 border-dashed border-gray-200 bg-gray-50 rounded-lg p-6 text-center hover:border-sky-300 transition-colors">
+            <div className={`mt-1.5 border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+              script ? 'border-emerald-300 bg-emerald-50' : 'border-gray-200 bg-gray-50 hover:border-sky-300'
+            }`}>
               <input
                 type="file"
-                accept=".pdf,.doc,.docx"
-                onChange={(e) => setScript(e.target.files[0])}
+                accept=".pdf,.doc,.docx,.txt,.rtf,.odt,.pages,.fdx,.fountain,.md"
+                onChange={(e) => {
+                  const f = e.target.files && e.target.files[0];
+                  if (f) setScript(f);
+                  e.target.value = '';
+                }}
                 className="hidden"
                 id="script-upload"
                 data-testid="new-project-script-input"
               />
-              <label htmlFor="script-upload" className="cursor-pointer">
-                <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
-                <p className="text-sm text-gray-500">{script ? script.name : 'Click to upload PDF, DOC, DOCX'}</p>
-              </label>
+              {script ? (
+                <div className="flex flex-col items-center gap-2" data-testid="new-project-script-selected">
+                  <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-base font-bold">✓</div>
+                  <p className="text-sm font-medium text-gray-800 break-all">{script.name}</p>
+                  <p className="text-[11px] text-gray-500">{(script.size / 1024).toFixed(1)} KB</p>
+                  <div className="flex gap-3 mt-1">
+                    <label htmlFor="script-upload" className="text-xs text-sky-600 hover:text-sky-700 cursor-pointer font-medium" data-testid="new-project-script-replace">
+                      Replace file
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setScript(null)}
+                      className="text-xs text-gray-500 hover:text-red-600 font-medium"
+                      data-testid="new-project-script-remove"
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <label htmlFor="script-upload" className="cursor-pointer block">
+                  <Upload className="w-6 h-6 text-gray-400 mx-auto mb-2" />
+                  <p className="text-sm text-gray-600">Click to upload your script or reference document</p>
+                  <p className="text-[11px] text-gray-400 mt-1">PDF, DOC, DOCX, TXT, RTF, ODT, Pages, Final Draft (.fdx), Fountain</p>
+                </label>
+              )}
             </div>
           </div>
 
