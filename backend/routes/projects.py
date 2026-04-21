@@ -104,6 +104,9 @@ async def create_project(
     }
     await db.projects.insert_one(project_doc)
     project_doc.pop("_id", None)
+    import asyncio as _asyncio
+    from services.notification_service import notify_admin_stage_event
+    _asyncio.create_task(notify_admin_stage_event(project_doc, "project_submitted"))
     return project_doc
 
 

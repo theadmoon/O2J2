@@ -5,12 +5,14 @@ Each endpoint validates:
   - User role (admin vs client-owner)
   - Previous stage has been completed (enforced via timestamp presence)
 """
-from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
+from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import FileResponse
 from database.connection import get_db
 from utils.security import get_current_user
 from services.project_service import calculate_current_status, build_timeline
 from services.document_service import get_or_generate_document_number
+from services.notification_service import notify_admin_stage_event
+import asyncio
 from datetime import datetime, timezone
 from pydantic import BaseModel
 from typing import Optional
@@ -267,7 +269,7 @@ async def client_sign_invoice(
             size += len(chunk)
             await out.write(chunk)
 
-    return await _set_timestamp_and_return(
+    updated = await _set_timestamp_and_return(
         db, project_id,
         {
             "invoice_signed_at": datetime.now(timezone.utc).isoformat(),
@@ -276,6 +278,8 @@ async def client_sign_invoice(
             "signed_invoice_size": size,
         },
     )
+    asyncio.create_task(notify_admin_stage_event(updated, "invoice_signed"))
+    return updated
 
 
 @router.get("/{project_id}/signed-invoice")
@@ -348,7 +352,9 @@ async def client_confirm_delivery(
     # Pre-generate doc numbers for stage 9 so client can download & sign them
     await get_or_generate_document_number(db, updated, "acceptance_act")
     await get_or_generate_document_number(db, updated, "payment_instructions")
-    return await _set_timestamp_and_return(db, project_id, {})
+    final = await _set_timestamp_and_return(db, project_id, {})
+    asyncio.create_task(notify_admin_stage_event(final, "delivery_confirmed"))
+    return final
 
 
 @router.get("/{project_id}/signed-delivery-cert")
@@ -418,7 +424,9 @@ async def client_accept_work(
     updated = await _set_timestamp_and_return(db, project_id, updates)
     await get_or_generate_document_number(db, updated, "acceptance_act")
     await get_or_generate_document_number(db, updated, "payment_instructions")
-    return await _set_timestamp_and_return(db, project_id, {})
+    final = await _set_timestamp_and_return(db, project_id, {})
+    asyncio.create_task(notify_admin_stage_event(final, "work_accepted"))
+    return final
 
 
 @router.get("/{project_id}/signed-acceptance-act")
@@ -499,7 +507,9 @@ async def client_mark_payment_sent(
         updates["payment_proof_size"] = size
 
     updated = await _set_timestamp_and_return(db, project_id, updates)
-    return await _set_timestamp_and_return(db, project_id, {})
+    final = await _set_timestamp_and_return(db, project_id, {})
+    asyncio.create_task(notify_admin_stage_event(final, "payment_sent"))
+    return final
 
 
 @router.get("/{project_id}/payment-proof")
