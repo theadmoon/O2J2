@@ -4,7 +4,8 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '../ui/dialog';
-import { Pencil, Upload, FileCheck2, Download, Hash, Image as ImageIcon } from 'lucide-react';
+import { Pencil, Upload, FileCheck2, Download, Hash, Image as ImageIcon, History } from 'lucide-react';
+import { formatDateTime } from '../../utils/formatters';
 
 /**
  * Shown inline inside the Payment Sent (stage 10) timeline row.
@@ -21,6 +22,20 @@ export default function PaymentProofPanel({ project, user, onUpdated }) {
   const [file, setFile] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [showHistory, setShowHistory] = useState(false);
+  const history = project.payment_proof_history || [];
+
+  const downloadHistorical = async (v, fname) => {
+    try {
+      const res = await api.get(`/projects/${project.id}/payment-proof/history/${v}`, { responseType: 'blob' });
+      const url = URL.createObjectURL(res.data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `v${v}_${fname || 'payment-proof'}`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch {}
+  };
 
   const open = (kind) => {
     setError('');
@@ -118,6 +133,17 @@ export default function PaymentProofPanel({ project, user, onUpdated }) {
                 <Pencil className="w-3 h-3" />
               </button>
             )}
+            {history.length > 0 && (
+              <button
+                type="button"
+                onClick={() => setShowHistory((s) => !s)}
+                className="ml-1 text-gray-500 hover:text-gray-700 flex items-center gap-0.5"
+                data-testid="payment-proof-history-toggle"
+                title="Previous versions"
+              >
+                <History className="w-3 h-3" /> {history.length} prev
+              </button>
+            )}
           </>
         ) : (
           <>
@@ -135,6 +161,27 @@ export default function PaymentProofPanel({ project, user, onUpdated }) {
           </>
         )}
       </div>
+
+      {/* History (compact) */}
+      {showHistory && history.length > 0 && (
+        <div className="ml-2 pl-3 border-l-2 border-emerald-200 space-y-1 text-[11px] text-gray-600" data-testid="payment-proof-history">
+          {history.map((h) => (
+            <div key={h.version} className="flex items-center gap-2">
+              <span className="font-mono text-gray-400">v{h.version}</span>
+              <span className="flex-1 truncate">{h.filename}</span>
+              <span className="text-gray-400">{h.uploaded_at ? formatDateTime(h.uploaded_at) : '—'}</span>
+              <button
+                type="button"
+                onClick={() => downloadHistorical(h.version, h.filename)}
+                className="text-sky-600 hover:text-sky-700 font-semibold underline underline-offset-2"
+                data-testid={`payment-proof-history-download-v${h.version}`}
+              >
+                Download
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Dialog */}
       <Dialog open={!!dialog} onOpenChange={(v) => { if (!v) setDialog(null); }}>

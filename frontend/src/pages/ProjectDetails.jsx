@@ -9,6 +9,7 @@ import ChainTimeline from '../components/OperationalChain/ChainTimeline';
 import StageActions from '../components/OperationalChain/StageActions';
 import Deliverables from '../components/OperationalChain/Deliverables';
 import ReferenceFiles from '../components/OperationalChain/ReferenceFiles';
+import SignedArtifactCard from '../components/OperationalChain/SignedArtifactCard';
 import ChatContainer from '../components/Chat/ChatContainer';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../components/ui/dialog';
 import {
@@ -127,6 +128,7 @@ export default function ProjectDetails() {
   }
 
   const isAdmin = user?.role === 'admin';
+  const isOwner = user?.id === project?.user_id;
   const quoteVisible = project.quote_amount > 0;
 
   return (
@@ -323,17 +325,57 @@ export default function ProjectDetails() {
                 </div>
               )}
               {project.signed_invoice_file && (
-                <div className="sm:col-span-3 flex items-center gap-2 text-xs text-emerald-700 bg-emerald-50 border border-emerald-200 rounded px-3 py-2" data-testid="signed-invoice-row">
-                  <FileCheck2 className="w-4 h-4 text-emerald-600" />
-                  <span className="flex-1">Signed invoice uploaded: <span className="font-medium">{project.signed_invoice_filename}</span></span>
-                  <button
-                    type="button"
-                    onClick={handleSignedInvoiceDownload}
-                    className="text-sky-600 hover:text-sky-700 font-semibold underline underline-offset-2"
-                    data-testid="download-signed-invoice"
-                  >
-                    Download
-                  </button>
+                <div className="sm:col-span-3" data-testid="signed-invoice-row">
+                  <SignedArtifactCard
+                    project={project}
+                    user={user}
+                    kind="signed-invoice"
+                    label="Signed Invoice"
+                    currentFileField="signed_invoice_file"
+                    filenameField="signed_invoice_filename"
+                    historyField="signed_invoice_history"
+                    versionField="signed_invoice_version"
+                    timestampField="invoice_signed_at"
+                    uploadEndpoint={`/projects/${project.id}/client/sign-invoice`}
+                    canReupload={!isAdmin && isOwner && !project.payment_confirmed_by_manager_at}
+                    onUpdated={(p) => setProject(p)}
+                  />
+                </div>
+              )}
+              {project.signed_delivery_cert_file && (
+                <div className="sm:col-span-3" data-testid="signed-delivery-cert-row">
+                  <SignedArtifactCard
+                    project={project}
+                    user={user}
+                    kind="signed-delivery-cert"
+                    label="Signed Certificate of Delivery"
+                    currentFileField="signed_delivery_cert_file"
+                    filenameField="signed_delivery_cert_filename"
+                    historyField="signed_delivery_cert_history"
+                    versionField="signed_delivery_cert_version"
+                    timestampField="delivery_confirmed_at"
+                    uploadEndpoint={`/projects/${project.id}/client/confirm-delivery`}
+                    canReupload={!isAdmin && isOwner && !project.payment_confirmed_by_manager_at}
+                    onUpdated={(p) => setProject(p)}
+                  />
+                </div>
+              )}
+              {project.signed_acceptance_act_file && (
+                <div className="sm:col-span-3" data-testid="signed-acceptance-act-row">
+                  <SignedArtifactCard
+                    project={project}
+                    user={user}
+                    kind="signed-acceptance-act"
+                    label="Signed Acceptance Act"
+                    currentFileField="signed_acceptance_act_file"
+                    filenameField="signed_acceptance_act_filename"
+                    historyField="signed_acceptance_act_history"
+                    versionField="signed_acceptance_act_version"
+                    timestampField="work_accepted_at"
+                    uploadEndpoint={`/projects/${project.id}/client/accept-work`}
+                    canReupload={!isAdmin && isOwner && !project.payment_confirmed_by_manager_at}
+                    onUpdated={(p) => setProject(p)}
+                  />
                 </div>
               )}
             </div>

@@ -80,6 +80,51 @@ async def _set_timestamp_and_return(
     return updated
 
 
+async def _archive_current_and_bump_version(
+    project: dict, kind: str, history_field: str,
+    file_field: str, filename_field: str, size_field: str,
+    uploaded_at_field: str,
+):
+    """If a signed artifact already exists for this upload kind, move it into the
+    versioned history array so the new upload can replace the 'current' pointers
+    without losing history. Returns (next_version:int, history_snapshot:list).
+    """
+    current_rel = project.get(file_field)
+    history = list(project.get(history_field) or [])
+    if current_rel:
+        abs_current = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            current_rel,
+        )
+        # Rename on disk to a versioned copy so future uploads of the same
+        # stored_name (e.g. signed_invoice.pdf) don't overwrite it.
+        version_idx = len(history) + 1
+        if os.path.exists(abs_current):
+            base, ext = os.path.splitext(abs_current)
+            archived_abs = f"{base}.v{version_idx}{ext}"
+            try:
+                os.rename(abs_current, archived_abs)
+                archived_rel = os.path.relpath(
+                    archived_abs,
+                    start=os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                )
+            except OSError:
+                archived_rel = current_rel  # fallback: keep original path
+        else:
+            archived_rel = current_rel
+
+        history.append({
+            "version": version_idx,
+            "filename": project.get(filename_field),
+            "file": archived_rel,
+            "size": project.get(size_field),
+            "uploaded_at": project.get(uploaded_at_field),
+            "kind": kind,
+        })
+    next_version = len(history) + 1
+    return next_version, history
+
+
 # =================================================================
 # ADMIN ACTIONS
 # =================================================================
@@ -234,10 +279,13 @@ async def client_sign_invoice(
     request: Request,
     file: UploadFile = File(...),
 ):
-    """Stage 3 → 4. Client uploads the signed invoice scan and accepts terms."""
+    """Stage 3 → 4. Client uploads the signed invoice scan and accepts terms.
+
+    On re-upload, the previous signed invoice is archived into
+    `signed_invoice_history` (versioned) so full audit trail is preserved.
+    """
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "invoice_sent_at", "invoice_sent")
-    _require_not_set(project, "invoice_signed_at", "sign-invoice")
 
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Signed invoice file is required")
@@ -256,6 +304,13 @@ async def client_sign_invoice(
     os.makedirs(signed_root, exist_ok=True)
     project_dir = os.path.join(signed_root, project_id)
     os.makedirs(project_dir, exist_ok=True)
+
+    next_version, history = await _archive_current_and_bump_version(
+        project, "signed_invoice",
+        "signed_invoice_history",
+        "signed_invoice_file", "signed_invoice_filename",
+        "signed_invoice_size", "invoice_signed_at",
+    )
 
     stored_name = f"signed_invoice{ext}"
     file_path = os.path.join(project_dir, stored_name)
@@ -276,6 +331,8 @@ async def client_sign_invoice(
             "signed_invoice_file": os.path.join("uploads", "signed_invoices", project_id, stored_name),
             "signed_invoice_filename": file.filename,
             "signed_invoice_size": size,
+            "signed_invoice_version": next_version,
+            "signed_invoice_history": history,
         },
     )
     asyncio.create_task(notify_admin_stage_event(updated, "invoice_signed"))
@@ -309,7 +366,6 @@ async def client_confirm_delivery(
     physical receipt of the materials."""
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "files_accessed_at", "files_accessed")
-    _require_not_set(project, "delivery_confirmed_at", "confirm-delivery")
 
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Signed Certificate of Delivery is required")
@@ -327,6 +383,13 @@ async def client_confirm_delivery(
     os.makedirs(signed_root, exist_ok=True)
     project_dir = os.path.join(signed_root, project_id)
     os.makedirs(project_dir, exist_ok=True)
+
+    next_version, history = await _archive_current_and_bump_version(
+        project, "signed_delivery_cert",
+        "signed_delivery_cert_history",
+        "signed_delivery_cert_file", "signed_delivery_cert_filename",
+        "signed_delivery_cert_size", "delivery_confirmed_at",
+    )
 
     stored_name = f"signed_delivery_cert{ext}"
     file_path = os.path.join(project_dir, stored_name)
@@ -347,6 +410,8 @@ async def client_confirm_delivery(
             "signed_delivery_cert_file": os.path.join("uploads", "signed_delivery_certs", project_id, stored_name),
             "signed_delivery_cert_filename": file.filename,
             "signed_delivery_cert_size": size,
+            "signed_delivery_cert_version": next_version,
+            "signed_delivery_cert_history": history,
         },
     )
     # Pre-generate doc numbers for stage 9 so client can download & sign them
@@ -383,7 +448,6 @@ async def client_accept_work(
     """Stage 8 → 9. Client uploads the signed Acceptance Act to confirm work acceptance."""
     db, user, project = await _get_project_for_client(project_id, request)
     _require_stage(project, "delivery_confirmed_at", "delivery_confirmed")
-    _require_not_set(project, "work_accepted_at", "accept-work")
 
     if not file or not file.filename:
         raise HTTPException(status_code=400, detail="Signed Acceptance Act is required")
@@ -401,6 +465,13 @@ async def client_accept_work(
     os.makedirs(signed_root, exist_ok=True)
     project_dir = os.path.join(signed_root, project_id)
     os.makedirs(project_dir, exist_ok=True)
+
+    next_version, history = await _archive_current_and_bump_version(
+        project, "signed_acceptance_act",
+        "signed_acceptance_act_history",
+        "signed_acceptance_act_file", "signed_acceptance_act_filename",
+        "signed_acceptance_act_size", "work_accepted_at",
+    )
 
     stored_name = f"signed_acceptance_act{ext}"
     file_path = os.path.join(project_dir, stored_name)
@@ -420,6 +491,8 @@ async def client_accept_work(
         "signed_acceptance_act_file": os.path.join("uploads", "signed_acceptance_acts", project_id, stored_name),
         "signed_acceptance_act_filename": file.filename,
         "signed_acceptance_act_size": size,
+        "signed_acceptance_act_version": next_version,
+        "signed_acceptance_act_history": history,
     }
     updated = await _set_timestamp_and_return(db, project_id, updates)
     await get_or_generate_document_number(db, updated, "acceptance_act")
@@ -444,6 +517,43 @@ async def download_signed_acceptance_act(project_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Signed acceptance act file not found on disk")
     download_name = project.get("signed_acceptance_act_filename") or os.path.basename(abs_path)
     return FileResponse(abs_path, filename=download_name)
+
+
+# ---------- Historical versions of signed artifacts ----------
+
+_HISTORY_MAP = {
+    "signed-invoice": "signed_invoice_history",
+    "signed-delivery-cert": "signed_delivery_cert_history",
+    "signed-acceptance-act": "signed_acceptance_act_history",
+    "payment-proof": "payment_proof_history",
+}
+
+
+@router.get("/{project_id}/{kind}/history/{version}")
+async def download_historical_signed_artifact(
+    project_id: str, kind: str, version: int, request: Request,
+):
+    """Download a specific historical version of a signed artifact or payment proof."""
+    if kind not in _HISTORY_MAP:
+        raise HTTPException(status_code=404, detail="Unknown artifact kind")
+    db, _, project = await _get_project_for_client(project_id, request)
+    history = project.get(_HISTORY_MAP[kind]) or []
+    entry = next((h for h in history if h.get("version") == version), None)
+    if not entry:
+        raise HTTPException(status_code=404, detail=f"Version {version} not found for {kind}")
+    rel = entry.get("file")
+    if not rel:
+        raise HTTPException(status_code=404, detail="Archive entry has no file path")
+    abs_path = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        rel,
+    )
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Archived file no longer on disk")
+    download_name = entry.get("filename") or os.path.basename(abs_path)
+    return FileResponse(abs_path, filename=f"v{version}_{download_name}")
+
+
 
 
 @router.post("/{project_id}/client/mark-payment-sent")
@@ -490,6 +600,13 @@ async def client_mark_payment_sent(
         project_dir = os.path.join(screenshot_root, project_id)
         os.makedirs(project_dir, exist_ok=True)
 
+        next_version, history = await _archive_current_and_bump_version(
+            project, "payment_proof",
+            "payment_proof_history",
+            "payment_proof_file", "payment_proof_filename",
+            "payment_proof_size", "payment_marked_by_client_at",
+        )
+
         stored_name = f"payment_proof{ext}"
         file_path = os.path.join(project_dir, stored_name)
 
@@ -505,8 +622,10 @@ async def client_mark_payment_sent(
         updates["payment_proof_file"] = os.path.join("uploads", "payment_proof", project_id, stored_name)
         updates["payment_proof_filename"] = file.filename
         updates["payment_proof_size"] = size
+        updates["payment_proof_version"] = next_version
+        updates["payment_proof_history"] = history
 
-    updated = await _set_timestamp_and_return(db, project_id, updates)
+    await _set_timestamp_and_return(db, project_id, updates)
     final = await _set_timestamp_and_return(db, project_id, {})
     asyncio.create_task(notify_admin_stage_event(final, "payment_sent"))
     return final
@@ -566,6 +685,13 @@ async def update_payment_proof(
         project_dir = os.path.join(screenshot_root, project_id)
         os.makedirs(project_dir, exist_ok=True)
 
+        next_version, history = await _archive_current_and_bump_version(
+            project, "payment_proof",
+            "payment_proof_history",
+            "payment_proof_file", "payment_proof_filename",
+            "payment_proof_size", "payment_marked_by_client_at",
+        )
+
         stored_name = f"payment_proof{ext}"
         file_path = os.path.join(project_dir, stored_name)
 
@@ -581,6 +707,8 @@ async def update_payment_proof(
         updates["payment_proof_file"] = os.path.join("uploads", "payment_proof", project_id, stored_name)
         updates["payment_proof_filename"] = file.filename
         updates["payment_proof_size"] = size
+        updates["payment_proof_version"] = next_version
+        updates["payment_proof_history"] = history
 
     if not updates:
         raise HTTPException(status_code=400, detail="Provide either transaction ID or a screenshot")
