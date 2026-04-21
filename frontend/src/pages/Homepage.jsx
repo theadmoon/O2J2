@@ -235,9 +235,16 @@ export default function Homepage() {
                     <p className="text-gray-600">{video.description}</p>
                     {video.tags && video.tags.length > 0 && (
                       <div className="mt-3 flex items-center gap-2 flex-wrap">
-                        {video.tags.map((tag, idx) => (
-                          <span key={idx} className="bg-sky-100 text-sky-800 text-xs px-2 py-1 rounded">{tag}</span>
-                        ))}
+                        {video.tags.map((tag, idx) => {
+                          const palette = [
+                            'bg-sky-100 text-sky-800',
+                            'bg-teal-100 text-teal-800',
+                            'bg-purple-100 text-purple-800',
+                          ];
+                          return (
+                            <span key={idx} className={`${palette[idx % palette.length]} text-xs px-2 py-1 rounded`}>{tag}</span>
+                          );
+                        })}
                       </div>
                     )}
                   </div>

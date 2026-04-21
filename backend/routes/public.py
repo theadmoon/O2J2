@@ -77,21 +77,21 @@ async def get_service_details(service_id: str):
 DEMO_VIDEOS = [
     {
         "id": "demo-1",
-        "title": "Custom Video Production",
-        "description": "A production-grade showcase demonstrating the end-to-end quality our team delivers for custom-video briefs.",
+        "title": "Cinematic Live-Action × VFX",
+        "description": "A live-action shoot with professional performers fused with cinema-grade visual effects. This is the standard we hold every frame to — the feel of a streaming-series production, delivered at digital-studio speed. Scripting, directing, on-set crew, post, VFX and color are all handled end-to-end by our team.",
         "video_url": "https://customer-assets.emergentagent.com/job_o2j-creative-hub/artifacts/n92uamk0_Demo1_720p_O2J2.mp4#t=38",
         "video_type": "url",
         "thumbnail_url": "/posters/demo1.jpg",
-        "tags": ["Professional", "HD 720p", "Custom"],
+        "tags": ["Live Actors", "Cinematic VFX", "End-to-End Production"],
     },
     {
         "id": "demo-2",
-        "title": "AI-Assisted Creation",
-        "description": "A short example highlighting the AI-enhanced workflow and the creative range we unlock for our clients.",
+        "title": "AI-Generated Video",
+        "description": "Worlds, characters and motion that would be impossible — or prohibitively expensive — to shoot on a real set. Our AI creative pipeline turns a brief into a fully animated sequence with style, pacing and mood controlled by a human director. Unlimited imagination, cinema-level discipline.",
         "video_url": "https://customer-assets.emergentagent.com/job_o2j-creative-hub/artifacts/4l4efdg2_Demo2_720p_O2J2.mp4#t=16",
         "video_type": "url",
         "thumbnail_url": "/posters/demo2.jpg",
-        "tags": ["AI", "HD 720p", "Innovative"],
+        "tags": ["AI-Generated", "Unlimited Imagination", "Director-Guided"],
     },
 ]
 
