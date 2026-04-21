@@ -74,9 +74,31 @@ async def get_service_details(service_id: str):
     raise HTTPException(status_code=404, detail="Service not found")
 
 
+DEMO_VIDEOS = [
+    {
+        "id": "demo-1",
+        "title": "Custom Video Production",
+        "description": "A production-grade showcase demonstrating the end-to-end quality our team delivers for custom-video briefs.",
+        "video_url": "https://customer-assets.emergentagent.com/job_o2j-creative-hub/artifacts/n92uamk0_Demo1_720p_O2J2.mp4",
+        "video_type": "url",
+        "thumbnail_url": None,
+        "tags": ["Professional", "HD 720p", "Custom"],
+    },
+    {
+        "id": "demo-2",
+        "title": "AI-Assisted Creation",
+        "description": "A short example highlighting the AI-enhanced workflow and the creative range we unlock for our clients.",
+        "video_url": "https://customer-assets.emergentagent.com/job_o2j-creative-hub/artifacts/4l4efdg2_Demo2_720p_O2J2.mp4",
+        "video_type": "url",
+        "thumbnail_url": None,
+        "tags": ["AI", "HD 720p", "Innovative"],
+    },
+]
+
+
 @router.get("/demo-videos")
 async def get_demo_videos():
-    return []
+    return DEMO_VIDEOS
 
 
 @router.get("/payment-settings")
