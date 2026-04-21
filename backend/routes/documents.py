@@ -793,7 +793,7 @@ def _build_certificate_completion_html(
     }.get(p.get("payment_method") or "paypal", "PayPal")
     payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
     payment_confirmed_dt = _fmt_datetime_utc(p.get("payment_confirmed_by_manager_at")) or "(pending)"
-    completed_dt = _fmt_datetime_utc(p.get("project_closed_at")) or "(pending)"
+    completed_dt = _fmt_datetime_utc(p.get("completed_at")) or "(pending)"
 
     # Deliverables list
     dels = p.get("deliverables") or []
@@ -954,7 +954,7 @@ def _build_certificate_completion_txt(p: dict, doc_number: str) -> str:
     }.get(p.get("payment_method") or "paypal", "PayPal")
     payment_time = _fmt_datetime_utc(p.get("paypal_transaction_time_utc")) or "(not provided)"
     payment_confirmed_dt = _fmt_datetime_utc(p.get("payment_confirmed_by_manager_at")) or "(pending)"
-    completed_dt = _fmt_datetime_utc(p.get("project_closed_at")) or "(pending)"
+    completed_dt = _fmt_datetime_utc(p.get("completed_at")) or "(pending)"
     sep = "═" * 60
 
     lines = [
