@@ -16,7 +16,6 @@ import pytest
 import requests
 import os
 import uuid
-import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
@@ -197,7 +196,7 @@ class TestClientIsolation:
         if other_project:
             resp = client_session.get(f"{BASE_URL}/api/projects/{other_project['id']}")
             assert resp.status_code == 403, f"Expected 403, got {resp.status_code}"
-            print(f"✓ Client blocked from accessing other user's project (403)")
+            print("✓ Client blocked from accessing other user's project (403)")
         else:
             print("⚠ No other user's project found to test isolation")
 
@@ -422,7 +421,7 @@ class TestDocumentGeneration:
                 assert len(txt_resp.text) > 0, f"{doc_type} TXT is empty"
                 # Check for (pending) in certificate_completion
                 if doc_type == 'certificate_completion':
-                    assert '(pending)' not in txt_resp.text, f"certificate_completion has (pending) where value should exist"
+                    assert '(pending)' not in txt_resp.text, "certificate_completion has (pending) where value should exist"
                 print(f"✓ {doc_type} TXT: {len(txt_resp.text)} chars")
             else:
                 print(f"⚠ {doc_type} TXT: {txt_resp.status_code}")

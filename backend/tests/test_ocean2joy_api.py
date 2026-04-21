@@ -131,7 +131,7 @@ class TestAuthEndpoints:
         """GET /api/auth/me returns 401 when not authenticated"""
         response = requests.get(f"{BASE_URL}/api/auth/me")
         assert response.status_code == 401
-        print(f"✓ /auth/me unauthenticated returns 401")
+        print("✓ /auth/me unauthenticated returns 401")
     
     def test_logout(self):
         """POST /api/auth/logout clears cookies"""
@@ -228,7 +228,7 @@ class TestProjectEndpoints:
         fake_id = str(uuid.uuid4())
         response = client_session.get(f"{BASE_URL}/api/projects/{fake_id}")
         assert response.status_code == 404
-        print(f"✓ Non-existent project returns 404")
+        print("✓ Non-existent project returns 404")
     
     def test_advance_stage_admin_only(self, admin_session, client_session):
         """PUT /api/projects/{id}/advance advances project stage (admin only)"""
@@ -246,7 +246,7 @@ class TestProjectEndpoints:
         # Try to advance as client (should fail)
         client_advance = client_session.put(f"{BASE_URL}/api/projects/{project_id}/advance")
         assert client_advance.status_code == 403
-        print(f"✓ Client cannot advance stage (403)")
+        print("✓ Client cannot advance stage (403)")
         
         # Advance as admin (should succeed)
         admin_advance = admin_session.put(f"{BASE_URL}/api/projects/{project_id}/advance")
@@ -414,7 +414,7 @@ class TestDocumentEndpoints:
             f"{BASE_URL}/api/projects/{project_id}/documents/invalid_doc_type/txt"
         )
         assert response.status_code == 400
-        print(f"✓ Invalid document type returns 400")
+        print("✓ Invalid document type returns 400")
 
 
 if __name__ == "__main__":

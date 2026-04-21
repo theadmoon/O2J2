@@ -5,7 +5,7 @@ Each endpoint validates:
   - User role (admin vs client-owner)
   - Previous stage has been completed (enforced via timestamp presence)
 """
-from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, Request, HTTPException, UploadFile, File, Form
 from fastapi.responses import FileResponse
 from database.connection import get_db
 from utils.security import get_current_user

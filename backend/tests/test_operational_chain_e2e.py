@@ -6,7 +6,6 @@ import pytest
 import requests
 import os
 import uuid
-import time
 
 BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
 
@@ -129,12 +128,12 @@ class TestRoleValidation:
             json={"quote_amount": 100, "quote_details": "test"}
         )
         assert resp.status_code == 403, f"Expected 403, got {resp.status_code}: {resp.text}"
-        print(f"✓ Client blocked from admin/activate-order (403)")
+        print("✓ Client blocked from admin/activate-order (403)")
         
         # Try admin send-invoice
         resp = client_session.post(f"{BASE_URL}/api/projects/{project_id}/admin/send-invoice")
         assert resp.status_code == 403
-        print(f"✓ Client blocked from admin/send-invoice (403)")
+        print("✓ Client blocked from admin/send-invoice (403)")
         
         # Try admin start-production
         resp = client_session.post(
@@ -142,7 +141,7 @@ class TestRoleValidation:
             json={"production_notes": "test"}
         )
         assert resp.status_code == 403
-        print(f"✓ Client blocked from admin/start-production (403)")
+        print("✓ Client blocked from admin/start-production (403)")
     
     def test_admin_cannot_access_client_endpoints_for_non_owned_project(self, admin_session, client_session):
         """Admin should get 403 on client-only endpoints for projects they don't own"""
@@ -168,7 +167,7 @@ class TestRoleValidation:
         # But the action should be for the project owner
         # Note: Based on code review, _get_project_for_client allows admin access
         # This is by design - admin can perform client actions on behalf of client
-        print(f"✓ Admin access to client endpoints follows design (admin can view all)")
+        print("✓ Admin access to client endpoints follows design (admin can view all)")
 
 
 class TestStageGating:
@@ -194,7 +193,7 @@ class TestStageGating:
         resp = admin_session.post(f"{BASE_URL}/api/projects/{project_id}/admin/send-invoice")
         assert resp.status_code == 400
         assert "order_activated" in resp.json()["detail"].lower()
-        print(f"✓ Cannot send invoice before order activated (400)")
+        print("✓ Cannot send invoice before order activated (400)")
     
     def test_cannot_sign_invoice_before_invoice_sent(self, client_session, admin_session, test_project):
         """Client cannot sign invoice before admin sends it"""
@@ -208,7 +207,7 @@ class TestStageGating:
         )
         assert resp.status_code == 400
         assert "invoice_sent" in resp.json()["detail"].lower()
-        print(f"✓ Cannot sign invoice before invoice sent (400)")
+        print("✓ Cannot sign invoice before invoice sent (400)")
     
     def test_cannot_start_production_before_invoice_signed(self, admin_session, test_project):
         """Cannot start production before client signs invoice"""
@@ -228,7 +227,7 @@ class TestStageGating:
         )
         assert resp.status_code == 400
         assert "invoice_signed" in resp.json()["detail"].lower()
-        print(f"✓ Cannot start production before invoice signed (400)")
+        print("✓ Cannot start production before invoice signed (400)")
     
     def test_cannot_mark_delivered_without_deliverables(self, admin_session, client_session):
         """Cannot mark delivered without uploading at least one deliverable"""
@@ -263,7 +262,7 @@ class TestStageGating:
         resp = admin_session.post(f"{BASE_URL}/api/projects/{project_id}/admin/mark-delivered")
         assert resp.status_code == 400
         assert "deliverable" in resp.json()["detail"].lower()
-        print(f"✓ Cannot mark delivered without deliverables (400)")
+        print("✓ Cannot mark delivered without deliverables (400)")
 
 
 class TestFullOperationalChain:
@@ -321,7 +320,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "invoice_sent"
         assert project["invoice_sent_at"] is not None
-        print(f"✓ Stage 3 (invoice_sent)")
+        print("✓ Stage 3 (invoice_sent)")
         
         # Verify INV document number generated
         docs_resp = admin_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -341,7 +340,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "invoice_signed"
         assert project["invoice_signed_at"] is not None
-        print(f"✓ Stage 4 (invoice_signed)")
+        print("✓ Stage 4 (invoice_signed)")
         
         # Stage 5: Admin starts production
         print("\n=== Stage 5: Production Started ===")
@@ -353,7 +352,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "production_started"
         assert project["production_started_at"] is not None
-        print(f"✓ Stage 5 (production_started)")
+        print("✓ Stage 5 (production_started)")
         
         # Verify PRD document generated
         docs_resp = admin_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -385,14 +384,14 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "delivered"
         assert project["delivered_at"] is not None
-        print(f"✓ Stage 6 (delivered)")
+        print("✓ Stage 6 (delivered)")
         
         # Verify DEL document is available (document_number generated on first access)
         docs_resp = admin_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
         docs = docs_resp.json()
         del_doc = next((d for d in docs if d["type"] == "certificate_delivery"), None)
         assert del_doc is not None, "certificate_delivery document should be available"
-        print(f"✓ DEL document available (number generated on first access)")
+        print("✓ DEL document available (number generated on first access)")
         
         # Stage 7: Client accesses deliverable (beacon - auto-sets files_accessed_at)
         print("\n=== Stage 7: Files Accessed ===")
@@ -404,7 +403,7 @@ class TestFullOperationalChain:
         project = project_resp.json()
         assert project["status"] == "files_accessed"
         assert project["files_accessed_at"] is not None
-        print(f"✓ Stage 7 (files_accessed) - auto-set on first access")
+        print("✓ Stage 7 (files_accessed) - auto-set on first access")
         
         # Verify DWN document generated
         docs_resp = client_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -424,7 +423,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "delivery_confirmed"
         assert project["delivery_confirmed_at"] is not None
-        print(f"✓ Stage 8 (delivery_confirmed)")
+        print("✓ Stage 8 (delivery_confirmed)")
         
         # Stage 9: Client accepts work (uploads signed acceptance act)
         print("\n=== Stage 9: Work Accepted ===")
@@ -437,7 +436,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "work_accepted"
         assert project["work_accepted_at"] is not None
-        print(f"✓ Stage 9 (work_accepted)")
+        print("✓ Stage 9 (work_accepted)")
         
         # Verify ACC document generated
         docs_resp = client_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -477,7 +476,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "payment_received"
         assert project["payment_confirmed_by_manager_at"] is not None
-        print(f"✓ Stage 11 (payment_received)")
+        print("✓ Stage 11 (payment_received)")
         
         # Verify PAY document generated
         docs_resp = admin_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -493,7 +492,7 @@ class TestFullOperationalChain:
         project = resp.json()
         assert project["status"] == "completed"
         assert project["completed_at"] is not None
-        print(f"✓ Stage 12 (completed)")
+        print("✓ Stage 12 (completed)")
         
         # Verify CRT document generated
         docs_resp = admin_session.get(f"{BASE_URL}/api/projects/{project_id}/documents")
@@ -502,7 +501,7 @@ class TestFullOperationalChain:
         assert crt_doc["document_number"] is not None
         print(f"✓ CRT document generated: {crt_doc['document_number']}")
         
-        print(f"\n=== FULL 12-STAGE FLOW COMPLETED SUCCESSFULLY ===")
+        print("\n=== FULL 12-STAGE FLOW COMPLETED SUCCESSFULLY ===")
         print(f"Project: {project['project_number']}")
         print(f"Final Status: {project['status']}")
 
@@ -554,7 +553,7 @@ class TestDeliverables:
             }
         )
         assert resp.status_code == 403
-        print(f"✓ Client cannot upload deliverables (403)")
+        print("✓ Client cannot upload deliverables (403)")
     
     def test_admin_can_upload_deliverable(self, admin_session, production_project):
         """Admin can upload deliverables after production started"""
@@ -622,7 +621,7 @@ class TestDeliverables:
         resp = admin_session.delete(f"{BASE_URL}/api/projects/{project_id}/deliverables/{deliverable_id}")
         assert resp.status_code == 400
         assert "after delivery" in resp.json()["detail"].lower()
-        print(f"✓ Cannot delete deliverable after delivery (400)")
+        print("✓ Cannot delete deliverable after delivery (400)")
 
 
 class TestDocumentGeneration:
@@ -734,7 +733,7 @@ class TestChatMessages:
         assert not any("PROJECT_2" in m["message"] for m in msgs1)
         assert any("PROJECT_2" in m["message"] for m in msgs2)
         assert not any("PROJECT_1" in m["message"] for m in msgs2)
-        print(f"✓ Messages are project-isolated")
+        print("✓ Messages are project-isolated")
 
 
 class TestDuplicateActionPrevention:
@@ -762,7 +761,7 @@ class TestDuplicateActionPrevention:
         )
         assert resp2.status_code == 400
         assert "already performed" in resp2.json()["detail"].lower()
-        print(f"✓ Cannot activate order twice (400)")
+        print("✓ Cannot activate order twice (400)")
 
 
 if __name__ == "__main__":

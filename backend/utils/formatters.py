@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 
 
 def format_date_utc(dt: datetime) -> str:

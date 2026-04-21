@@ -597,7 +597,6 @@ def _build_payment_instructions_html(
 
 
 def _build_payment_instructions_txt(p: dict, doc_number: str) -> str:
-    name = p.get("user_name", "Client")
     pn = p.get("project_number", "")
     amount = format_currency(p.get("quote_amount", 0))
     service_type_label = (p.get("service_type") or "").replace("_", " ").title()
@@ -2169,7 +2168,6 @@ def _generate_document_txt(doc_type: str, project: dict, doc_number: str) -> str
         pm_code = (p.get("payment_method") or "paypal")
         pm_label = PAYMENT_METHODS.get(pm_code, {}).get("display", pm_code.upper()).upper()
         pm_txt_lines = _payment_method_details_txt(p)
-        acceptance_date = (format_date_utc(p.get("invoice_signed_at")) + " UTC") if p.get("invoice_signed_at") else ""
         tax_str = "$0.00"
 
         lines = [
@@ -2412,7 +2410,6 @@ async def get_document_pdf(project_id: str, doc_type: str, request: Request):
 
     from weasyprint import HTML
     from fastapi.responses import Response as FastAPIResponse
-    import io
 
     pdf_bytes = HTML(string=html).write_pdf()
     display_name = DOCUMENT_TYPES[doc_type]["display_name"].replace(" ", "_")

@@ -1,8 +1,7 @@
 from fastapi import APIRouter
 from utils.constants import (
-    LEGAL_ENTITY_NAME, TAX_ID, COUNTRY_OF_REGISTRATION,
-    CONTACT_EMAIL, CONTACT_PHONE, LOCATION, PAYPAL_EMAIL,
-    CRYPTO_NETWORK, CRYPTO_ASSET,
+    LEGAL_ENTITY_NAME, PAYPAL_EMAIL,
+    CRYPTO_ASSET,
 )
 
 router = APIRouter(prefix="/api", tags=["public"])
@@ -152,16 +151,6 @@ class ContactInput(BaseModel):
     message: str
 
 
-class QuickRequestInput(BaseModel):
-    name: str
-    email: str
-    phone: str = ""
-    service_type: str
-    brief_description: str
-    deadline: str = ""
-    payment_method: str = "paypal"
-
-
 @router.post("/contact")
 async def submit_contact(data: ContactInput):
     from database.connection import get_db
@@ -177,45 +166,6 @@ async def submit_contact(data: ContactInput):
     }
     await db.contact_messages.insert_one(msg)
     return {"message": "Message received. We'll respond within 24 hours."}
-
-
-@router.post("/quick-request")
-async def submit_quick_request(data: QuickRequestInput):
-    from database.connection import get_db
-    from utils.security import hash_password
-    db = get_db()
-    request_id = str(uuid.uuid4())[:8].upper()
-
-    existing = await db.users.find_one({"email": data.email.lower()})
-    if not existing:
-        user_id = str(uuid.uuid4())
-        temp_password = str(uuid.uuid4())[:8]
-        await db.users.insert_one({
-            "id": user_id,
-            "email": data.email.lower(),
-            "password_hash": hash_password(temp_password),
-            "name": data.name,
-            "role": "client",
-            "created_at": datetime.now(timezone.utc).isoformat(),
-            "is_active": True,
-        })
-
-    await db.quick_requests.insert_one({
-        "id": request_id,
-        "name": data.name,
-        "email": data.email.lower(),
-        "phone": data.phone,
-        "service_type": data.service_type,
-        "brief_description": data.brief_description,
-        "deadline": data.deadline,
-        "payment_method": data.payment_method,
-        "created_at": datetime.now(timezone.utc).isoformat(),
-        "status": "pending",
-    })
-    return {
-        "message": "Request submitted! We'll send you a custom quote within 24 hours.",
-        "request_id": request_id,
-    }
 
 
 POLICIES = {
