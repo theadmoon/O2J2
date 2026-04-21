@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Layout/Footer';
-import { FaPlay, FaRocket, FaVideo, FaMagic, FaCheckCircle } from 'react-icons/fa';
+import { FaPlay, FaRocket, FaVideo, FaMagic, FaCheckCircle, FaComments } from 'react-icons/fa';
 import axios from 'axios';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -305,6 +305,80 @@ export default function Homepage() {
             <p className="text-sm text-gray-500 italic">
               * Demo videos are representative examples. Your custom project will be created specifically for your needs.
             </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Questions-first / Consultation Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-sky-50 via-white to-teal-50 border-y border-sky-100" data-testid="consultation-section">
+        <div className="max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-5 gap-10 items-center">
+            <div className="md:col-span-3">
+              <p className="text-xs uppercase tracking-[0.2em] font-bold text-sky-600 mb-3">Have questions first?</p>
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
+                Not sure yet? <span className="text-ocean">Talk to us</span> inside the project workspace.
+              </h2>
+              <p className="text-gray-600 text-base leading-relaxed mb-5">
+                You don't need a finished script or a polished brief to reach out.
+                <strong className="text-gray-900"> Start a project with a one-line idea</strong> — your personal project manager will appear in the project chat and answer every question before you commit to anything.
+              </p>
+              <ul className="space-y-2.5 mb-7">
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
+                  <span>Brief is optional — a single sentence is enough to get the conversation going.</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
+                  <span>Attach script, references, mood-boards or screenshots any time before the quote is confirmed.</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
+                  <span>Zero commitment until you accept the quote. Projects can be discarded at any time.</span>
+                </li>
+              </ul>
+              <div className="flex flex-wrap gap-3">
+                <Link
+                  to="/request"
+                  className="bg-gradient-to-r from-sky-500 to-teal-500 hover:from-sky-600 hover:to-teal-600 text-white px-6 py-3 rounded-lg font-bold text-sm shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition inline-flex items-center gap-2"
+                  data-testid="cta-start-consultation"
+                >
+                  <FaComments />
+                  Start a free consultation
+                </Link>
+                <Link
+                  to="/contact"
+                  className="border-2 border-sky-300 text-sky-700 bg-white hover:bg-sky-50 px-6 py-3 rounded-lg font-bold text-sm transition inline-flex items-center gap-2"
+                >
+                  Send a quick message
+                </Link>
+              </div>
+            </div>
+            <div className="md:col-span-2">
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-br from-sky-400 to-teal-400 rounded-2xl opacity-10 blur-2xl" />
+                <div className="relative bg-white border-2 border-sky-100 rounded-2xl shadow-xl p-5 space-y-3">
+                  <div className="flex items-center gap-2 pb-2 border-b border-gray-100">
+                    <div className="w-8 h-8 bg-gradient-to-br from-sky-500 to-teal-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs font-bold">O2J</span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-900">Project chat</p>
+                      <p className="text-[10px] text-emerald-600">● Manager online</p>
+                    </div>
+                  </div>
+                  <div className="bg-sky-50 rounded-xl rounded-tl-sm px-3 py-2 text-xs text-gray-800 max-w-[85%]">
+                    Hi! Can you do a 30-second clip for my café opening?
+                  </div>
+                  <div className="bg-gradient-to-br from-sky-500 to-teal-500 text-white rounded-xl rounded-tr-sm px-3 py-2 text-xs max-w-[85%] ml-auto">
+                    Absolutely — tell us your date, location and any reference videos you like. No script needed to start.
+                  </div>
+                  <div className="bg-sky-50 rounded-xl rounded-tl-sm px-3 py-2 text-xs text-gray-800 max-w-[85%]">
+                    Great, here's a link to a similar vibe.
+                  </div>
+                  <p className="text-[10px] text-gray-400 text-center italic pt-1">Example preview — real chat opens after you create a project.</p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>

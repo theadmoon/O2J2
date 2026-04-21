@@ -136,16 +136,18 @@ export default function NewProject() {
           </div>
 
           <div>
-            <Label className="text-gray-600 text-xs uppercase tracking-wider">Project Brief</Label>
+            <Label className="text-gray-600 text-xs uppercase tracking-wider flex items-center gap-1">
+              Project Brief <span className="text-gray-400 normal-case tracking-normal">(can be a single sentence)</span>
+            </Label>
             <Textarea
               value={brief}
               onChange={(e) => setBrief(e.target.value)}
-              required
               rows={5}
               className="mt-1.5 resize-none"
-              placeholder="Describe your project requirements, goals, timeline..."
+              placeholder="A one-line idea is perfectly fine to start. You can attach a script, add reference files and chat with your project manager right after submitting — no commitment until you accept the quote."
               data-testid="new-project-brief"
             />
+            <p className="text-[11px] text-gray-500 mt-1">You will be able to update the brief, add files and chat with our team right inside the project workspace.</p>
           </div>
 
           <div>

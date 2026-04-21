@@ -29,7 +29,7 @@ async def list_projects(request: Request):
 async def create_project(
     request: Request,
     service_type: str = Form(...),
-    brief: str = Form(...),
+    brief: str = Form(""),
     project_title: str = Form(""),
     payment_method: str = Form(...),
     script: UploadFile = File(None),
@@ -104,6 +104,28 @@ async def create_project(
     }
     await db.projects.insert_one(project_doc)
     project_doc.pop("_id", None)
+
+    # Seed a welcome message from the Ocean2Joy team so the client immediately
+    # sees where to chat and is nudged to ask questions.
+    welcome = (
+        f"Hi {user.get('name') or 'there'}, welcome to Ocean2Joy! "
+        "Your project workspace is live. Ask us anything here — scripts, timelines, "
+        "references, pricing questions. You can still update the brief and attach "
+        "files from the 'Brief & attachments' block above, any time before the "
+        "quote is confirmed. We'll be with you shortly."
+    )
+    await db.messages.insert_one({
+        "id": str(uuid.uuid4()),
+        "project_id": project_id,
+        "sender_id": "system",
+        "sender_name": "Ocean2Joy Team",
+        "sender_role": "admin",
+        "message": welcome,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+        "attachments": [],
+        "is_system": True,
+    })
+
     import asyncio as _asyncio
     from services.notification_service import notify_admin_stage_event
     _asyncio.create_task(notify_admin_stage_event(project_doc, "project_submitted"))

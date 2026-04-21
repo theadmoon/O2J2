@@ -29,6 +29,14 @@ export default function ProjectDetails() {
   const [titleEdit, setTitleEdit] = useState({ editing: false, value: '', saving: false, error: '' });
   const [detailsExpanded, setDetailsExpanded] = useState(false);
 
+  // Auto-expand "Brief & attachments" for the client while materials can still
+  // be added (i.e., before the invoice is sent), so the upload control is visible.
+  useEffect(() => {
+    if (project && user && user.role !== 'admin' && !project.invoice_sent_at) {
+      setDetailsExpanded(true);
+    }
+  }, [project?.id, project?.invoice_sent_at, user?.role]);
+
   useEffect(() => {
     loadProject();
     window.scrollTo(0, 0);
