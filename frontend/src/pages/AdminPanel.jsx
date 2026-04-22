@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import api from '../utils/api';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
+import DemoVideosManager from '../components/admin/DemoVideosManager';
 import {
   ShieldCheck, ArrowLeft, Copy, Check, CreditCard, Landmark, Coins, AlertTriangle,
 } from 'lucide-react';
@@ -144,6 +145,8 @@ export default function AdminPanel() {
             Beneficiary of record: <strong>{ref.beneficiary}</strong> · Tax ID: {ref.tax_id} · {ref.country}
           </p>
         )}
+
+        <DemoVideosManager />
       </main>
       <Footer />
     </div>

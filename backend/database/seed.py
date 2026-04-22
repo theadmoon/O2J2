@@ -38,6 +38,15 @@ async def seed_database(db):
     await db.projects.create_index("id", unique=True)
     await db.projects.create_index("user_id")
     await db.messages.create_index("project_id")
+    await db.demo_videos.create_index("id", unique=True)
+
+    # Seed demo videos (homepage reel) on first start only.
+    if await db.demo_videos.count_documents({}) == 0:
+        from routes.public import DEMO_VIDEOS  # noqa: WPS433 — avoid circular at import time
+        now = datetime.now(timezone.utc).isoformat()
+        await db.demo_videos.insert_many([
+            {**d, "created_at": now, "updated_at": now} for d in DEMO_VIDEOS
+        ])
 
     # Write test credentials
     creds_path = "/app/memory/test_credentials.md"

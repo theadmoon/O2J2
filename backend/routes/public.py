@@ -1,10 +1,48 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import FileResponse
+import os
+
+from database.connection import get_db
 from utils.constants import (
     LEGAL_ENTITY_NAME, PAYPAL_EMAIL,
     CRYPTO_ASSET,
 )
 
 router = APIRouter(prefix="/api", tags=["public"])
+
+
+DEMO_MEDIA_ROOT = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "uploads",
+    "demo_media",
+)
+
+
+def _build_public_demo_video(doc: dict) -> dict:
+    """Turn a stored demo_videos doc into the public-facing shape used by the UI.
+    - Static-seeded records keep their /videos/... and /posters/... URLs (served
+      by the frontend nginx).
+    - Admin-uploaded records expose streaming URLs under /api/public/demo-media.
+    """
+    def _video_url():
+        if doc.get("video_storage") == "uploaded":
+            return f"/api/public/demo-media/{doc['id']}/video"
+        return doc.get("video_url") or ""
+
+    def _thumb_url():
+        if doc.get("poster_storage") == "uploaded":
+            return f"/api/public/demo-media/{doc['id']}/poster"
+        return doc.get("poster_url") or ""
+
+    return {
+        "id": doc["id"],
+        "title": doc.get("title") or "",
+        "description": doc.get("description") or "",
+        "tags": doc.get("tags") or [],
+        "video_url": _video_url(),
+        "video_type": "url",
+        "thumbnail_url": _thumb_url(),
+    }
 
 # Full services data with features, genres, etc.
 SERVICES_DATA = [
@@ -78,26 +116,60 @@ DEMO_VIDEOS = [
         "id": "demo-1",
         "title": "Cinematic Live-Action × VFX",
         "description": "A live-action shoot with professional performers fused with cinema-grade visual effects. This is the standard we hold every frame to — the feel of a streaming-series production, delivered at digital-studio speed. Scripting, directing, on-set crew, post, VFX and color are all handled end-to-end by our team.",
+        "video_storage": "static",
         "video_url": "/videos/Demo1_720p_O2J2.mp4",
-        "video_type": "url",
-        "thumbnail_url": "/posters/demo1.png",
+        "poster_storage": "static",
+        "poster_url": "/posters/demo1.png",
         "tags": ["Live Actors", "Cinematic VFX", "End-to-End Production"],
+        "order": 1,
     },
     {
         "id": "demo-2",
         "title": "AI-Generated Video",
         "description": "Worlds, characters and motion that would be impossible — or prohibitively expensive — to shoot on a real set. Our AI creative pipeline turns a brief into a fully animated sequence with style, pacing and mood controlled by a human director. Unlimited imagination, cinema-level discipline.",
+        "video_storage": "static",
         "video_url": "/videos/Demo2_720p_O2J2.mp4",
-        "video_type": "url",
-        "thumbnail_url": "/posters/demo2.png",
+        "poster_storage": "static",
+        "poster_url": "/posters/demo2.png",
         "tags": ["AI-Generated", "Unlimited Imagination", "Director-Guided"],
+        "order": 2,
     },
 ]
 
 
 @router.get("/demo-videos")
 async def get_demo_videos():
-    return DEMO_VIDEOS
+    """Public list of demo videos, sorted by `order`. Source of truth is the
+    `demo_videos` Mongo collection (seeded on first start, editable in admin)."""
+    db = get_db()
+    docs = await db.demo_videos.find({}, {"_id": 0}).sort("order", 1).to_list(length=None)
+    return [_build_public_demo_video(d) for d in docs]
+
+
+@router.get("/public/demo-media/{demo_id}/video")
+async def get_demo_video_file(demo_id: str):
+    db = get_db()
+    doc = await db.demo_videos.find_one({"id": demo_id}, {"_id": 0})
+    if not doc or doc.get("video_storage") != "uploaded":
+        raise HTTPException(status_code=404, detail="Demo video not found")
+    filename = doc.get("video_filename") or "video.mp4"
+    abs_path = os.path.join(DEMO_MEDIA_ROOT, demo_id, "video", filename)
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Demo video file missing on disk")
+    return FileResponse(abs_path, media_type="video/mp4")
+
+
+@router.get("/public/demo-media/{demo_id}/poster")
+async def get_demo_poster_file(demo_id: str):
+    db = get_db()
+    doc = await db.demo_videos.find_one({"id": demo_id}, {"_id": 0})
+    if not doc or doc.get("poster_storage") != "uploaded":
+        raise HTTPException(status_code=404, detail="Demo poster not found")
+    filename = doc.get("poster_filename") or "poster.png"
+    abs_path = os.path.join(DEMO_MEDIA_ROOT, demo_id, "poster", filename)
+    if not os.path.exists(abs_path):
+        raise HTTPException(status_code=404, detail="Demo poster file missing on disk")
+    return FileResponse(abs_path)
 
 
 @router.get("/payment-settings")

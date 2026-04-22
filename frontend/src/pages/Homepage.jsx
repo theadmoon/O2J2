@@ -20,6 +20,51 @@ export default function Homepage() {
     fetchPaymentSettings();
   }, []);
 
+  // --- SEO: emit VideoObject JSON-LD so demo reels appear in Google Video search.
+  useEffect(() => {
+    if (!demoVideos || demoVideos.length === 0) return;
+    const origin = (typeof window !== 'undefined' && window.location.origin) || '';
+    const toAbs = (rel) => {
+      if (!rel) return '';
+      if (/^https?:\/\//i.test(rel)) return rel;
+      // Backend-streamed uploads go through the same origin in production
+      // (reverse-proxied under /api). Frontend-static paths (/videos, /posters)
+      // are also served from the same origin.
+      return `${origin}${rel.startsWith('/') ? '' : '/'}${rel}`;
+    };
+    const uploadDate = new Date().toISOString().slice(0, 10);
+    const data = demoVideos.map((v) => ({
+      '@context': 'https://schema.org',
+      '@type': 'VideoObject',
+      name: v.title,
+      description: v.description,
+      thumbnailUrl: toAbs(v.thumbnail_url),
+      contentUrl: toAbs(v.video_url),
+      uploadDate,
+      publisher: {
+        '@type': 'Organization',
+        name: 'Ocean2Joy',
+        logo: {
+          '@type': 'ImageObject',
+          url: `${origin}/logo-horizontal.png`,
+        },
+      },
+    }));
+    const elId = 'ocean2joy-videoobject-ld';
+    let script = document.getElementById(elId);
+    if (!script) {
+      script = document.createElement('script');
+      script.id = elId;
+      script.type = 'application/ld+json';
+      document.head.appendChild(script);
+    }
+    script.textContent = JSON.stringify(data.length === 1 ? data[0] : data);
+    return () => {
+      const s = document.getElementById(elId);
+      if (s) s.remove();
+    };
+  }, [demoVideos]);
+
   const fetchServices = async () => {
     try {
       const response = await axios.get(`${API}/services`);
@@ -42,12 +87,16 @@ export default function Homepage() {
   };
 
   const renderVideoPlayer = (video) => {
-    const getThumbnailUrl = (thumbnailUrl) => {
-      if (!thumbnailUrl) return null;
-      if (thumbnailUrl.startsWith('/uploads/')) return `${BACKEND_URL}${thumbnailUrl}`;
-      return thumbnailUrl;
+    const toFullUrl = (url) => {
+      if (!url) return null;
+      if (/^https?:\/\//i.test(url)) return url;
+      // Backend-served paths (streaming or legacy uploads) need the API host.
+      // Frontend-static paths (/videos/, /posters/) stay relative.
+      if (url.startsWith('/api/') || url.startsWith('/uploads/')) return `${BACKEND_URL}${url}`;
+      return url;
     };
-    const fullThumbnailUrl = getThumbnailUrl(video.thumbnail_url);
+    const fullThumbnailUrl = toFullUrl(video.thumbnail_url);
+    const fullVideoUrl = toFullUrl(video.video_url);
 
     if (video.video_type === 'url') {
       if (video.video_url.includes('disk.yandex') || video.video_url.includes('drive.google')) {
@@ -66,14 +115,14 @@ export default function Homepage() {
       }
       return (
         <video controls className="w-full aspect-video rounded-lg bg-black" poster={fullThumbnailUrl}>
-          <source src={video.video_url} type="video/mp4" />
+          <source src={fullVideoUrl} type="video/mp4" />
           Your browser does not support the video tag.
         </video>
       );
     }
     return (
       <video controls className="w-full aspect-video rounded-lg bg-black" poster={fullThumbnailUrl}>
-        <source src={`${BACKEND_URL}${video.video_url}`} type="video/mp4" />
+        <source src={fullVideoUrl || `${BACKEND_URL}${video.video_url}`} type="video/mp4" />
         Your browser does not support the video tag.
       </video>
     );
