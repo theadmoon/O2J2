@@ -7,10 +7,10 @@
 
         <!-- Primary SEO -->
         <title>Ocean2Joy — Digital Video Production Studio</title>
-        <meta name="description" content="Ocean2Joy is a boutique digital video production studio. End-to-end video creation through a transparent 12-stage workflow — pay only after you accept the final result." />
-        <meta name="keywords" content="video production, digital video, video studio, post-production, script to screen, storyboard, motion graphics, explainer video, promo video, Ocean2Joy" />
+        <meta name="description" content="Digital video production studio. Live-action with actors, cinematic VFX and AI-generated video. Pay only after you accept the final result." />
+        <meta name="keywords" content="video production studio, live-action video, cinematic VFX, AI video generation, AI-generated video, video editing, post-production, motion graphics, color grading, commercial video, brand video, explainer video, Ocean2Joy" />
         <meta name="author" content="Ocean2Joy" />
-        <meta name="robots" content="index, follow" />
+        <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
         <link rel="canonical" href="https://ocean2joy.com/" />
 
         <!-- Favicon & App Icons -->
@@ -22,29 +22,41 @@
         <meta property="og:site_name" content="Ocean2Joy" />
         <meta property="og:url" content="https://ocean2joy.com/" />
         <meta property="og:title" content="Ocean2Joy — Digital Video Production Studio" />
-        <meta property="og:description" content="Dive into an ocean of video possibilities. End-to-end digital video production through a transparent 12-stage workflow — pay only after you accept the final result." />
+        <meta property="og:description" content="Live-action with actors, cinematic VFX & AI-generated video. Transparent 12-stage workflow — pay only after you accept the final result." />
         <meta property="og:image" content="https://ocean2joy.com/logo-horizontal.png" />
+        <meta property="og:image:width" content="2752" />
+        <meta property="og:image:height" content="1536" />
         <meta property="og:locale" content="en_US" />
 
         <!-- Twitter Card -->
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="Ocean2Joy — Digital Video Production Studio" />
-        <meta name="twitter:description" content="Dive into an ocean of video possibilities. End-to-end digital video production through a transparent 12-stage workflow." />
+        <meta name="twitter:description" content="Live-action with actors, cinematic VFX & AI-generated video. Transparent 12-stage workflow." />
         <meta name="twitter:image" content="https://ocean2joy.com/logo-horizontal.png" />
 
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
 
-        <!-- Organization schema for Google Knowledge Graph + AI search context -->
+        <!-- Organization + ProfessionalService schema for Google Knowledge Graph + AI search context.
+             logo uses the stacked/vertical composition — preferred for brand panel display. -->
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
-            "@type": "Organization",
+            "@type": ["Organization", "ProfessionalService"],
+            "@id": "https://ocean2joy.com/#organization",
             "name": "Ocean2Joy",
+            "alternateName": "Ocean2joy Video Production Studio",
             "url": "https://ocean2joy.com",
-            "logo": "https://ocean2joy.com/logo-horizontal.png",
-            "description": "Boutique digital video production studio offering cinematic live-action, VFX, professional editing and AI-generated video through a transparent 12-stage workflow.",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://ocean2joy.com/logo-vertical.png",
+                "width": 2752,
+                "height": 1536
+            },
+            "image": "https://ocean2joy.com/logo-vertical.png",
+            "description": "Digital video production studio offering live-action with actors, cinematic VFX and AI-generated video. Transparent 12-stage workflow, pay only after you accept the final result.",
+            "slogan": "Dive into an ocean of video possibilities",
             "founder": { "@type": "Person", "name": "Vera Iambaeva" },
             "address": {
                 "@type": "PostalAddress",
@@ -53,18 +65,55 @@
             },
             "taxID": "302335809",
             "areaServed": "Worldwide",
-            "knowsAbout": ["video production","video editing","visual effects","AI-generated video","post-production","color grading","sound design"]
+            "priceRange": "$$",
+            "serviceType": ["Live-action video production","Cinematic VFX","AI-generated video","Video editing and post-production","Motion graphics","Color grading"],
+            "knowsAbout": ["video production","live-action shooting","visual effects","AI-generated video","post-production","color grading","sound design","motion graphics","commercial video","brand films","explainer videos"],
+            "hasOfferCatalog": {
+                "@type": "OfferCatalog",
+                "name": "Ocean2Joy video production services",
+                "itemListElement": [
+                    {
+                        "@type": "Offer",
+                        "itemOffered": {
+                            "@type": "Service",
+                            "name": "Custom Video Production with Actors",
+                            "url": "https://ocean2joy.com/services/custom-video",
+                            "description": "Live-action shoots with professional performers, custom scripts and 4K filming. Ideal for commercials, brand films and educational content."
+                        }
+                    },
+                    {
+                        "@type": "Offer",
+                        "itemOffered": {
+                            "@type": "Service",
+                            "name": "Professional Video Editing & Special Effects",
+                            "url": "https://ocean2joy.com/services/video-editing",
+                            "description": "Professional editing, cinematic VFX, motion graphics, color grading and sound design for existing footage."
+                        }
+                    },
+                    {
+                        "@type": "Offer",
+                        "itemOffered": {
+                            "@type": "Service",
+                            "name": "AI-Generated Video Content",
+                            "url": "https://ocean2joy.com/services/ai-video",
+                            "description": "Director-guided AI video creation — worlds, characters and motion that would be impossible or prohibitively expensive to shoot on a real set."
+                        }
+                    }
+                ]
+            }
         }
         </script>
 
-        <!-- WebSite schema: enables sitelinks searchbox + clarifies canonical site identity -->
+        <!-- WebSite schema: clarifies canonical site identity to search engines. -->
         <script type="application/ld+json">
         {
             "@context": "https://schema.org",
             "@type": "WebSite",
+            "@id": "https://ocean2joy.com/#website",
             "name": "Ocean2Joy",
             "url": "https://ocean2joy.com",
-            "publisher": { "@type": "Organization", "name": "Ocean2Joy" }
+            "inLanguage": "en",
+            "publisher": { "@id": "https://ocean2joy.com/#organization" }
         }
         </script>
         <!--

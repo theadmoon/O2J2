@@ -18,7 +18,7 @@ export default function Homepage() {
   useSeo({
     title: 'Ocean2Joy — Digital Video Production Studio',
     description:
-      'Ocean2Joy is a boutique digital video production studio. End-to-end video creation through a transparent 12-stage workflow — pay only after you accept the final result.',
+      'Digital video production studio. Live-action with actors, cinematic VFX and AI-generated video. Pay only after you accept the final result.',
     path: '/',
   });
 
@@ -40,7 +40,7 @@ export default function Homepage() {
       // are also served from the same origin.
       return `${origin}${rel.startsWith('/') ? '' : '/'}${rel}`;
     };
-    const uploadDate = new Date().toISOString().slice(0, 10);
+    const fallbackIso = new Date().toISOString();
     const data = demoVideos.map((v) => ({
       '@context': 'https://schema.org',
       '@type': 'VideoObject',
@@ -48,13 +48,15 @@ export default function Homepage() {
       description: v.description,
       thumbnailUrl: toAbs(v.thumbnail_url),
       contentUrl: toAbs(v.video_url),
-      uploadDate: (v.created_at ? String(v.created_at).slice(0, 10) : uploadDate),
+      // Google requires ISO 8601 with timezone. `created_at` from the API is a full
+      // UTC ISO string (e.g. "2026-04-22T09:23:48.432101+00:00") — pass it through.
+      uploadDate: v.created_at || fallbackIso,
       publisher: {
         '@type': 'Organization',
         name: 'Ocean2Joy',
         logo: {
           '@type': 'ImageObject',
-          url: `${origin}/logo-horizontal.png`,
+          url: `${origin}/logo-vertical.png`,
         },
       },
     }));
@@ -160,7 +162,7 @@ export default function Homepage() {
             Dive Into an <span className="text-yellow-300">Ocean</span> of Video Possibilities
           </h1>
           <p className="text-xl md:text-2xl mb-8 text-sky-50">
-            Professional video production services delivered digitally. From custom filming to AI-powered content.
+            Live-action with actors, cinematic VFX and AI-generated video — all delivered digitally. Pay only after you accept the final result.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Link to="/request" className="bg-yellow-400 text-gray-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-yellow-300 transition shadow-2xl hover:shadow-yellow-400/50 transform hover:scale-105 inline-flex items-center justify-center">
