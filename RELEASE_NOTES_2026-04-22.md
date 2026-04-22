@@ -1,6 +1,14 @@
 # Ocean2Joy v2.0 — Release Notes (22 April 2026)
 
-> **Контекст для разработчика:** этот релиз (1) полностью убирает зависимость от инфраструктуры Emergent (external CDN, трекинг-скрипты, Emergent-бейдж), (2) добавляет SEO-слой (мета-теги per-page, JSON-LD, sitemap, robots.txt), (3) вводит админ-CMS для демо-видео с загрузкой файлов и постеров, (4) добавляет Resend-диагностику. Все изменения оттестированы testing-агентом (16/16 backend PASS + полный e2e на фронте).
+> **Контекст:** этот релиз объединяет несколько итераций работы и закрывает четыре крупные задачи:
+> 1. Полная независимость продакшена от инфраструктуры Emergent.
+> 2. Админ-CMS для демо-видео (загрузка видео + постеров через `/admin`).
+> 3. JSON-LD структурированные данные (VideoObject, Organization, ProfessionalService, WebSite, FAQPage, BreadcrumbList, Service).
+> 4. SEO-слой для всех публичных страниц: per-page title/description/canonical, OG/Twitter, robots.txt, sitemap.xml, hreflang.
+>
+> Всё протестировано: `testing_agent_v3_fork` → 16/16 бэкенд PASS, e2e фронтенд PASS (create/edit/delete demo videos, JSON-LD emission, per-page meta). Плюс Playwright-проверки на 9 публичных страницах.
+>
+> **До этого релиза в продакшен ничего из перечисленного не пушилось.** Это один большой консолидированный pull-request.
 
 ---
 
@@ -8,215 +16,270 @@
 
 | № | Задача | Статус |
 |---|---|---|
-| 1 | Сделать продакшен полностью независимым от Emergent (хостинг ассетов, трекинг, бейджи) | ✅ |
-| 2 | Корректные `<title>` + meta description для браузерной вкладки и SEO | ✅ |
-| 3 | JSON-LD VideoObject для демо-видео + Organization/WebSite schema для AI-поисковиков | ✅ |
-| 4 | Админ-панель: загрузка и управление демо-видео с постерами | ✅ |
-| 5 | Диагностика Resend (почему могли пропасть уведомления на проде) | ✅ |
-| 6 | Per-page meta-теги для всех публичных страниц (для быстрой индексации нового сайта в Google + Perplexity/ChatGPT Search/Claude) | ✅ |
-| 7 | `robots.txt` + `sitemap.xml` | ✅ |
+| 1 | Убрать все ссылки на инфраструктуру Emergent из продакшен-кода | ✅ |
+| 2 | Корректные browser-вкладки и meta для SEO + AI-поиска | ✅ |
+| 3 | JSON-LD VideoObject для демо-роликов (Google Video Search) | ✅ |
+| 4 | Organization + ProfessionalService JSON-LD (Knowledge Graph) | ✅ |
+| 5 | Админ-CMS для демо-видео: добавление, редактирование, замена файлов, reorder, удаление | ✅ |
+| 6 | Диагностические эндпоинты для Resend (почему пропали уведомления на проде) | ✅ |
+| 7 | Per-page SEO (title, description, OG/Twitter, canonical) на всех 15 страницах | ✅ |
+| 8 | robots.txt с явным allow-листом AI-краулеров (GPTBot, PerplexityBot, ClaudeBot и др.) | ✅ |
+| 9 | sitemap.xml со всеми публичными URL | ✅ |
+| 10 | FAQPage schema на `/how-it-works` (для FAQ rich results в Google) | ✅ |
+| 11 | BreadcrumbList schema на всех вложенных публичных страницах | ✅ |
+| 12 | Service schema на detail-страницах услуг | ✅ |
+| 13 | Фикс замечаний Google Search Console (uploadDate timezone, vertical logo) | ✅ |
 
 ---
 
-## 2. Найдены и удалены ссылки на Emergent (6 мест)
+## 2. Удалены ссылки на Emergent (6 мест)
 
-| Файл | Что убрано | Замена |
+| Файл | Что было | Что стало |
 |---|---|---|
-| `backend/routes/public.py` | 2 видео на `customer-assets.emergentagent.com` | Локальные файлы `/videos/Ocean2Joy_Demo1_720p.mp4`, `Ocean2Joy_Demo2_720p.mp4` (раздаются nginx'ом фронта) |
-| `frontend/public/index.html` (line 52 старый) | `<script src="https://assets.emergent.sh/scripts/emergent-main.js">` | Полностью удалён |
-| `frontend/public/index.html` (lines 67–111 старые) | «Made with Emergent» бейдж → `app.emergent.sh` | Полностью удалён |
-| `frontend/public/index.html` (lines 112–182 старые) | PostHog-трекер с токеном Emergent (`phc_xAvL2Iq4...`) | Полностью удалён |
-| `frontend/package.json` (devDependencies) | `@emergentbase/visual-edits` → `assets.emergent.sh` | Удалён через `yarn remove`. `craco.config.js` уже имеет try/catch → сборка продолжает работать без него. |
+| `backend/routes/public.py` | 2 видео на `customer-assets.emergentagent.com/.../Demo*_720p_O2J2.mp4` | Локальные файлы `frontend/public/videos/Ocean2Joy_Demo*_720p.mp4` (раздаются frontend-nginx) |
+| `frontend/public/index.html` | `<script src="https://assets.emergent.sh/scripts/emergent-main.js">` | Удалён |
+| `frontend/public/index.html` | Блок `<a id="emergent-badge">` → `app.emergent.sh` | Удалён |
+| `frontend/public/index.html` | PostHog-трекер с Emergent-токеном `phc_xAvL2Iq4...` | Удалён |
+| `frontend/package.json` (devDependencies) | `@emergentbase/visual-edits` → `assets.emergent.sh/npm/...` | Удалён через `yarn remove`. `craco.config.js` имеет graceful try/catch — сборка работает без него. |
 | `frontend/yarn.lock` | Автосгенерировано после `yarn remove` | — |
 
-**Проверено:** `grep -rn "emergentagent\|emergent.sh\|emergentbase" src/ public/ backend/ --exclude-dir=node_modules` → 0 совпадений (кроме `.env`, где preview-URL для dev, на продакшене будет `ocean2joy.com`).
+**Проверка после деплоя:**
+```bash
+curl -s https://ocean2joy.com/ | grep -iE "emergent|posthog"
+# Ожидание: пусто
+```
 
 ---
 
 ## 3. Новые бэкенд-эндпоинты
 
-### Demo Videos (публичные)
+### Публичные
 ```
-GET  /api/demo-videos                            # список из MongoDB, отсортирован по order
-GET  /api/public/demo-media/{id}/video           # стриминг MP4 для uploaded-записей
+GET  /api/demo-videos                            # список из MongoDB, сортировка по order
+GET  /api/public/demo-media/{id}/video           # стриминг MP4 для uploaded-записей (FileResponse)
 GET  /api/public/demo-media/{id}/poster          # стриминг постера
 ```
 
-### Demo Videos (admin-only, требуется сессионная cookie админа)
+### Admin-only (требуется cookie-сессия админа)
 ```
 GET    /api/admin/demo-videos                    # список с метаданными
 POST   /api/admin/demo-videos                    # создать (multipart: title, description, tags, video, poster)
 PUT    /api/admin/demo-videos/{id}               # обновить title/description/tags (JSON body)
-POST   /api/admin/demo-videos/{id}/video         # заменить видеофайл (multipart: file)
+POST   /api/admin/demo-videos/{id}/video         # заменить видеофайл
 POST   /api/admin/demo-videos/{id}/poster        # заменить постер
 DELETE /api/admin/demo-videos/{id}               # удалить запись + файлы с диска
 POST   /api/admin/demo-videos/reorder            # {order: [id1, id2, ...]}
+
+GET    /api/admin/notifications/diagnostics      # ввод env Resend (ключ маскируется)
+POST   /api/admin/notifications/test             # отправить тестовое письмо
 ```
 
-### Resend диагностика (admin-only)
-```
-GET   /api/admin/notifications/diagnostics       # показывает env-конфиг Resend (ключ маскируется)
-POST  /api/admin/notifications/test              # отправляет тестовое письмо с полным ответом Resend
-```
-
-### Размерные лимиты
-- Видео: **200 MB** (`MAX_VIDEO_MB = 200`)
-- Постер: **10 MB** (`MAX_POSTER_MB = 10`)
-- Валидация расширений: видео `.mp4 .mov .webm .m4v`; постер `.png .jpg .jpeg .webp`.
+### Лимиты и валидация
+- Видео: 200 MB (`MAX_VIDEO_MB`), расширения `.mp4 .mov .webm .m4v`
+- Постер: 10 MB (`MAX_POSTER_MB`), расширения `.png .jpg .jpeg .webp`
 
 ---
 
-## 4. Изменения в БД (MongoDB)
+## 4. MongoDB — новая коллекция `demo_videos`
 
-Новая коллекция **`demo_videos`**:
 ```js
 {
   id: "demo-1" | "demo-<uuid8>",
   title, description, tags: [str],
   order: int,
   video_storage: "static" | "uploaded",
-  video_url: str | null,             // если static
-  video_filename, video_original_name, video_size,   // если uploaded
+  video_url: str | null,              // static: "/videos/Ocean2Joy_Demo1_720p.mp4"
+  video_filename, video_original_name, video_size,  // uploaded
   poster_storage: "static" | "uploaded",
-  poster_url: str | null,
+  poster_url: str | null,             // static: "/posters/demo1.png"
   poster_filename, poster_original_name, poster_size,
-  created_at, updated_at  (ISO UTC strings)
+  created_at, updated_at              // ISO UTC strings
 }
 ```
 
-**Seed** (`backend/database/seed.py`) на первом запуске вставляет 2 записи (`demo-1`, `demo-2`) со `storage="static"`, указывающие на `/videos/Ocean2Joy_Demo*_720p.mp4`. Если коллекция уже не пуста — ничего не делает (идемпотентно).
+**Seed** (`backend/database/seed.py`): при первом старте backend'а, если коллекция пуста, вставляются 2 записи (`demo-1`, `demo-2`) со `storage="static"`. Идемпотентно.
 
-**Индекс:** `db.demo_videos.createIndex({id:1}, {unique:true})`.
+**Индекс:** `demo_videos.id` unique.
+
+**Структура загрузок:**
+```
+/app/backend/uploads/demo_media/<demo-id>/
+  ├── video/video.<ext>
+  └── poster/poster.<ext>
+```
+Персистится через существующий Docker volume `backend_uploads`. Изменений в `docker-compose.yml` **не требуется**.
 
 ---
 
-## 5. Новая файловая структура загрузок
+## 5. SEO-слой
 
-```
-/app/backend/uploads/demo_media/
-  └── <demo-id>/
-      ├── video/video.<ext>
-      └── poster/poster.<ext>
-```
+### 5.1. Per-page meta через кастомный хук `useSeo`
 
-В docker-compose.yml уже есть volume `backend_uploads` → `/app/backend/uploads`. Новая папка `demo_media` создастся автоматически.
+Файл: `frontend/src/hooks/useSeo.js` (без новых npm-зависимостей).
 
----
-
-## 6. SEO-слой (новое)
-
-### 6.1. Per-page meta через кастомный хук `useSeo`
-
-Файл: `frontend/src/hooks/useSeo.js` (нет новых npm-зависимостей).
-
-Применён ко всем страницам:
-
-| Роут | Title | robots |
-|---|---|---|
-| `/` | Ocean2Joy — Digital Video Production Studio | index,follow |
-| `/services` | Video Production Services \| Ocean2Joy | index,follow |
-| `/services/:id` | `{service.title}` \| Ocean2Joy (динамически) | index,follow |
-| `/how-it-works` | How It Works — 12-Stage Video Production Workflow \| Ocean2Joy | index,follow |
-| `/contact` | Contact Ocean2Joy — Video Production Studio | index,follow |
-| `/legal` | Legal Information \| Ocean2Joy | index,follow |
-| `/policies/terms` | Terms of Service \| Ocean2Joy | index,follow |
-| `/policies/digital_delivery` | Digital Delivery Policy \| Ocean2Joy | index,follow |
-| `/policies/refund` | Refund & Cancellation Policy \| Ocean2Joy | index,follow |
-| `/policies/revision` | Revision Policy \| Ocean2Joy | index,follow |
-| `/policies/privacy` | Privacy Policy \| Ocean2Joy | index,follow |
-| `/login`, `/register` | — | **noindex, nofollow** |
-| `/dashboard`, `/profile`, `/projects/*`, `/admin` | — | **noindex, nofollow** |
-
-Для каждой страницы хук выставляет:
+Применён ко всем 15 страницам. Выставляет:
 - `document.title`
-- `meta[name="description"]` (уникальный контент)
+- `meta[name="description"]`
 - `meta[property="og:title|og:description|og:type|og:image|og:url"]`
 - `meta[name="twitter:card|twitter:title|twitter:description|twitter:image"]`
 - `link[rel="canonical"]`
-- `meta[name="robots"]`
+- `meta[name="robots"]` (`index,follow,max-image-preview:large,max-snippet:-1` для публичных; `noindex,nofollow` для auth/admin)
 
-### 6.2. JSON-LD structured data
+| Роут | Title | robots |
+|---|---|---|
+| `/` | Ocean2Joy — Digital Video Production Studio | index |
+| `/services` | Video Production Services \| Ocean2Joy | index |
+| `/services/:id` | `{service.title}` \| Ocean2Joy (динамически) | index |
+| `/how-it-works` | How It Works — 12-Stage Video Production Workflow \| Ocean2Joy | index |
+| `/contact` | Contact Ocean2Joy — Video Production Studio | index |
+| `/legal` | Legal Information \| Ocean2Joy | index |
+| `/policies/terms` | Terms of Service \| Ocean2Joy | index |
+| `/policies/digital_delivery` | Digital Delivery Policy \| Ocean2Joy | index |
+| `/policies/refund` | Refund & Cancellation Policy \| Ocean2Joy | index |
+| `/policies/revision` | Revision Policy \| Ocean2Joy | index |
+| `/policies/privacy` | Privacy Policy \| Ocean2Joy | index |
+| `/login`, `/register` | — | **noindex, nofollow** |
+| `/dashboard`, `/profile`, `/projects/*`, `/admin` | — | **noindex, nofollow** |
 
-**В `frontend/public/index.html` (статично, видно всем ботам без JS):**
-- `Organization` schema — идентичность бренда (название, логотип, адрес, основатель, tax ID)
-- `WebSite` schema — канонический сайт
+### 5.2. Meta description (главная)
 
-**На Homepage (`Homepage.jsx`, динамически через `useEffect`):**
-- `VideoObject[]` schema — по одной записи на каждое демо-видео, с абсолютными URL, `uploadDate` из `created_at` из БД, `publisher`=Ocean2Joy.
+**Было (172 симв., Google обрезал/подменял):**
+> "Ocean2Joy is a boutique digital video production studio. End-to-end video creation through a transparent 12-stage workflow — pay only after you accept the final result."
 
-### 6.3. `robots.txt`
+**Стало (138 симв., упоминает все 3 продукта):**
+> "Digital video production studio. Live-action with actors, cinematic VFX and AI-generated video. Pay only after you accept the final result."
 
-`frontend/public/robots.txt` — разрешает краулинг публичных страниц, запрещает `/admin`, `/dashboard`, `/profile`, `/projects`, `/login`, `/register`, `/api/`. Явно указаны allow для:
-- Googlebot, Googlebot-Image, Googlebot-Video, Bingbot, DuckDuckBot, YandexBot, Applebot
-- **AI-краулеры:** GPTBot, ChatGPT-User, OAI-SearchBot, PerplexityBot, ClaudeBot, Claude-Web, Google-Extended, Applebot-Extended
+Параллельно **синхронизирован видимый hero-подзаголовок** на Homepage — Google охотнее принимает meta, когда формулировки встречаются в видимом тексте:
+- Было: "Professional video production services delivered digitally. From custom filming to AI-powered content."
+- Стало: "Live-action with actors, cinematic VFX and AI-generated video — all delivered digitally. Pay only after you accept the final result."
 
-### 6.4. `sitemap.xml`
+### 5.3. JSON-LD structured data
 
-`frontend/public/sitemap.xml` — 13 публичных URL с приоритетами. Ссылается на `https://ocean2joy.com/...`. После деплоя нужно будет **один раз** добавить в Google Search Console и Bing Webmaster Tools.
+**Статически в `index.html` (видно ботам без JS):**
+
+1. **`Organization` + `ProfessionalService`** с `@id: #organization`
+   - `logo` → `logo-vertical.png` (вертикальная композиция — для Knowledge Graph)
+   - `image` → то же
+   - `address`: Tbilisi, GE
+   - `taxID: 302335809`
+   - `slogan`, `alternateName`
+   - `hasOfferCatalog`: 3 `Service` (custom-video, video-editing, ai-video) с URL и описаниями
+   - `knowsAbout`: массив из 11 тематических ключевых слов
+
+2. **`WebSite`** с `@id: #website`, `publisher: { @id: #organization }`, `inLanguage: en`
+
+**Динамически через React-хук `useJsonLd` (файл `frontend/src/hooks/useJsonLd.js`):**
+
+| Страница | Schema |
+|---|---|
+| `/` | `VideoObject[]` (по одной на каждое демо из БД, с `contentUrl`, `thumbnailUrl`, `publisher`, **полным ISO `uploadDate` с timezone**) |
+| `/how-it-works` | `FAQPage` (7 Q&A) + `BreadcrumbList` |
+| `/services` | `BreadcrumbList` |
+| `/services/:id` | `BreadcrumbList` + `Service` (с `provider: {@id: #organization}`) |
+| `/contact` | `BreadcrumbList` |
+| `/legal` | `BreadcrumbList` |
+| `/policies/:type` | `BreadcrumbList` |
+
+### 5.4. FAQ на `/how-it-works`
+
+7 реальных клиентских вопросов (оплата, сроки, ревизии, форматы, скрипт/кастинг, методы оплаты, работа с международными клиентами). Реализованы как **видимый `<details>` accordion** над CTA + JSON-LD FAQPage. Google требует, чтобы FAQ-контент был видимым — иначе FAQ rich result не появляется.
+
+### 5.5. Фиксы по отчёту Google Search Console
+
+- **«Invalid datetime for uploadDate — missing timezone»** → `VideoObject.uploadDate` теперь полный ISO 8601 с timezone (пример: `"2026-04-22T09:23:48+00:00"`) вместо `"2026-04-22"`.
+- **Горизонтальный лого в Knowledge Graph** → `Organization.logo` и `publisher.logo` переведены на `logo-vertical.png`. OG/Twitter image оставлены горизонтальными (16:9 — стандарт для социальных карточек).
+
+### 5.6. `robots.txt`
+
+`frontend/public/robots.txt` — allow/disallow по роутам + явный allow-лист для:
+- Стандартных ботов: Googlebot, Googlebot-Image, Googlebot-Video, Bingbot, DuckDuckBot, YandexBot, Applebot
+- **AI-краулеров:** GPTBot, ChatGPT-User, OAI-SearchBot, PerplexityBot, ClaudeBot, Claude-Web, Google-Extended, Applebot-Extended
+
+### 5.7. `sitemap.xml`
+
+`frontend/public/sitemap.xml` — 13 публичных URL с приоритетами и `changefreq`. Ссылается на `https://ocean2joy.com/...`.
 
 ---
 
-## 7. Полный список изменённых/новых файлов
+## 6. Полный список изменённых/новых файлов
 
-### Создано (7 новых файлов)
+### Создано (9 новых)
 ```
-frontend/src/hooks/useSeo.js                       — SEO hook, 60 строк
+frontend/src/hooks/useSeo.js                       — SEO hook, ~60 строк
+frontend/src/hooks/useJsonLd.js                    — JSON-LD injection hook, ~30 строк
 frontend/src/components/admin/DemoVideosManager.jsx — Admin UI для демо-видео, ~380 строк
-frontend/public/robots.txt                         — crawler directives
-frontend/public/sitemap.xml                        — static sitemap
-frontend/public/videos/Ocean2Joy_Demo1_720p.mp4    — 36 MB (self-hosted demo 1)
-frontend/public/videos/Ocean2Joy_Demo2_720p.mp4    — 13 MB (self-hosted demo 2)
-```
-*(Примечание: `/app/frontend/public/videos/Demo*_O2J2.mp4` — **удалены** и переименованы в `Ocean2Joy_Demo*_720p.mp4` для лучшей SEO-подписи в URL.)*
-
-### Изменено (15 файлов)
-
-**Backend:**
-```
-backend/routes/public.py          — новая helper _build_public_demo_video, GET /api/demo-videos теперь из БД, + GET /api/public/demo-media/{id}/{video,poster}
-backend/routes/admin.py           — CRUD для demo_videos (~220 строк) + Resend diagnostics + test endpoints
-backend/database/seed.py          — seed демо-видео + индекс demo_videos(id)
+frontend/public/robots.txt                         — crawler directives + AI bots
+frontend/public/sitemap.xml                        — static sitemap (13 URL)
+frontend/public/videos/Ocean2Joy_Demo1_720p.mp4    — 36 MB
+frontend/public/videos/Ocean2Joy_Demo2_720p.mp4    — 13 MB
+RELEASE_NOTES_2026-04-22.md                        — этот документ
+backend/uploads/demo_media/                        — (создастся автоматически при первой загрузке)
 ```
 
-**Frontend:**
+### Удалено (2 старых видеофайла)
 ```
-frontend/public/index.html        — убраны Emergent-скрипты/бейдж/PostHog, добавлены: proper title, meta description, OG/Twitter, favicon, theme-color, Organization + WebSite JSON-LD
-frontend/package.json             — удалён @emergentbase/visual-edits
-frontend/yarn.lock                — автосгенерировано
-frontend/src/pages/Homepage.jsx              — useSeo, JSON-LD VideoObject useEffect, URL-resolver для /api/public/...
-frontend/src/pages/Services.jsx              — useSeo
-frontend/src/pages/ServiceDetails.jsx        — useSeo (динамически)
-frontend/src/pages/HowItWorks.jsx            — useSeo
-frontend/src/pages/Contact.jsx               — useSeo
-frontend/src/pages/LegalInformation.jsx      — useSeo
-frontend/src/pages/Policies.jsx              — useSeo (динамически per type)
+frontend/public/videos/Demo1_720p_O2J2.mp4    → переименовано в Ocean2Joy_Demo1_720p.mp4
+frontend/public/videos/Demo2_720p_O2J2.mp4    → переименовано в Ocean2Joy_Demo2_720p.mp4
+```
+
+### Изменено (20 файлов)
+
+**Backend (3):**
+```
+backend/routes/public.py           — DB-driven GET /api/demo-videos + streaming endpoints + helper _build_public_demo_video
+backend/routes/admin.py            — CRUD для demo_videos (~220 строк) + Resend diagnostics + test
+backend/database/seed.py           — seed demo_videos + индекс
+```
+
+**Frontend root (3):**
+```
+frontend/public/index.html         — убраны Emergent-скрипты/бейдж/PostHog; добавлены: title, meta description, OG/Twitter с width/height, favicon, theme-color, Organization+ProfessionalService+WebSite JSON-LD с @id-связью
+frontend/package.json              — удалён @emergentbase/visual-edits
+frontend/yarn.lock                 — автосгенерировано
+```
+
+**Frontend pages (14):**
+```
+frontend/src/pages/Homepage.jsx              — useSeo, VideoObject JSON-LD (useJsonLd-совместимо), hero-подзаголовок обновлён, URL-resolver для /api/public/demo-media/, publisher.logo → вертикальный
+frontend/src/pages/Services.jsx              — useSeo + BreadcrumbList
+frontend/src/pages/ServiceDetails.jsx        — useSeo + BreadcrumbList + Service JSON-LD (динамически)
+frontend/src/pages/HowItWorks.jsx            — useSeo + FAQPage schema (7 Q&A) + BreadcrumbList + видимый FAQ accordion
+frontend/src/pages/Contact.jsx               — useSeo + BreadcrumbList
+frontend/src/pages/LegalInformation.jsx      — useSeo + BreadcrumbList
+frontend/src/pages/Policies.jsx              — useSeo + BreadcrumbList (per type)
 frontend/src/pages/Login.jsx                 — useSeo (noindex)
 frontend/src/pages/Register.jsx              — useSeo (noindex)
 frontend/src/pages/ClientDashboard.jsx       — useSeo (noindex)
 frontend/src/pages/NewProject.jsx            — useSeo (noindex)
 frontend/src/pages/ProjectDetails.jsx        — useSeo (noindex)
 frontend/src/pages/Profile.jsx               — useSeo (noindex)
-frontend/src/pages/AdminPanel.jsx            — useSeo (noindex) + подключен <DemoVideosManager/>
+frontend/src/pages/AdminPanel.jsx            — useSeo (noindex) + подключён <DemoVideosManager/>
 ```
 
-**Нетронутые:** все `utils/*`, `context/*`, все компоненты `OperationalChain/*`, все файлы бэкенда кроме перечисленных выше. API-контракты существующих эндпоинтов **не менялись** — регрессий не ожидается.
+### **НЕ** менялось
+- `docker-compose.yml`, `nginx.conf`, `backend.Dockerfile`, `frontend.Dockerfile` — без изменений
+- Операционная цепочка (все stage-transitions в `project_actions.py`)
+- PDF-генерация (11 WeasyPrint-шаблонов в `documents.py`)
+- JWT-аутентификация, cookie-настройки, hash_password
+- Схемы `users`, `projects`, `messages` — без изменений
+- Client isolation — без изменений
+- API-контракты существующих endpoints — без изменений. **Регрессий не ожидается.**
 
 ---
 
-## 8. Пошаговая инструкция для деплоя
+## 7. Пошаговая инструкция деплоя
 
 ### Предпосылки
-- Ты пуллишь последние изменения из GitHub.
 - На сервере установлены Docker + Docker Compose.
-- Структура деплоя уже существует (из `/app/deploy/` предыдущего релиза).
+- Репозиторий уже клонирован из предыдущего деплоя, структура `/app/deploy/*` существует.
 
 ### Шаг 1. Забрать код
 ```bash
-cd /opt/ocean2joy   # или где у тебя репо
+cd /opt/ocean2joy   # или где лежит репо
 git pull
 ```
 
-### Шаг 2. (Опционально, но рекомендуется) сделать бэкап Mongo
+### Шаг 2. (Рекомендуется) бэкап Mongo
 ```bash
 docker exec o2j_mongo mongodump --archive=/tmp/o2j_backup_$(date +%F).archive --db=ocean2joy_v2
 docker cp o2j_mongo:/tmp/o2j_backup_$(date +%F).archive ./backup/
@@ -227,100 +290,144 @@ docker cp o2j_mongo:/tmp/o2j_backup_$(date +%F).archive ./backup/
 docker compose build backend frontend
 docker compose up -d backend frontend
 ```
-Backend при старте увидит пустую коллекцию `demo_videos` и автоматически вставит 2 дефолтных записи (это single-run seed).
 
-### Шаг 4. Быстрые smoke-тесты (curl)
+Backend при первом рестарте увидит пустую коллекцию `demo_videos` → автоматически засеет 2 демо-записи со ссылками на `/videos/Ocean2Joy_Demo*_720p.mp4`. **Никаких ручных скриптов Mongo не требуется.**
+
+### Шаг 4. Smoke-тесты через curl
 ```bash
-# 1. Публичный список демо-видео из БД
-curl https://ocean2joy.com/api/demo-videos | jq .
-#    Ожидание: массив из 2 объектов с video_url="/videos/Ocean2Joy_Demo*_720p.mp4"
+# 1. HTML чист от Emergent
+curl -s https://ocean2joy.com/ | grep -iE "emergent|posthog"
+# Ожидание: пусто
 
 # 2. Самохостинг видео
 curl -I https://ocean2joy.com/videos/Ocean2Joy_Demo1_720p.mp4
-#    Ожидание: HTTP/2 200, content-type: video/mp4
+# Ожидание: HTTP/2 200, content-type: video/mp4
 
-# 3. robots.txt + sitemap
-curl https://ocean2joy.com/robots.txt
-curl https://ocean2joy.com/sitemap.xml
-#    Ожидание: обычный plain-text и валидный XML
+# 3. API демо-видео из БД
+curl https://ocean2joy.com/api/demo-videos | jq '.[] | {id, video_url, created_at}'
+# Ожидание: 2 объекта с video_url="/videos/Ocean2Joy_Demo*_720p.mp4"
 
-# 4. HTML без Emergent
-curl -s https://ocean2joy.com/ | grep -iE "emergent|posthog" | head
-#    Ожидание: пусто
+# 4. robots.txt + sitemap
+curl -I https://ocean2joy.com/robots.txt     # 200, text/plain
+curl -I https://ocean2joy.com/sitemap.xml    # 200, application/xml
 
-# 5. Organization + WebSite JSON-LD присутствуют
-curl -s https://ocean2joy.com/ | grep -c '"@type": "Organization"'
-#    Ожидание: 1 (или больше)
+# 5. Organization + ProfessionalService JSON-LD присутствуют
+curl -s https://ocean2joy.com/ | grep -c "ProfessionalService"
+# Ожидание: ≥ 1
+
+# 6. Meta description (новая, короткая, 3 продукта)
+curl -s https://ocean2joy.com/ | grep -o 'name="description"[^>]*'
+# Ожидание: "Digital video production studio. Live-action with actors, cinematic VFX and AI-generated video..."
 ```
 
-### Шаг 5. Проверки через браузер
-1. Открыть `https://ocean2joy.com/` → вкладка называется **«Ocean2Joy — Digital Video Production Studio»**, favicon — логотип.
-2. DevTools → Elements → `<head>`: должны быть:
-   - `<title>`, `meta[name=description]`, `meta[property=og:*]`, `link[rel=canonical]`
-   - 2 скрипта `<script type="application/ld+json">` (Organization + WebSite)
-   - 3-й скрипт с id `ocean2joy-videoobject-ld` (появляется через ~1 сек после загрузки).
-3. Правый нижний угол — **НЕТ чёрной плашки** «Made with Emergent».
-4. Network вкладка: **нет** запросов к `assets.emergent.sh`, `app.emergent.sh`, `us.i.posthog.com`, `customer-assets.emergentagent.com`.
-5. Перейти на `/services`, `/how-it-works`, `/policies/terms` — у каждой страницы уникальный `<title>` и `meta description`.
+### Шаг 5. Проверки в браузере
+1. **Вкладка браузера:** "Ocean2Joy — Digital Video Production Studio". Favicon — ваш вертикальный логотип.
+2. **DevTools → Elements → `<head>`** должен содержать:
+   - `<title>`, `meta[name=description]`, канонические `meta[property=og:*]`, `link[rel=canonical]`
+   - 2 статических `<script type="application/ld+json">`: Organization и WebSite
+   - Через ~1 сек после загрузки: 3-й скрипт `id="ocean2joy-videoobject-ld"` с VideoObject[]
+3. **Правый нижний угол** — пусто (нет «Made with Emergent»).
+4. **Network вкладка** — нет запросов к `assets.emergent.sh`, `app.emergent.sh`, `us.i.posthog.com`, `customer-assets.emergentagent.com`.
+5. **Клик по роутам** `/services`, `/how-it-works`, `/policies/terms` — у каждой уникальный `<title>` и `<meta description>`.
+6. **`/how-it-works`** — прокрутить вниз: есть видимый блок «Frequently Asked Questions» с 7 раскрывающимися вопросами.
 
-### Шаг 6. Проверить Resend и загрузку через админку
-1. Войти на `https://ocean2joy.com/login` как `admin@ocean2joy.com`.
-2. Открыть в адресной строке: `https://ocean2joy.com/api/admin/notifications/diagnostics` → должны быть правильные email, API-ключ замаскирован.
-3. Открыть: `https://ocean2joy.com/api/admin/notifications/test` через POST (можно через Postman или curl с сессионной cookie) → должен прийти email. Если не приходит — ответ содержит точный текст ошибки Resend.
-4. Перейти в `/admin` → прокрутить вниз до секции **«Demo Videos»** → там 2 демо-записи с превью постерами.
-5. Клик **«+ Add new video»** → загрузить свой MP4 (≤200MB) и PNG/JPG (≤10MB) → нажать **Create** → новая запись появляется в списке и сразу отображается на homepage.
+### Шаг 6. Проверить Resend и админ-CMS
+
+1. Войти `https://ocean2joy.com/login` как `admin@ocean2joy.com` / `admin123`.
+2. Открыть в адресной строке:
+   ```
+   https://ocean2joy.com/api/admin/notifications/diagnostics
+   ```
+   → Должны быть правильные email, API-ключ замаскирован.
+3. Через curl с сессионной cookie или Postman POST на `/api/admin/notifications/test` → должно прийти тестовое письмо (если не приходит — ответ содержит точный текст ошибки Resend).
+4. Перейти в `/admin` → прокрутить вниз до секции **«Demo Videos»** → там 2 засеянные демо-записи с превью постеров.
+5. Клик **«+ Add new video»** → загрузить свой MP4 (≤200MB) и PNG/JPG (≤10MB) → Create → новая запись появляется в списке и сразу видна на Homepage.
 6. Протестировать Edit / Replace video / Replace poster / стрелки reorder / Delete.
 
 ### Шаг 7. SEO-регистрация (в первые 24 часа после деплоя)
 
-**Google Search Console** ([search.google.com/search-console](https://search.google.com/search-console)):
-1. Add Property → Domain → `ocean2joy.com` (верификация через DNS TXT).
-2. Sitemaps → добавить `https://ocean2joy.com/sitemap.xml`.
-3. URL Inspection → `https://ocean2joy.com/` → **Test Live URL** → **Request Indexing**.
-4. Повторить Request Indexing для `/services`, `/how-it-works`, `/contact` (главные публичные).
+**Google Search Console** — [search.google.com/search-console](https://search.google.com/search-console)
+1. Add Property → Domain → `ocean2joy.com` → верификация через DNS TXT.
+2. Sitemaps → `https://ocean2joy.com/sitemap.xml`.
+3. URL Inspection → главная → **Test Live URL** → **Request Indexing**.
+4. Повторить для `/services`, `/services/custom-video`, `/services/video-editing`, `/services/ai-video`, `/how-it-works`.
 
-**Bing Webmaster Tools** ([bing.com/webmasters](https://www.bing.com/webmasters)):
-- Add Site → `https://ocean2joy.com` → Import from Google Search Console (1 клик).
+**Google Rich Results Test** — [search.google.com/test/rich-results](https://search.google.com/test/rich-results)
+- Вставить `https://ocean2joy.com/` → ✅ Organization + ProfessionalService + WebSite + VideoObject (2 items, без warnings про uploadDate)
+- Вставить `https://ocean2joy.com/how-it-works` → ✅ FAQ (7 items) + Breadcrumbs
+- Вставить `https://ocean2joy.com/services/custom-video` → ✅ Breadcrumbs + Service
 
-**Yandex Webmaster** (если нужен русскоязычный трафик):
-- [webmaster.yandex.com](https://webmaster.yandex.com) → Add Site → submit sitemap.
+**Bing Webmaster Tools** — [bing.com/webmasters](https://www.bing.com/webmasters) → Add Site → **Import from Google Search Console** (1 клик).
 
-**AI-поисковики** (Perplexity / ChatGPT Search / Claude) **не принимают** явные submission'ы — они **сами** краулят сайты через свои боты (их уже разрешил `robots.txt`). Типичный срок первой индексации: 1–3 недели.
+**Yandex Webmaster** (если нужен русскоязычный трафик) — [webmaster.yandex.com](https://webmaster.yandex.com) → Add Site → submit sitemap.
 
-### Шаг 8. Если что-то пошло не так (troubleshooting)
+**AI-поисковики (Perplexity, ChatGPT Search, Claude)** — **НЕ** принимают submission'ы. Они сами краулят сайты своими ботами, которые уже разрешены в `robots.txt`. Первая индексация типично за 1–3 недели.
+
+### Шаг 8. Troubleshooting
 
 | Симптом | Проверка | Решение |
 |---|---|---|
-| `GET /api/demo-videos` вернул `[]` | `docker exec o2j_mongo mongosh ocean2joy_v2 --eval 'db.demo_videos.countDocuments()'` | Перезапустить backend (`docker compose restart backend`) — seed запустится |
-| `GET /videos/Ocean2Joy_Demo1_720p.mp4` → 404 | В образе фронта файла нет | Проверить, что файлы закоммичены в git и скопированы в образ (`docker compose build frontend` без кэша: `--no-cache`) |
-| Новое видео через админку уходит в 413 | Upload > 200 MB | Уменьшить видео или поднять `MAX_VIDEO_MB` в `backend/routes/admin.py` |
-| В Nginx лог: `client intended to send too large body` | Nginx-лимит меньше `MAX_VIDEO_MB` | В `/app/deploy/nginx.conf` → `client_max_body_size 250M;` → `docker compose restart nginx` |
-| Title на вкладке — старый «Emergent Fullstack App» | Браузерный / CDN кэш | Ctrl+Shift+R; очистить Cloudflare кэш если есть |
-| Resend тестовое письмо падает 502 | Ответ содержит точный текст ошибки Resend | Смотри таблицу в истории чата: смена `ADMIN_NOTIFY_EMAIL`, `SENDER_EMAIL=onboarding@resend.dev`, верификация API-ключа |
+| `GET /api/demo-videos` вернул `[]` | `docker exec o2j_mongo mongosh ocean2joy_v2 --eval 'db.demo_videos.countDocuments()'` | Перезапустить backend: `docker compose restart backend` — seed сработает |
+| `GET /videos/Ocean2Joy_Demo1_720p.mp4` → 404 | Файл не попал в образ фронта | Пересобрать без кэша: `docker compose build --no-cache frontend && docker compose up -d frontend` |
+| Загрузка нового видео в 413 | Upload > 200 MB | Уменьшить видео, либо поднять `MAX_VIDEO_MB` в `backend/routes/admin.py` |
+| Nginx лог: `client intended to send too large body` | Nginx-лимит меньше `MAX_VIDEO_MB` | В `deploy/nginx.conf` → `client_max_body_size 250M;` → `docker compose restart nginx` |
+| Title на вкладке старый («Emergent \| Fullstack App») | Браузерный/CDN кэш | Ctrl+Shift+R; очистить Cloudflare кэш |
+| Google всё ещё показывает старое описание | Google-кэш | Request Indexing в Search Console; рассасывается 2–4 недели |
+| Resend тестовое письмо 502 | Ответ содержит точный текст ошибки Resend | Частые причины: `ADMIN_NOTIFY_EMAIL` ≠ email Resend-аккаунта; `SENDER_EMAIL` ≠ `onboarding@resend.dev` и не верифицированный домен; invalid API key |
 
 ---
 
-## 9. Что **НЕ** менялось (для спокойствия)
+## 8. Бэклог — что можно сделать в следующих релизах
 
-- 12-этапная операционная цепочка (все stage-transitions)
-- PDF-генерация (WeasyPrint, 11 шаблонов в `documents.py`)
-- JWT-аутентификация, hash_password, cookie settings
-- Схема `users`, `projects`, `messages` — без изменений
-- Клиентская изоляция (`user_id` filter на `/api/projects`)
-- Все существующие publicAPI (услуги, политики, платежи) — контракты не трогались
-- `docker-compose.yml`, `nginx.conf`, `backend.Dockerfile` — **не менялись**
-- `frontend.Dockerfile` — **не менялся** (он просто копирует `/public` и `/src`, наши новые файлы пролетят автоматически)
+**P1 (рекомендуется):**
+- **Верифицировать домен `ocean2joy.com` в Resend** ([resend.com/domains](https://resend.com/domains)) — разблокирует отправку с `noreply@ocean2joy.com` и произвольные адреса получателей.
+- **Отдельная страница `/showreel`** с одним главным видео по центру — Google Search Console писал «Video isn't on a watch page». На watch-page VideoObject попадёт в Google Video-выдачу с полноценной карточкой.
+- **`ItemList` schema на `/services`** — Google покажет карусель из 3 услуг прямо в SERP.
 
----
+**P2 (технический долг):**
+- Tier-2 React Hooks fixes (`useCallback` в ProjectDetails, ClientDashboard, AdminPanel, AuthContext, ChatContainer, NotificationBell).
+- Рефакторинг `backend/routes/documents.py` (~2100 строк → Jinja2 templates).
+- UI/UX редизайн Project Workspace под стилистику Homepage (`design_agent_full_stack`).
 
-## 10. Что рекомендуется сделать в следующих релизах (P1/P2)
-
-1. **Верифицировать домен `ocean2joy.com` в Resend** ([resend.com/domains](https://resend.com/domains)) — разблокирует отправку с `noreply@ocean2joy.com` на любые адреса клиентов. Сейчас testing-mode ограничивает получателя одним emailом.
-2. **Добавить отдельную страницу `/showreel`** с одним большим видео — Google Search Console писал «Video isn't on a watch page». На такой странице VideoObject получит priority, а не supplementary.
-3. **Tier-2 React Hooks fixes** (отложено из прошлого форка): обернуть init-функции в `useCallback` в `ProjectDetails`, `ClientDashboard`, `AdminPanel`, `AuthContext`, `ChatContainer`, `NotificationBell`.
-4. **Рефакторинг `backend/routes/documents.py`** (~2100 строк → Jinja2).
-5. **UI/UX редизайн Project Workspace** под стилистику Homepage (вызов `design_agent_full_stack`).
+**P3 (nice-to-have):**
+- Google Business Profile для Tbilisi.
+- Оригинальные фотографии вместо Unsplash stock на главной и service-карточках.
+- Серверный sitemap (API-эндпоинт) для автогенерации при добавлении новых услуг/политик.
 
 ---
 
-**Что проверял testing-агент (iteration_4):** 16/16 бэкенд-тестов PASS (CRUD, upload, size/extension caps, auth guards, streaming endpoints, reorder, cleanup) + полный e2e на фронте (Create modal, Edit, Delete, JSON-LD, отображение Homepage).
+## 9. Тестовые учётные данные (для верификации после деплоя)
+
+```
+Admin:       admin@ocean2joy.com / admin123
+Test Client: client@test.com     / client123
+```
+
+*(Если пароль админа уже изменён на проде через `ADMIN_PASSWORD` в `.env` — используй текущее значение оттуда.)*
+
+---
+
+## 10. Git commit message (рекомендуемый)
+
+```
+chore: Emergent-independent production + demo videos CMS + SEO layer
+
+- Remove all references to emergentagent.com / emergent.sh / emergentbase
+  (trackers, Emergent badge, @emergentbase/visual-edits devDep)
+- Self-host demo videos at /videos/Ocean2Joy_Demo*_720p.mp4
+- Replace browser tab title, meta description, favicon, theme-color
+- Add Organization + ProfessionalService + WebSite JSON-LD (with @id linking)
+- Emit VideoObject JSON-LD on homepage (full ISO uploadDate with timezone)
+- Per-page SEO (title, description, canonical, OG/Twitter, robots) across all 15 routes
+- FAQPage schema on /how-it-works (7 Q&A, visible accordion for rich results)
+- BreadcrumbList schema on all public sub-pages
+- Service schema on service detail pages (linked to Organization via @id)
+- robots.txt with explicit allow for AI crawlers (GPTBot, PerplexityBot, ClaudeBot, etc.)
+- sitemap.xml with 13 public URLs
+- Admin CMS: /admin panel — demo videos upload, replace, reorder, delete (CRUD + streaming endpoints)
+- Resend diagnostics endpoints: /api/admin/notifications/{diagnostics,test}
+
+Files: +9, ~20, -2 (old demo video filenames).
+Tested: testing_agent_v3_fork 16/16 backend PASS + full e2e frontend.
+No regressions on existing flows (12-stage chain, PDF generation, auth, project isolation).
+```
