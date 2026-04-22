@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFileContract, FaBuilding, FaCreditCard } from 'react-icons/fa';
 import useSeo from '../hooks/useSeo';
+import useJsonLd from '../hooks/useJsonLd';
 
 function LegalInformation() {
   useSeo({
@@ -8,6 +9,15 @@ function LegalInformation() {
     description:
       'Ocean2Joy legal entity, tax details, and terms of engagement. Individual Entrepreneur Vera Iambaeva, registered in Tbilisi, Georgia. Tax ID 302335809.',
     path: '/legal',
+  });
+
+  useJsonLd('breadcrumb-legal', {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ocean2joy.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Legal', item: 'https://ocean2joy.com/legal' },
+    ],
   });
 
   return (

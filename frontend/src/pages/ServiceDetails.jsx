@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaCheckCircle, FaClock, FaSync, FaDownload, FaRocket } from 'react-icons/fa';
 import useSeo from '../hooks/useSeo';
+import useJsonLd from '../hooks/useJsonLd';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -20,6 +21,27 @@ function ServiceDetails() {
     path: `/services/${serviceId}`,
     image: service?.image_url,
   });
+
+  useJsonLd('breadcrumb-service-detail', service ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ocean2joy.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://ocean2joy.com/services' },
+      { '@type': 'ListItem', position: 3, name: service.title, item: `https://ocean2joy.com/services/${serviceId}` },
+    ],
+  } : null);
+
+  useJsonLd('service-detail', service ? {
+    '@context': 'https://schema.org',
+    '@type': 'Service',
+    name: service.title,
+    description: service.description,
+    url: `https://ocean2joy.com/services/${serviceId}`,
+    provider: { '@id': 'https://ocean2joy.com/#organization' },
+    areaServed: 'Worldwide',
+    serviceType: service.title,
+  } : null);
 
   useEffect(() => {
     fetchServiceDetails();

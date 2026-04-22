@@ -1,5 +1,6 @@
 import { FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
 import useSeo from '../hooks/useSeo';
+import useJsonLd from '../hooks/useJsonLd';
 
 function Contact() {
   useSeo({
@@ -7,6 +8,15 @@ function Contact() {
     description:
       'Get in touch with Ocean2Joy for custom video production, professional editing with VFX, or AI-generated video. Response within 1–2 business days.',
     path: '/contact',
+  });
+
+  useJsonLd('breadcrumb-contact', {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ocean2joy.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Contact', item: 'https://ocean2joy.com/contact' },
+    ],
   });
 
   return (

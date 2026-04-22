@@ -1,6 +1,38 @@
 import { FaPlay, FaComments, FaPalette, FaDownload, FaCheckCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
 import useSeo from '../hooks/useSeo';
+import useJsonLd from '../hooks/useJsonLd';
+
+const HOW_IT_WORKS_FAQ = [
+  {
+    q: 'When do I pay for the project?',
+    a: 'Ocean2Joy follows a pay-after-acceptance model. You sign the invoice upfront to lock the scope, but the actual payment is due only after you have reviewed the final delivery, confirmed it meets the brief, and signed the Acceptance Act. If you are not satisfied, you are not charged.',
+  },
+  {
+    q: 'How long does a typical video project take?',
+    a: 'Turnaround depends on the service and complexity. Custom live-action videos typically take 2–4 weeks end-to-end (script → shoot → post). Video editing of existing footage usually ships in 5–10 business days. AI-generated videos are the fastest — often delivered in 3–7 days.',
+  },
+  {
+    q: 'How many revision rounds are included?',
+    a: 'Every project includes 2–3 rounds of revisions at no extra cost, scoped to the agreed brief. Substantial re-directions that fall outside the original scope are quoted separately. See the Revision Policy for details.',
+  },
+  {
+    q: 'What video formats do you deliver?',
+    a: 'We deliver master files in MP4 and MOV as standard. On request we can also provide AVI or a bespoke codec/resolution for broadcast or streaming platforms. All deliverables are uploaded to a secure client portal — no physical media, no shipping.',
+  },
+  {
+    q: 'Do you handle the script, storyboard and casting?',
+    a: 'Yes. We offer end-to-end production: scriptwriting, storyboarding, casting professional actors, directing on-set, full post-production (editing, VFX, color grading, sound design). You can also come with your own script — we adapt the workflow to your starting point.',
+  },
+  {
+    q: 'What payment methods do you accept?',
+    a: 'PayPal, international SWIFT bank transfer, and USDT on the TRON network (TRC-20). All payment details are printed on the invoice issued at stage 3 of the workflow.',
+  },
+  {
+    q: 'Do you work with clients internationally?',
+    a: 'Yes — Ocean2Joy operates 100% digitally, and our service is available worldwide. Communication, briefs, revisions and final delivery all happen through the client portal. The legal entity is registered in Tbilisi, Georgia.',
+  },
+];
 
 function HowItWorks() {
   useSeo({
@@ -8,6 +40,25 @@ function HowItWorks() {
     description:
       "See Ocean2Joy's transparent 12-stage process: from project brief and invoice to delivery and acceptance. You pay only after you sign off on the final result.",
     path: '/how-it-works',
+  });
+
+  useJsonLd('faq-how-it-works', {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: HOW_IT_WORKS_FAQ.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  });
+
+  useJsonLd('breadcrumb-how-it-works', {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ocean2joy.com/' },
+      { '@type': 'ListItem', position: 2, name: 'How It Works', item: 'https://ocean2joy.com/how-it-works' },
+    ],
   });
 
   return (
@@ -290,6 +341,31 @@ function HowItWorks() {
             <Link to="/policies/terms" className="bg-white/20 backdrop-blur-sm text-white border-2 border-white px-6 py-2 rounded-lg font-semibold hover:bg-white/30 transition">
               Read Terms of Service
             </Link>
+          </div>
+        </div>
+
+        {/* Frequently Asked Questions — kept visible for Google FAQ rich results. */}
+        <div className="mt-20" data-testid="how-faq-section">
+          <div className="text-center mb-10">
+            <h3 className="text-3xl font-bold text-gray-900 mb-3">Frequently Asked Questions</h3>
+            <p className="text-gray-500">Everything clients ask before starting a project — in one place.</p>
+          </div>
+          <div className="max-w-3xl mx-auto space-y-3">
+            {HOW_IT_WORKS_FAQ.map((item, idx) => (
+              <details
+                key={idx}
+                className="group bg-white border border-gray-200 rounded-lg open:shadow-sm transition"
+                data-testid={`how-faq-item-${idx}`}
+              >
+                <summary className="flex items-start justify-between gap-4 px-5 py-4 cursor-pointer list-none">
+                  <span className="text-sm font-semibold text-gray-900 flex-1">{item.q}</span>
+                  <span className="shrink-0 w-6 h-6 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center text-lg leading-none transition-transform group-open:rotate-45">+</span>
+                </summary>
+                <div className="px-5 pb-5 -mt-1 text-sm text-gray-600 leading-relaxed">
+                  {item.a}
+                </div>
+              </details>
+            ))}
           </div>
         </div>
 

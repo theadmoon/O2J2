@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaArrowRight, FaCheckCircle } from 'react-icons/fa';
 import useSeo from '../hooks/useSeo';
+import useJsonLd from '../hooks/useJsonLd';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -16,6 +17,15 @@ function Services() {
     description:
       "Explore Ocean2Joy's video services: custom video production with real actors, professional editing with cinematic VFX, and AI-generated video. Transparent pricing, pay after acceptance.",
     path: '/services',
+  });
+
+  useJsonLd('breadcrumb-services', {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ocean2joy.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Services', item: 'https://ocean2joy.com/services' },
+    ],
   });
 
   useEffect(() => {

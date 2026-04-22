@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
 import useSeo from '../hooks/useSeo';
+import useJsonLd from '../hooks/useJsonLd';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -34,6 +35,16 @@ function Policies() {
     path: `/policies/${type || ''}`,
     type: 'article',
   });
+
+  useJsonLd('breadcrumb-policy', type && policyTitles[type] ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: 'https://ocean2joy.com/' },
+      { '@type': 'ListItem', position: 2, name: 'Policies', item: 'https://ocean2joy.com/legal' },
+      { '@type': 'ListItem', position: 3, name: policyTitles[type], item: `https://ocean2joy.com/policies/${type}` },
+    ],
+  } : null);
 
   useEffect(() => {
     if (type) {
