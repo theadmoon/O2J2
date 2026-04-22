@@ -11,6 +11,7 @@ import {
   ArrowLeft, User as UserIcon, Mail, CreditCard, ShieldCheck,
   Check, X, Eye, EyeOff, Calendar,
 } from 'lucide-react';
+import useSeo from '../hooks/useSeo';
 
 function formatIsoDate(iso) {
   if (!iso) return '';
@@ -23,6 +24,7 @@ function formatIsoDate(iso) {
 
 export default function Profile() {
   const { user, refreshUser } = useAuth();
+  useSeo({ title: 'Profile | Ocean2Joy', path: '/profile', noIndex: true });
 
   const [nameEdit, setNameEdit] = useState({ editing: false, value: '', saving: false, error: '' });
   const [paypalEdit, setPaypalEdit] = useState({ editing: false, value: '', saving: false, error: '' });

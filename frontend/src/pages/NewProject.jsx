@@ -10,9 +10,11 @@ import { Label } from '../components/ui/label';
 import { Textarea } from '../components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { ArrowRight, Upload } from 'lucide-react';
+import useSeo from '../hooks/useSeo';
 
 export default function NewProject() {
   const { user } = useAuth();
+  useSeo({ title: 'Start a new project | Ocean2Joy', path: '/projects/new', noIndex: true });
   const navigate = useNavigate();
   const [serviceType, setServiceType] = useState('custom_video');
   const [projectTitle, setProjectTitle] = useState('');

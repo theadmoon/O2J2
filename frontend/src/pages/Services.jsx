@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaArrowRight, FaCheckCircle } from 'react-icons/fa';
+import useSeo from '../hooks/useSeo';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -9,6 +10,13 @@ const API = `${BACKEND_URL}/api`;
 function Services() {
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  useSeo({
+    title: 'Video Production Services | Ocean2Joy',
+    description:
+      "Explore Ocean2Joy's video services: custom video production with real actors, professional editing with cinematic VFX, and AI-generated video. Transparent pricing, pay after acceptance.",
+    path: '/services',
+  });
 
   useEffect(() => {
     fetchServices();

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import { FaCheckCircle, FaClock, FaSync, FaDownload, FaRocket } from 'react-icons/fa';
+import useSeo from '../hooks/useSeo';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -10,6 +11,15 @@ function ServiceDetails() {
   const { serviceId } = useParams();
   const [service, setService] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useSeo({
+    title: service ? `${service.title} | Ocean2Joy` : 'Service | Ocean2Joy',
+    description: service
+      ? String(service.description || '').slice(0, 160)
+      : 'Professional digital video production services by Ocean2Joy — transparent 12-stage workflow, pay after acceptance.',
+    path: `/services/${serviceId}`,
+    image: service?.image_url,
+  });
 
   useEffect(() => {
     fetchServiceDetails();

@@ -1,7 +1,15 @@
 import { FaPlay, FaComments, FaPalette, FaDownload, FaCheckCircle } from 'react-icons/fa';
 import { Link } from 'react-router-dom';
+import useSeo from '../hooks/useSeo';
 
 function HowItWorks() {
+  useSeo({
+    title: 'How It Works — 12-Stage Video Production Workflow | Ocean2Joy',
+    description:
+      "See Ocean2Joy's transparent 12-stage process: from project brief and invoice to delivery and acceptance. You pay only after you sign off on the final result.",
+    path: '/how-it-works',
+  });
+
   return (
     <div className="how-it-works-page py-20 px-4">
       <div className="max-w-6xl mx-auto">

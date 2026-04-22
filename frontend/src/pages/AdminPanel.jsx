@@ -5,6 +5,7 @@ import api from '../utils/api';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
 import DemoVideosManager from '../components/admin/DemoVideosManager';
+import useSeo from '../hooks/useSeo';
 import {
   ShieldCheck, ArrowLeft, Copy, Check, CreditCard, Landmark, Coins, AlertTriangle,
 } from 'lucide-react';
@@ -42,6 +43,8 @@ export default function AdminPanel() {
   const [ref, setRef] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  useSeo({ title: 'Admin Panel | Ocean2Joy', path: '/admin', noIndex: true });
 
   useEffect(() => {
     api.get('/admin/payment-reference')

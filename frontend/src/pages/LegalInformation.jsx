@@ -1,7 +1,15 @@
 import { Link } from 'react-router-dom';
 import { FaEnvelope, FaPhone, FaMapMarkerAlt, FaFileContract, FaBuilding, FaCreditCard } from 'react-icons/fa';
+import useSeo from '../hooks/useSeo';
 
 function LegalInformation() {
+  useSeo({
+    title: 'Legal Information | Ocean2Joy',
+    description:
+      'Ocean2Joy legal entity, tax details, and terms of engagement. Individual Entrepreneur Vera Iambaeva, registered in Tbilisi, Georgia. Tax ID 302335809.',
+    path: '/legal',
+  });
+
   return (
     <div className="legal-information py-16 px-4 bg-gray-50 min-h-screen">
       <div className="max-w-4xl mx-auto">

@@ -4,6 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import Footer from '../components/Layout/Footer';
 import { FaPlay, FaRocket, FaVideo, FaMagic, FaCheckCircle, FaComments } from 'react-icons/fa';
 import axios from 'axios';
+import useSeo from '../hooks/useSeo';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -13,6 +14,13 @@ export default function Homepage() {
   const [services, setServices] = useState([]);
   const [demoVideos, setDemoVideos] = useState([]);
   const [paymentSettings, setPaymentSettings] = useState(null);
+
+  useSeo({
+    title: 'Ocean2Joy — Digital Video Production Studio',
+    description:
+      'Ocean2Joy is a boutique digital video production studio. End-to-end video creation through a transparent 12-stage workflow — pay only after you accept the final result.',
+    path: '/',
+  });
 
   useEffect(() => {
     fetchServices();

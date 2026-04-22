@@ -17,6 +17,7 @@ import {
   Paperclip, Download, Pencil, Check, X, ChevronDown, ChevronUp, CreditCard,
   FileCheck2,
 } from 'lucide-react';
+import useSeo from '../hooks/useSeo';
 
 export default function ProjectDetails() {
   const { id } = useParams();
@@ -26,6 +27,7 @@ export default function ProjectDetails() {
   const [docPreview, setDocPreview] = useState(null);
   const [previewText, setPreviewText] = useState('');
   const [showAdvanceFallback, setShowAdvanceFallback] = useState(false);
+  useSeo({ title: project ? `${project.project_number} · ${project.project_title || 'Project'} | Ocean2Joy` : 'Project | Ocean2Joy', path: `/projects/${id}`, noIndex: true });
   const [titleEdit, setTitleEdit] = useState({ editing: false, value: '', saving: false, error: '' });
   const [detailsExpanded, setDetailsExpanded] = useState(false);
 

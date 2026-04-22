@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import ReactMarkdown from 'react-markdown';
+import useSeo from '../hooks/useSeo';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
@@ -14,10 +15,25 @@ const policyTitles = {
   privacy: 'Privacy Policy'
 };
 
+const policyDescriptions = {
+  terms: 'Ocean2Joy Terms of Service: 12-stage workflow, pay-after-acceptance model, obligations of the studio and the client.',
+  digital_delivery: 'Digital Delivery Policy: how Ocean2Joy delivers final videos, access links, supported formats, and client responsibilities on pickup.',
+  refund: 'Refund & Cancellation Policy: conditions under which a client may cancel or request a refund in the Ocean2Joy pay-after-acceptance model.',
+  revision: 'Revision Policy: scope of included revision rounds, how to request changes, and what counts as a new project.',
+  privacy: 'Privacy Policy: what personal data Ocean2Joy collects, how we store and process it, and your rights.',
+};
+
 function Policies() {
   const { type } = useParams();
   const [policy, setPolicy] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  useSeo({
+    title: policyTitles[type] ? `${policyTitles[type]} | Ocean2Joy` : 'Policies | Ocean2Joy',
+    description: policyDescriptions[type] || 'Ocean2Joy legal policies — terms, privacy, refund, delivery, revisions.',
+    path: `/policies/${type || ''}`,
+    type: 'article',
+  });
 
   useEffect(() => {
     if (type) {

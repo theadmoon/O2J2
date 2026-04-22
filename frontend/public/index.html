@@ -35,6 +35,38 @@
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@600&display=swap" rel="stylesheet" />
+
+        <!-- Organization schema for Google Knowledge Graph + AI search context -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Ocean2Joy",
+            "url": "https://ocean2joy.com",
+            "logo": "https://ocean2joy.com/logo-horizontal.png",
+            "description": "Boutique digital video production studio offering cinematic live-action, VFX, professional editing and AI-generated video through a transparent 12-stage workflow.",
+            "founder": { "@type": "Person", "name": "Vera Iambaeva" },
+            "address": {
+                "@type": "PostalAddress",
+                "addressLocality": "Tbilisi",
+                "addressCountry": "GE"
+            },
+            "taxID": "302335809",
+            "areaServed": "Worldwide",
+            "knowsAbout": ["video production","video editing","visual effects","AI-generated video","post-production","color grading","sound design"]
+        }
+        </script>
+
+        <!-- WebSite schema: enables sitelinks searchbox + clarifies canonical site identity -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Ocean2Joy",
+            "url": "https://ocean2joy.com",
+            "publisher": { "@type": "Organization", "name": "Ocean2Joy" }
+        }
+        </script>
         <!--
         manifest.json provides metadata used when your web app is installed on a
         user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/

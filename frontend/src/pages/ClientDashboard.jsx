@@ -6,6 +6,7 @@ import { formatDate } from '../utils/formatters';
 import Navbar from '../components/Layout/Navbar';
 import Footer from '../components/Layout/Footer';
 import { Plus, FolderOpen, Clock, ArrowRight, Filter, ShieldCheck, Trash2 } from 'lucide-react';
+import useSeo from '../hooks/useSeo';
 
 const STATUS_COLORS = {
   submitted: 'bg-blue-100 text-blue-700',
@@ -34,6 +35,8 @@ export default function ClientDashboard() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
   const [deletingId, setDeletingId] = useState(null);
+
+  useSeo({ title: 'Dashboard | Ocean2Joy', path: '/dashboard', noIndex: true });
 
   const handleDelete = async (e, project) => {
     e.preventDefault();

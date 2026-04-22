@@ -1,6 +1,14 @@
 import { FaEnvelope, FaPhone, FaMapMarkerAlt } from 'react-icons/fa';
+import useSeo from '../hooks/useSeo';
 
 function Contact() {
+  useSeo({
+    title: 'Contact Ocean2Joy — Video Production Studio',
+    description:
+      'Get in touch with Ocean2Joy for custom video production, professional editing with VFX, or AI-generated video. Response within 1–2 business days.',
+    path: '/contact',
+  });
+
   return (
     <div className="contact-page py-20 px-4">
       <div className="max-w-3xl mx-auto">

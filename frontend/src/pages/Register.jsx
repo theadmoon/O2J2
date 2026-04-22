@@ -5,10 +5,12 @@ import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Waves, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import useSeo from '../hooks/useSeo';
 
 const OCEAN_BG = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80";
 
 export default function Register() {
+  useSeo({ title: 'Create account | Ocean2Joy', description: 'Create your Ocean2Joy client account to start a video project.', path: '/register', noIndex: true });
   const { register } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
