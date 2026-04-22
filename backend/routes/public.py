@@ -42,6 +42,7 @@ def _build_public_demo_video(doc: dict) -> dict:
         "video_url": _video_url(),
         "video_type": "url",
         "thumbnail_url": _thumb_url(),
+        "created_at": doc.get("created_at") or "",
     }
 
 # Full services data with features, genres, etc.

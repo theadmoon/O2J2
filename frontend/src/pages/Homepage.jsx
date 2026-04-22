@@ -40,7 +40,7 @@ export default function Homepage() {
       description: v.description,
       thumbnailUrl: toAbs(v.thumbnail_url),
       contentUrl: toAbs(v.video_url),
-      uploadDate,
+      uploadDate: (v.created_at ? String(v.created_at).slice(0, 10) : uploadDate),
       publisher: {
         '@type': 'Organization',
         name: 'Ocean2Joy',

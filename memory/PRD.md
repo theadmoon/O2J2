@@ -11,6 +11,16 @@ Build a clean, modular web platform for digital video production using Marcos pr
 ## DEPLOY READINESS (as of 21 Apr 2026)
 MVP is production-ready. Full audit passed (37/39 backend, all critical frontend flows). Ready for first Emergent Deploy.
 
+## Post-deploy hardening (22 Apr 2026)
+- **Emergent-independent deploy**: removed all references to emergentagent.com / emergent.sh / emergentbase from production build. Self-hosted Demo1/Demo2 MP4s in frontend/public/videos/. Stripped `<script src=emergent-main.js>`, «Made with Emergent» badge, PostHog tracker, and `@emergentbase/visual-edits` devDep.
+- **SEO**: Proper `<title>`, meta description, Open Graph, Twitter Card, favicon, theme-color in index.html. VideoObject JSON-LD emitted from Homepage.jsx (one entry per demo video, absolute URLs, stable uploadDate from DB created_at).
+- **Resend diagnostics**: `GET /api/admin/notifications/diagnostics` (config introspection, API key masked) and `POST /api/admin/notifications/test` (send real test email, surfaces Resend error text) in admin.py.
+- **Demo Videos CMS**: demo reel moved from hardcoded Python list to MongoDB `demo_videos` collection (seeded on first start). Admin UI at `/admin` → Demo Videos section. Endpoints:
+  - Public: GET /api/demo-videos (DB-sourced, sorted by order), GET /api/public/demo-media/{id}/{video|poster} (FileResponse streaming for uploaded records).
+  - Admin: GET/POST /api/admin/demo-videos, PUT /api/admin/demo-videos/{id}, POST /{id}/video, POST /{id}/poster, DELETE /{id}, POST /api/admin/demo-videos/reorder.
+  - Storage: uploaded media at /app/backend/uploads/demo_media/{id}/{video|poster}/. Size caps: video 200 MB, poster 10 MB. Extension whitelists enforced.
+- Backend fully tested (testing_agent_v3_fork iteration_4: 16/16 PASS + all frontend flows).
+
 ## Implementation status
 
 ### Completed (all production-verified)
