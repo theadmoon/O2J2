@@ -8,8 +8,11 @@
 >
 > **Revision 2 — 2026-04-24 — residuals from content audit**:
 > - Stage-2 label aligned with internal constants — `Quote activated` → **Order Activated** in §3 of Terms and §2 of Refund table.
+> - Terms §4 updated — `after the quote is activated` → `after the order is activated` (terminology consistency with §3).
+> - Public `/api/payment-settings` note (rendered on Homepage payments block) rephrased — `after quote confirmation` → `after the order is activated`; internal docstring of the same handler updated accordingly.
 > - Digital Delivery §9 rewritten from plain email contact to portal-first with email-as-emergency-fallback wording.
 > - Explicit mention of signing the **Certificate of Delivery** *before* the Acceptance Act added in HowItWorks Step 5 and ServiceDetails Step 4.
+> - HowItWorks Step 5 bullet softened — `no external sharing services` → aligned with Digital Delivery §2 (own storage or third-party storage platform, documented per project).
 > - `Content version last refreshed` line removed from all 5 policy snapshots (and the corresponding `updated_at` field dropped from the backend payload); only `Substantive version in force from: 2025-10-21` remains.
 
 ---
@@ -303,7 +306,7 @@ Our team works on the project internally. All communication about the project �
 
 #### Step 5 — Electronic Delivery, File Access & Client Acceptance
 Once the work is complete, our team issues a **Delivery Certificate** in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, then signs the **Certificate of Delivery** inside the portal to confirm the files were received, and finally signs the **Acceptance Act** to confirm the work meets the brief.
-- All deliverables are accessible through the secure portal — no external sharing services.
+- All deliverables are accessible through the secure portal workflow. Depending on file size and security requirements, the access path may use our own storage or a third-party storage platform documented inside the project.
 - Included revision rounds are requested and processed inside the portal.
 - The client first signs the **Certificate of Delivery**, then the **Acceptance Act** — the final confirmation before the payment stage.
 
@@ -457,7 +460,7 @@ Every order follows a fixed 12-stage workflow inside the client portal. Each sta
 ## 4. Payment Model — Pay-After-Acceptance
 Unlike conventional prepayment models, **actual payment is transferred only after** the client has inspected the deliverables and signed the Acceptance Act (Stage 9). The Invoice signature at Stage 4 is a contractual commitment, not a payment.
 
-Payment is currently processed **manually** via one of three channels: **PayPal**, **SWIFT bank transfer**, or **USDT-TRC20** cryptocurrency. Full payment details for the channel you choose are provided inside the client portal after the quote is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
+Payment is currently processed **manually** via one of three channels: **PayPal**, **SWIFT bank transfer**, or **USDT-TRC20** cryptocurrency. Full payment details for the channel you choose are provided inside the client portal after the order is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
 
 ## 5. Revisions
 Revisions are handled inside the project chat before the Certificate of Delivery is signed (Stage 8). When changes are requested, we upload a new deliverable URL — previous versions remain visible in the deliverables history. See our **Revision Policy** for scope and limits.
@@ -794,5 +797,5 @@ These pages are marked `noindex, nofollow` — they are not discoverable through
 
 ## End of document
 
-Generated directly from the source code on 23 April 2026.  
+Generated directly from the source code on 24 April 2026 (revision 2).  
 Source files: `backend/routes/public.py` (SERVICES + POLICIES), `backend/utils/constants.py` (legal/payment details), `frontend/src/pages/*.jsx` (hero/body text), `frontend/src/pages/HowItWorks.jsx` (FAQ constant).

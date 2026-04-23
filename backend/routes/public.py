@@ -180,7 +180,7 @@ async def get_payment_settings():
     We expose only minimum info needed to (a) let PayPal verify Vera Iambaeva's
     receiving account is legitimate, and (b) inform the client what to expect.
     Full payment details (IBAN, SWIFT, wallet address) are rendered only inside
-    the authenticated invoice document after the quote has been activated.
+    the authenticated invoice document after the order has been activated.
     """
     return {
         "methods": [
@@ -208,7 +208,7 @@ async def get_payment_settings():
         ],
         "currency": "USD",
         "beneficiary": LEGAL_ENTITY_NAME,
-        "note": "Full payment details will be provided in your invoice after quote confirmation.",
+        "note": "Full payment details will be provided in your invoice after the order is activated.",
     }
 
 
@@ -272,7 +272,7 @@ Every order follows a fixed 12-stage workflow inside the client portal. Each sta
 ## 4. Payment Model — Pay-After-Acceptance
 Unlike conventional prepayment models, **actual payment is transferred only after** the client has inspected the deliverables and signed the Acceptance Act (Stage 9). The Invoice signature at Stage 4 is a contractual commitment, not a payment.
 
-Payment is currently processed **manually** via one of three channels: **PayPal**, **SWIFT bank transfer**, or **USDT-TRC20** cryptocurrency. Full payment details for the channel you choose are provided inside the client portal after the quote is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
+Payment is currently processed **manually** via one of three channels: **PayPal**, **SWIFT bank transfer**, or **USDT-TRC20** cryptocurrency. Full payment details for the channel you choose are provided inside the client portal after the order is activated. Automated payment integration is planned for a future release; we will update these Terms accordingly.
 
 ## 5. Revisions
 Revisions are handled inside the project chat before the Certificate of Delivery is signed (Stage 8). When changes are requested, we upload a new deliverable URL — previous versions remain visible in the deliverables history. See our **Revision Policy** for scope and limits.

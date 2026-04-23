@@ -44,11 +44,13 @@ MVP is production-ready. Full audit passed (37/39 backend, all critical frontend
 
 ### Content audit residuals (24 Apr 2026, this session)
 - Replaced legacy `Quote activated` → `Order Activated` in Terms §3 and Refund §2 (aligned with constants.py stage 2 `display_name`)
+- **Terms §4** + **`GET /api/payment-settings` note** (rendered on Homepage payments block): `after the quote is activated` / `after quote confirmation` → `after the order is activated` — so the word `quote` no longer appears anywhere in the public model
 - Digital Delivery Policy §9 rewritten from plain email contact to **Portal-First** with email-as-emergency-fallback wording (removes "ocean2joy@gmail.com for any delivery question" as a direct-contact channel)
 - HowItWorks Step 5 + ServiceDetails Step 4 now explicitly mention signing the **Certificate of Delivery** before the Acceptance Act (previously only mentioned the Acceptance Act)
+- HowItWorks Step 5 first bullet softened: `no external sharing services` → `own storage or a third-party storage platform documented inside the project` — aligned with Digital Delivery Policy §2
 - Dropped `updated_at` field from all 5 policies in backend response; removed `Content version last refreshed` line from MD snapshot; Policies.jsx no longer falls back to `updated_at`
-- All 6 TestPoliciesContent tests pass; `/policies/terms`, `/how-it-works`, `/services/custom-video`, `/policies/digital_delivery` verified via UI smoke test
-- Deliverables: `/app/RELEASE_NOTES_2026-04-24_CONTENT_AUDIT_RESIDUALS.md`, `/app/OCEAN2JOY_SITE_CONTENT.md` (revision 2)
+- All 6 TestPoliciesContent tests pass; `/policies/terms`, `/how-it-works`, `/services/custom-video`, `/policies/digital_delivery`, Homepage payments-block verified via curl + UI smoke
+- Deliverables: `/app/RELEASE_NOTES_2026-04-24_CONTENT_AUDIT_RESIDUALS.md` (rev 2, covers all 7 micro-items), `/app/OCEAN2JOY_SITE_CONTENT.md` (revision 2, hearer + footer date synchronised)
 
 ### Audit cleanup (21 Apr 2026, this session)
 - Removed QuickRequest.jsx (orphan component, not in router)

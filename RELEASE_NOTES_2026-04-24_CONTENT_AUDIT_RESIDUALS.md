@@ -1,18 +1,18 @@
 # Ocean2Joy — Release Notes
 
 **Release tag**: `v2.0.24-content-audit-residuals`
-**Date**: 2026-04-24
+**Date**: 2026-04-24 (revision 2 — micro-consistency pass)
 **Scope**: Content / legal copy alignment only. **No schema, no API, no data migration changes.**
 
 ---
 
 ## 1. Context
 
-Following the 23 April 2026 full-site content snapshot (`OCEAN2JOY_SITE_CONTENT.md`), the business owner flagged four residual inconsistencies between the public-facing copy and the actual 12-stage operational chain. This release closes them out.
+Following the 23 April 2026 full-site content snapshot (`OCEAN2JOY_SITE_CONTENT.md`), the business owner flagged four residual inconsistencies between the public-facing copy and the actual 12-stage operational chain, then — after re-reading the updated snapshot — three more micro-consistency items. All seven items are addressed in this release.
 
 All changes are pure text edits in:
 
-- `backend/routes/public.py` (the `POLICIES` dictionary served by `GET /api/policies/{type}`)
+- `backend/routes/public.py` (the `POLICIES` dictionary and the `/api/payment-settings` note)
 - `frontend/src/pages/HowItWorks.jsx`
 - `frontend/src/pages/ServiceDetails.jsx`
 - `frontend/src/pages/Policies.jsx` (dropped `updated_at` fallback in the "Substantive version" header)
@@ -38,9 +38,26 @@ The internal operational-chain constant has always been `display_name: "Order Ac
   - after: `| 2 — Order Activated | **0 — no charge** |`
 - `OCEAN2JOY_SITE_CONTENT.md` — snapshots of both strings above regenerated.
 
-### 2.2 Digital Delivery Policy §9 — portal-first, email-as-fallback
+### 2.2 Terms of Service §4 — `after the quote is activated` → `after the order is activated`
 
-Section 9 used to be a plain "Contact" line pointing at `ocean2joy@gmail.com`. This contradicted the portal-first directive already enforced everywhere else. Rewritten so the section explicitly routes delivery questions into the project chat, with email called out as an emergency fallback only.
+Terminology dotyazhka so the word **quote** does not stick out anywhere in the public-facing model after we standardised on **Order Activated** in §3.
+
+- `backend/routes/public.py` → Terms §4:
+  - before: `Full payment details for the channel you choose are provided inside the client portal after the quote is activated.`
+  - after: `Full payment details for the channel you choose are provided inside the client portal after the order is activated.`
+
+### 2.3 `GET /api/payment-settings` — Homepage payments block `note` rephrased
+
+This payload is consumed by `Homepage.jsx` and rendered under the payments block (`paymentSettings.note`). Same terminology fix.
+
+- `backend/routes/public.py` → `get_payment_settings()`:
+  - before: `"note": "Full payment details will be provided in your invoice after quote confirmation."`
+  - after: `"note": "Full payment details will be provided in your invoice after the order is activated."`
+- Internal docstring in the same handler (non-user-facing, but updated for consistency).
+
+### 2.4 Digital Delivery Policy §9 — portal-first, email-as-fallback
+
+Section 9 used to be a plain "Contact" line pointing at `ocean2joy@gmail.com`. Rewritten so the section explicitly routes delivery questions into the project chat, with email called out as an emergency fallback only.
 
 **New §9 in `backend/routes/public.py` → `digital_delivery`**:
 
@@ -51,20 +68,28 @@ All delivery-related questions, file-access issues, and revision requests are ha
 Email (ocean2joy@gmail.com) is used only as an emergency fallback when portal communication is temporarily unavailable — for example, if you cannot sign in, the portal is under maintenance, or a technical issue prevents you from posting a delivery message. We do not deliver files by email and we do not answer substantive delivery questions by email.
 ```
 
-### 2.3 Certificate of Delivery explicit in step descriptions
+### 2.5 Certificate of Delivery explicit in step descriptions
 
 `HowItWorks.jsx` Step 5 and `ServiceDetails.jsx` Step 4 previously mentioned only the *Acceptance Act*, skipping the *Certificate of Delivery* signature that comes before it in stages 8 → 9 of the chain.
 
-- **`frontend/src/pages/HowItWorks.jsx` — Step 5 paragraph (line 254-256)**:
+- **`frontend/src/pages/HowItWorks.jsx` — Step 5 paragraph**:
   > Once the work is complete, our team issues a **Delivery Certificate** in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, then signs the **Certificate of Delivery** inside the portal to confirm the files were received, and finally signs the **Acceptance Act** to confirm the work meets the brief.
 
-  The third bullet in Step 5 was also updated:
+  Third bullet in Step 5:
   > The client first signs the **Certificate of Delivery**, then the **Acceptance Act** — the final confirmation before the payment stage.
 
-- **`frontend/src/pages/ServiceDetails.jsx` — Step 4 paragraph (line 198)**:
+- **`frontend/src/pages/ServiceDetails.jsx` — Step 4 paragraph**:
   > Our team issues a Delivery Certificate, provides file access inside the portal, processes included revisions if requested, and the client signs the **Certificate of Delivery** (to confirm the files were received) and then the **Acceptance Act** (to confirm the work meets the brief) inside the portal.
 
-### 2.4 `Content version last refreshed` removed everywhere
+### 2.6 HowItWorks Step 5 — storage-access bullet aligned with Digital Delivery §2
+
+The first bullet of Step 5 previously said `All deliverables are accessible through the secure portal — no external sharing services.`, which conflicts with Digital Delivery Policy §2 (where the access path is explicitly allowed to use "our own storage or a third-party storage platform, depending on file size and security requirements"). Bullet softened to match the policy wording:
+
+- `frontend/src/pages/HowItWorks.jsx` — Step 5, first bullet:
+  - before: `All deliverables are accessible through the secure portal — no external sharing services.`
+  - after: `All deliverables are accessible through the secure portal workflow. Depending on file size and security requirements, the access path may use our own storage or a third-party storage platform documented inside the project.`
+
+### 2.7 `Content version last refreshed` removed everywhere
 
 Only the substantive version date is kept in the policy page header.
 
@@ -86,7 +111,7 @@ Only the substantive version date is kept in the policy page header.
       : ''}
   ```
 
-- `OCEAN2JOY_SITE_CONTENT.md` — the `Content version last refreshed` bullet has been removed from the five policy sections (9.1 – 9.5).
+- `OCEAN2JOY_SITE_CONTENT.md` — the `Content version last refreshed` bullet has been removed from the five policy sections (9.1 – 9.5), and the footer line now reads `Generated directly from the source code on 24 April 2026 (revision 2).`
 
 ---
 
@@ -99,13 +124,16 @@ Run from any shell with `$API` set to the deployment base URL:
 ```bash
 API=https://<host>
 
-# Terms: Order Activated present, Quote activated absent, updated_at dropped
+# Terms: Order Activated present, Quote activated absent, updated_at dropped,
+#        §4 uses "after the order is activated"
 curl -s $API/api/policies/terms | python3 -c "
 import sys, json
 d = json.load(sys.stdin)
 c = d['content']
 assert 'Order Activated' in c, 'Order Activated missing'
 assert 'Quote activated' not in c, 'legacy Quote activated still present'
+assert 'after the order is activated' in c, '§4 still uses legacy quote wording'
+assert 'after the quote is activated' not in c
 assert 'updated_at' not in d, 'updated_at should be removed from response'
 assert d.get('substantive_version_date') == '2025-10-21T00:00:00Z'
 print('terms OK')
@@ -130,6 +158,15 @@ assert 'Quote activated' not in c
 print('refund OK')
 "
 
+# Payment settings note uses order-activated wording
+curl -s $API/api/payment-settings | python3 -c "
+import sys, json
+d = json.load(sys.stdin)
+assert 'after the order is activated' in d['note']
+assert 'quote' not in d['note'].lower()
+print('payment-settings OK')
+"
+
 # Revision & Privacy: updated_at removed
 for k in revision privacy; do
   curl -s $API/api/policies/$k | python3 -c "
@@ -143,11 +180,12 @@ done
 
 ### 3.2 Manual UI checks
 
-1. `/policies/terms` — header shows only **Substantive version in force from: 21/10/2025**, no second date line. §3 item 2 reads `Order Activated`.
+1. `/policies/terms` — header shows only **Substantive version in force from: 21/10/2025**, no second date line. §3 item 2 reads `Order Activated`. §4 reads `after the order is activated`.
 2. `/policies/digital_delivery` — same header rule. §9 now titled **Delivery Questions & Escalation — Portal-First**.
 3. `/policies/refund` — table row 2 reads `2 — Order Activated | 0 — no charge`.
-4. `/how-it-works` — Step 5 paragraph and third bullet mention the **Certificate of Delivery** *before* the **Acceptance Act**.
+4. `/how-it-works` — Step 5 paragraph and third bullet mention the **Certificate of Delivery** *before* the **Acceptance Act**. First bullet mentions `own storage or a third-party storage platform`.
 5. `/services/custom-video` (or any service) — Step 4 of the "How It Works" card lists **Certificate of Delivery** → **Acceptance Act**.
+6. Homepage → payments block — the small note under "Accepted currency / Beneficiary" reads `… after the order is activated.`
 
 ### 3.3 Existing test suite
 
@@ -158,7 +196,9 @@ done
 
 ## 4. Impact
 
-- **API contract**: `GET /api/policies/{type}` no longer returns the `updated_at` key. Any external consumer relying on that field must switch to `substantive_version_date`. No internal code references the removed key.
+- **API contract**:
+  - `GET /api/policies/{type}` no longer returns the `updated_at` key. Any external consumer relying on that field must switch to `substantive_version_date`. No internal code references the removed key.
+  - `GET /api/payment-settings` `note` string content changed. No schema change.
 - **SEO / JSON-LD**: no change — policy pages do not emit structured data referencing the removed line.
 - **Database / migrations**: none.
 - **Environment / secrets**: none.

@@ -257,7 +257,7 @@ function HowItWorks() {
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>All deliverables are accessible through the secure portal — no external sharing services.</span>
+                        <span>All deliverables are accessible through the secure portal workflow. Depending on file size and security requirements, the access path may use our own storage or a third-party storage platform documented inside the project.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
