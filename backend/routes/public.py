@@ -245,7 +245,6 @@ POLICIES = {
     "terms": {
         "title": "Terms of Service",
         "substantive_version_date": "2025-10-21T00:00:00Z",
-        "updated_at": "2026-04-21T00:00:00Z",
         "content": """## 1. General
 These Terms govern the use of services provided by **Individual Entrepreneur Vera Iambaeva** (Tax ID: **302335809**, Tbilisi, Georgia), operating under the brand name **Ocean2Joy Digital Video Production** ("we", "us", "the Company").
 
@@ -258,7 +257,7 @@ We design and produce custom digital video content (live-action, post-production
 Every order follows a fixed 12-stage workflow inside the client portal. Each stage is time-stamped in UTC and produces auditable PDF + TXT records. **All stage timestamps are UTC-based and reflect the moment the corresponding event was recorded inside the portal** — they are portal-side events, not external system events.
 
 1. **Project submitted** by the client inside the portal.
-2. **Quote activated** by our team inside the portal.
+2. **Order Activated** by our team inside the portal.
 3. **Invoice issued** by our team inside the portal.
 4. **Invoice signed** by the client inside the portal — this is the moment the client contractually commits to the order. Signing the invoice does not require payment.
 5. **Production started** by our team.
@@ -313,7 +312,6 @@ We may update these Terms. The "Substantive version in force from" date above re
     "digital_delivery": {
         "title": "Digital Delivery Policy",
         "substantive_version_date": "2025-10-21T00:00:00Z",
-        "updated_at": "2026-04-21T00:00:00Z",
         "content": """## 1. Electronic Delivery Only
 All Ocean2Joy services are delivered **exclusively in electronic form**. No physical media (DVD, USB, hard drive) is ever shipped.
 
@@ -350,14 +348,15 @@ We do **not** send deliverables by email. All deliverables are accessed inside t
 ## 8. Failure to Deliver
 If a deliverable URL is unavailable or corrupted, please report it in the project chat immediately. Time spent replacing a broken URL is not counted against the delivery deadline.
 
-## 9. Contact
-**ocean2joy@gmail.com** — for any delivery-related question or escalation.
+## 9. Delivery Questions & Escalation — Portal-First
+All delivery-related questions, file-access issues, and revision requests are handled **inside the project chat in the client portal**. The portal keeps a full audit trail of every delivery message, file-access event, and revision turn, which is what the Certificate of Delivery is ultimately built from.
+
+Email (**ocean2joy@gmail.com**) is used **only as an emergency fallback** when portal communication is temporarily unavailable — for example, if you cannot sign in, the portal is under maintenance, or a technical issue prevents you from posting a delivery message. We do not deliver files by email and we do not answer substantive delivery questions by email.
 """,
     },
     "refund": {
         "title": "Refund & Cancellation Policy",
         "substantive_version_date": "2025-10-21T00:00:00Z",
-        "updated_at": "2026-04-21T00:00:00Z",
         "content": """## 1. Overview
 Because our payment model is **pay-after-acceptance** (actual funds are transferred only after the client has inspected and accepted the work at Stage 9, and are reported at Stage 10 — Payment Reported, then confirmed at Stage 11 — Payment Confirmed), most cancellations do not involve a refund at all — they are simply the termination of an unpaid order.
 
@@ -369,7 +368,7 @@ You may cancel your order at any time **before** the payment is reported at Stag
 | Stage at cancellation | Amount due |
 |---|---|
 | 1 — Project submitted | **0 — no charge** |
-| 2 — Quote activated | **0 — no charge** |
+| 2 — Order Activated | **0 — no charge** |
 | 3 — Invoice issued (not yet signed) | **0 — no charge** |
 | 4 — Invoice signed, production not yet started | **0 — no charge** (you may withdraw your commitment at this point without penalty) |
 | 5 — Production started | **Partial fee** reflecting work actually completed, at our reasonable estimation. We will issue a pro-rata invoice with justification. |
@@ -409,7 +408,6 @@ If you disagree with a refund decision, escalate inside the project chat first. 
     "revision": {
         "title": "Revision Policy",
         "substantive_version_date": "2025-10-21T00:00:00Z",
-        "updated_at": "2026-04-21T00:00:00Z",
         "content": """## 1. Where Revisions Happen
 Revisions are an integral part of our 12-stage operational chain. They take place **inside the project chat and the deliverables list in the portal**, between:
 
@@ -455,7 +453,6 @@ For anything revision-related, use the project chat inside the portal. Email (**
     "privacy": {
         "title": "Privacy Policy",
         "substantive_version_date": "2025-10-21T00:00:00Z",
-        "updated_at": "2026-02-18T00:00:00Z",
         "content": """This Privacy Policy explains how **Individual Entrepreneur Vera Iambaeva** (Tax ID: 302335809, Tbilisi, Georgia), operating the Ocean2Joy Digital Video Production brand ("we", "us", "the Controller"), collects and processes personal data in accordance with the **EU General Data Protection Regulation (GDPR)** and the **Law of Georgia on Personal Data Protection**.
 
 ## 1. Data Controller

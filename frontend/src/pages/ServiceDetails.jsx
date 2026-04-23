@@ -195,7 +195,7 @@ function ServiceDetails() {
                   <div className="bg-sky-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">4</div>
                   <div>
                     <h3 className="font-semibold text-gray-900 mb-1">Delivery, File Access, Client Acceptance</h3>
-                    <p className="text-gray-600">Our team issues a Delivery Certificate, provides file access inside the portal, processes included revisions if requested, and the client signs the Acceptance Act inside the portal.</p>
+                    <p className="text-gray-600">Our team issues a Delivery Certificate, provides file access inside the portal, processes included revisions if requested, and the client signs the <strong>Certificate of Delivery</strong> (to confirm the files were received) and then the <strong>Acceptance Act</strong> (to confirm the work meets the brief) inside the portal.</p>
                   </div>
                 </li>
                 <li className="flex items-start">

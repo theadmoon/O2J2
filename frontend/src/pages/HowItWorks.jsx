@@ -252,7 +252,7 @@ function HowItWorks() {
                       <h3 className="text-2xl font-bold text-gray-900">Electronic Delivery, File Access & Client Acceptance</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Once the work is complete, our team issues a <strong>Delivery Certificate</strong> in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, and then signs the <strong>Acceptance Act</strong> inside the portal.
+                      Once the work is complete, our team issues a <strong>Delivery Certificate</strong> in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, then signs the <strong>Certificate of Delivery</strong> inside the portal to confirm the files were received, and finally signs the <strong>Acceptance Act</strong> to confirm the work meets the brief.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
@@ -265,7 +265,7 @@ function HowItWorks() {
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Signing the Acceptance Act is the final confirmation before the payment stage.</span>
+                        <span>The client first signs the <strong>Certificate of Delivery</strong>, then the <strong>Acceptance Act</strong> — the final confirmation before the payment stage.</span>
                       </li>
                     </ul>
                   </div>

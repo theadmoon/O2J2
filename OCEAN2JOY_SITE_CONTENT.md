@@ -1,10 +1,16 @@
 # Ocean2Joy — Full Site Content Documentation
 
-> **Purpose**: Single-file snapshot of every user-facing text on ocean2joy.com — titles, meta descriptions, hero copy, page bodies, service details, FAQ, policies, legal info, and footer. Generated from the live code on 23 April 2026.
+> **Purpose**: Single-file snapshot of every user-facing text on ocean2joy.com — titles, meta descriptions, hero copy, page bodies, service details, FAQ, policies, legal info, and footer. Generated from the live code on 24 April 2026 (revision 2).
 >
 > **Use**: share with reviewers, translators, legal counsel, or anyone who needs the complete content without crawling each page manually.
 >
 > **Format**: Markdown. Direct quotes are word-for-word from the production code. Dynamic elements (logos, hero images) are described in brackets.
+>
+> **Revision 2 — 2026-04-24 — residuals from content audit**:
+> - Stage-2 label aligned with internal constants — `Quote activated` → **Order Activated** in §3 of Terms and §2 of Refund table.
+> - Digital Delivery §9 rewritten from plain email contact to portal-first with email-as-emergency-fallback wording.
+> - Explicit mention of signing the **Certificate of Delivery** *before* the Acceptance Act added in HowItWorks Step 5 and ServiceDetails Step 4.
+> - `Content version last refreshed` line removed from all 5 policy snapshots (and the corresponding `updated_at` field dropped from the backend payload); only `Substantive version in force from: 2025-10-21` remains.
 
 ---
 
@@ -253,7 +259,7 @@ Each service detail page shows:
 1. **Submit in the Portal** — Create a project inside the portal — a short idea is enough; scripts, references, and files can be uploaded later.
 2. **Order Activation and Invoice** — Our team activates the order and issues the invoice inside the portal once scope, deliverables, and timeline are agreed.
 3. **Invoice Signature and Production** — The client signs the invoice inside the portal to lock the scope. Production then starts — no payment is required at this stage.
-4. **Delivery, File Access, Client Acceptance** — Our team issues a Delivery Certificate, provides file access inside the portal, processes included revisions if requested, and the client signs the Acceptance Act inside the portal.
+4. **Delivery, File Access, Client Acceptance** — Our team issues a Delivery Certificate, provides file access inside the portal, processes included revisions if requested, and the client signs the **Certificate of Delivery** (to confirm the files were received) and then the **Acceptance Act** (to confirm the work meets the brief) inside the portal.
 5. **Payment Reporting, Confirmation, Completion** — After acceptance, the client transfers payment, reports it inside the portal with the transaction reference; our team confirms it and the Certificate of Completion is issued.
 
 **Footer disclaimer on each service detail page:**
@@ -296,10 +302,10 @@ Our team works on the project internally. All communication about the project �
 - Email is used only as an emergency fallback if portal communication is temporarily unavailable.
 
 #### Step 5 — Electronic Delivery, File Access & Client Acceptance
-Once the work is complete, our team issues a **Delivery Certificate** in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, and then signs the **Acceptance Act** inside the portal.
+Once the work is complete, our team issues a **Delivery Certificate** in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, then signs the **Certificate of Delivery** inside the portal to confirm the files were received, and finally signs the **Acceptance Act** to confirm the work meets the brief.
 - All deliverables are accessible through the secure portal — no external sharing services.
 - Included revision rounds are requested and processed inside the portal.
-- Signing the Acceptance Act is the final confirmation before the payment stage.
+- The client first signs the **Certificate of Delivery**, then the **Acceptance Act** — the final confirmation before the payment stage.
 
 #### Step 6 — Payment Reporting, Confirmation, and Completion
 After the client signs the Acceptance Act, payment becomes due. The client transfers payment through the selected channel (PayPal, SWIFT bank transfer, or USDT on the TRON network) and then **reports the payment inside the portal** by providing the transaction reference. Our team verifies the payment and records the confirmation — a **Certificate of Completion** is then issued to close the project.
@@ -421,7 +427,6 @@ A: Yes — Ocean2Joy operates 100% digitally, and our service is available world
 
 - **URL**: `/policies/terms`
 - **Substantive version in force from**: 2025-10-21
-- **Content version last refreshed**: 2026-04-21
 
 ---
 
@@ -437,7 +442,7 @@ We design and produce custom digital video content (live-action, post-production
 Every order follows a fixed 12-stage workflow inside the client portal. Each stage is time-stamped in UTC and produces auditable PDF + TXT records. **All stage timestamps are UTC-based and reflect the moment the corresponding event was recorded inside the portal** — they are portal-side events, not external system events.
 
 1. **Project submitted** by the client inside the portal.
-2. **Quote activated** by our team inside the portal.
+2. **Order Activated** by our team inside the portal.
 3. **Invoice issued** by our team inside the portal.
 4. **Invoice signed** by the client inside the portal — this is the moment the client contractually commits to the order. Signing the invoice does not require payment.
 5. **Production started** by our team.
@@ -495,7 +500,6 @@ We may update these Terms. The "Substantive version in force from" date above re
 
 - **URL**: `/policies/digital_delivery`
 - **Substantive version in force from**: 2025-10-21
-- **Content version last refreshed**: 2026-04-21
 
 ---
 
@@ -535,8 +539,10 @@ We do **not** send deliverables by email. All deliverables are accessed inside t
 ## 8. Failure to Deliver
 If a deliverable URL is unavailable or corrupted, please report it in the project chat immediately. Time spent replacing a broken URL is not counted against the delivery deadline.
 
-## 9. Contact
-**ocean2joy@gmail.com** — for any delivery-related question or escalation.
+## 9. Delivery Questions & Escalation — Portal-First
+All delivery-related questions, file-access issues, and revision requests are handled **inside the project chat in the client portal**. The portal keeps a full audit trail of every delivery message, file-access event, and revision turn, which is what the Certificate of Delivery is ultimately built from.
+
+Email (**ocean2joy@gmail.com**) is used **only as an emergency fallback** when portal communication is temporarily unavailable — for example, if you cannot sign in, the portal is under maintenance, or a technical issue prevents you from posting a delivery message. We do not deliver files by email and we do not answer substantive delivery questions by email.
 
 
 ---
@@ -545,7 +551,6 @@ If a deliverable URL is unavailable or corrupted, please report it in the projec
 
 - **URL**: `/policies/refund`
 - **Substantive version in force from**: 2025-10-21
-- **Content version last refreshed**: 2026-04-21
 
 ---
 
@@ -560,7 +565,7 @@ You may cancel your order at any time **before** the payment is reported at Stag
 | Stage at cancellation | Amount due |
 |---|---|
 | 1 — Project submitted | **0 — no charge** |
-| 2 — Quote activated | **0 — no charge** |
+| 2 — Order Activated | **0 — no charge** |
 | 3 — Invoice issued (not yet signed) | **0 — no charge** |
 | 4 — Invoice signed, production not yet started | **0 — no charge** (you may withdraw your commitment at this point without penalty) |
 | 5 — Production started | **Partial fee** reflecting work actually completed, at our reasonable estimation. We will issue a pro-rata invoice with justification. |
@@ -603,7 +608,6 @@ If you disagree with a refund decision, escalate inside the project chat first. 
 
 - **URL**: `/policies/revision`
 - **Substantive version in force from**: 2025-10-21
-- **Content version last refreshed**: 2026-04-21
 
 ---
 
@@ -655,7 +659,6 @@ For anything revision-related, use the project chat inside the portal. Email (**
 
 - **URL**: `/policies/privacy`
 - **Substantive version in force from**: 2025-10-21
-- **Content version last refreshed**: 2026-02-18
 
 ---
 
