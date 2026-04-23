@@ -39,8 +39,8 @@ STAGE_LABEL = {
     "files_accessed": "Files Accessed",
     "delivery_confirmed": "Delivery Confirmed",
     "work_accepted": "Work Accepted",
-    "payment_sent": "Payment Sent",
-    "payment_received": "Payment Received",
+    "payment_sent": "Payment Reported",
+    "payment_received": "Payment Confirmed",
     "completed": "Completed",
 }
 

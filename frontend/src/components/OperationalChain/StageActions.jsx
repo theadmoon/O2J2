@@ -128,7 +128,7 @@ export default function StageActions({ project, user, onUpdated }) {
     key: 'mark-payment-sent',
     title: 'I Have Sent the Payment',
     description: 'Please provide the transaction ID so we can record it in the closing document. You can either type the ID as text OR upload a screenshot of the payment confirmation — at least one is required. If you upload only a screenshot, the manager will transcribe the ID at the next stage.',
-    submit: 'Confirm Payment Sent',
+    submit: 'Report Payment',
     icon: HandCoins,
     fields: [
       { name: 'paypal_transaction_id', label: 'Transaction ID (text)', type: 'text', placeholder: 'e.g. 9XA1234567B890123' },
@@ -170,11 +170,11 @@ export default function StageActions({ project, user, onUpdated }) {
 
   const openConfirmPayment = () => setDialog({
     key: `confirm-payment-${project.id}`,
-    title: 'Confirm Payment Received',
+    title: 'Confirm Payment',
     description: needsTxIdFromAdmin
-      ? `${clientPaypalInfo}The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Sent" stage) and enter it here along with the exact payment time in UTC from your PayPal dashboard. Both fields go into the final closing document.`
+      ? `${clientPaypalInfo}The client did not type the transaction ID — please read it from the uploaded screenshot (see "Payment Reported" stage) and enter it here along with the exact payment time in UTC from your PayPal dashboard. Both fields go into the final closing document.`
       : `${clientPaypalInfo}Confirm that the payment has arrived. Enter the exact payment time in UTC from your PayPal dashboard. You may also correct the transaction ID if needed.`,
-    submit: 'Confirm Received',
+    submit: 'Confirm Payment',
     icon: DollarSign,
     preFormContent: confirmPaymentPreForm,
     fields: [
@@ -207,7 +207,7 @@ export default function StageActions({ project, user, onUpdated }) {
       actions.push(<ActionButton key="del" icon={PackageCheck} label={hasDeliv ? 'Mark as Delivered' : 'Add deliverable link below to enable'} color="emerald" disabled={!hasDeliv} onClick={() => call('post', `/projects/${project.id}/admin/mark-delivered`)} testId="admin-mark-delivered" loading={loading} />);
     }
     if (status === 'payment_sent') {
-      actions.push(<ActionButton key="pay" icon={DollarSign} label="Confirm Payment Received" color="teal" onClick={openConfirmPayment} testId="admin-confirm-payment" />);
+      actions.push(<ActionButton key="pay" icon={DollarSign} label="Confirm Payment" color="teal" onClick={openConfirmPayment} testId="admin-confirm-payment" />);
     }
     if (status === 'payment_received') {
       actions.push(<ActionButton key="comp" icon={CheckCircle2} label="Complete Project" color="sky" onClick={() => call('post', `/projects/${project.id}/admin/complete`)} testId="admin-complete" loading={loading} />);
@@ -226,7 +226,7 @@ export default function StageActions({ project, user, onUpdated }) {
       actions.push(<ActionButton key="accW" icon={ThumbsUp} label="Accept Work & Upload Signed Act" color="sky" onClick={openAcceptWork} testId="client-accept-work" />);
     }
     if (status === 'work_accepted') {
-      actions.push(<ActionButton key="paid" icon={HandCoins} label="I Have Sent the Payment" color="amber" onClick={openMarkPaymentSent} testId="client-mark-payment-sent" />);
+      actions.push(<ActionButton key="paid" icon={HandCoins} label="Report Payment" color="amber" onClick={openMarkPaymentSent} testId="client-mark-payment-sent" />);
     }
   }
 

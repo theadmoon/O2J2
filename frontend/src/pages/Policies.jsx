@@ -108,7 +108,9 @@ function Policies() {
             {policy.title}
           </h1>
           <div className="text-sm text-gray-500 mb-8 text-left">
-            Last updated: {new Date(policy.updated_at).toLocaleDateString()}
+            Substantive version in force from: {policy.substantive_version_date
+              ? new Date(policy.substantive_version_date).toLocaleDateString('en-GB')
+              : new Date(policy.updated_at).toLocaleDateString('en-GB')}
           </div>
           <div className="prose prose-lg max-w-none text-left">
             <ReactMarkdown

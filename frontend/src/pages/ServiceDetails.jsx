@@ -173,39 +173,43 @@ function ServiceDetails() {
                 <li className="flex items-start">
                   <div className="bg-sky-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">1</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Submit Your Request</h3>
-                    <p className="text-gray-600">Fill out our detailed brief form with your project requirements</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">Submit in the Portal</h3>
+                    <p className="text-gray-600">Create a project inside the portal — a short idea is enough; scripts, references, and files can be uploaded later.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-sky-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">2</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Receive Custom Quote</h3>
-                    <p className="text-gray-600">Get a detailed quote within 24 hours based on your specific needs</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">Order Activation and Invoice</h3>
+                    <p className="text-gray-600">Our team activates the order and issues the invoice inside the portal once scope, deliverables, and timeline are agreed.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-sky-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">3</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Production Begins</h3>
-                    <p className="text-gray-600">Our team starts working on your custom video project</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">Invoice Signature and Production</h3>
+                    <p className="text-gray-600">The client signs the invoice inside the portal to lock the scope. Production then starts — no payment is required at this stage.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-sky-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">4</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Review & Revisions</h3>
-                    <p className="text-gray-600">Review deliverables and request revisions as needed</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">Delivery, File Access, Client Acceptance</h3>
+                    <p className="text-gray-600">Our team issues a Delivery Certificate, provides file access inside the portal, processes included revisions if requested, and the client signs the Acceptance Act inside the portal.</p>
                   </div>
                 </li>
                 <li className="flex items-start">
                   <div className="bg-teal-500 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold mr-4 flex-shrink-0">5</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900 mb-1">Final Delivery</h3>
-                    <p className="text-gray-600">Download your final files from secure client portal</p>
+                    <h3 className="font-semibold text-gray-900 mb-1">Payment Reporting, Confirmation, Completion</h3>
+                    <p className="text-gray-600">After acceptance, the client transfers payment, reports it inside the portal with the transaction reference; our team confirms it and the Certificate of Completion is issued.</p>
                   </div>
                 </li>
               </ol>
+
+              <p className="mt-6 text-xs text-gray-500 leading-relaxed">
+                All project documents, communication, and deliverables are handled inside the secure client portal. Email is used only as an emergency fallback when portal communication is temporarily unavailable. Payment is processed under the Pay-After-Acceptance model.
+              </p>
             </div>
           </div>
 

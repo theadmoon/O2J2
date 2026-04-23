@@ -110,8 +110,11 @@ function Footer() {
             <FaPhone className="inline mx-2" />
             +995 555 375 032
           </p>
+          <p className="text-xs text-gray-500 mb-1">
+            Primary project communication takes place inside the secure client portal. Email is used only as an emergency fallback channel.
+          </p>
           <p className="text-xs text-gray-500">
-            Digital video production services delivered electronically. No physical products shipped.
+            Digital video production services are delivered electronically. No physical products are shipped.
           </p>
         </div>
       </div>

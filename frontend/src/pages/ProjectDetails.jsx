@@ -29,7 +29,7 @@ export default function ProjectDetails() {
   const [showAdvanceFallback, setShowAdvanceFallback] = useState(false);
   useSeo({ title: project ? `${project.project_number} · ${project.project_title || 'Project'} | Ocean2Joy` : 'Project | Ocean2Joy', path: `/projects/${id}`, noIndex: true });
   const [titleEdit, setTitleEdit] = useState({ editing: false, value: '', saving: false, error: '' });
-  const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(true);
 
   // Auto-expand "Brief & attachments" for the client while materials can still
   // be added (i.e., before the invoice is sent), so the upload control is visible.
@@ -213,9 +213,32 @@ export default function ProjectDetails() {
               <Mail className="w-4 h-4 text-sky-500" />
               <span className="truncate">{project.user_email}</span>
             </div>
-            <div className="flex items-center gap-2 text-gray-600">
+            <div className="flex items-center gap-2 text-gray-600" data-testid="project-service-type">
               <Briefcase className="w-4 h-4 text-sky-500" />
-              <span className="capitalize">{project.service_type?.replace(/_/g, ' ')}</span>
+              {(() => {
+                const ST_LABEL = { custom_video: 'Custom Video', video_editing: 'Video Editing', ai_video: 'AI Video' };
+                const canEdit = !project.invoice_sent_at && (user?.role === 'admin' || user?.id === project.user_id);
+                if (!canEdit) {
+                  return <span className="capitalize">{project.service_type?.replace(/_/g, ' ')}</span>;
+                }
+                return (
+                  <select
+                    className="text-sm border border-gray-200 rounded px-2 py-1 bg-white hover:border-sky-300 cursor-pointer"
+                    value={project.service_type || ''}
+                    onChange={async (e) => {
+                      try {
+                        const { data } = await api.patch(`/projects/${id}`, { service_type: e.target.value });
+                        setProject(data);
+                      } catch {}
+                    }}
+                    data-testid="project-service-type-select"
+                  >
+                    <option value="custom_video">{ST_LABEL.custom_video}</option>
+                    <option value="video_editing">{ST_LABEL.video_editing}</option>
+                    <option value="ai_video">{ST_LABEL.ai_video}</option>
+                  </select>
+                );
+              })()}
             </div>
           </div>
 

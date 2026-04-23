@@ -162,7 +162,7 @@ async def get_project(project_id: str, request: Request):
 
 @router.patch("/{project_id}")
 async def patch_project(project_id: str, request: Request):
-    """Update editable fields of a project. Currently: project_title only.
+    """Update editable fields of a project. Currently: project_title, payment_method, service_type.
     Allowed for owner and admin, and only until the invoice has been sent."""
     payload = await request.json()
     db = get_db()
@@ -188,6 +188,14 @@ async def patch_project(project_id: str, request: Request):
         if pm not in PAYMENT_METHODS:
             raise HTTPException(status_code=400, detail="Invalid payment method")
         updates["payment_method"] = pm
+
+    if "service_type" in payload:
+        # Valid service_type values are the ids of the SERVICES list in public.py.
+        allowed = {"custom_video", "video_editing", "ai_video"}
+        st = (payload.get("service_type") or "").strip()
+        if st not in allowed:
+            raise HTTPException(status_code=400, detail="Invalid service type")
+        updates["service_type"] = st
 
     if not updates:
         raise HTTPException(status_code=400, detail="No updatable fields provided")

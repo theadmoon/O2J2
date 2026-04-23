@@ -8,7 +8,7 @@ import { Pencil, Upload, FileCheck2, Download, Hash, Image as ImageIcon, History
 import { formatDateTime } from '../../utils/formatters';
 
 /**
- * Shown inline inside the Payment Sent (stage 10) timeline row.
+ * Shown inline inside the Payment Reported (stage 10) timeline row.
  * Both fields (transaction ID text + screenshot file) are always visible.
  * If a field is empty, an inline "Add" action is available — the owner client
  * or admin can upload/update it at any point up until admin confirms the payment.

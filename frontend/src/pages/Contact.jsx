@@ -28,7 +28,7 @@ function Contact() {
             Get in <span className="text-ocean">Touch</span>
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Have questions about our video production services? We're here to help bring your vision to life.
+            Have questions about our video production services? Start a project in the portal to open the formal project workspace. Use email only if portal communication is temporarily unavailable.
           </p>
         </div>
 
@@ -45,7 +45,7 @@ function Contact() {
                     <a href="mailto:ocean2joy@gmail.com" className="text-sky-600 hover:text-sky-700">
                       ocean2joy@gmail.com
                     </a>
-                    <p className="text-sm text-gray-600 mt-1">Response within 24 hours</p>
+                    <p className="text-sm text-gray-600 mt-1">Emergency fallback contact only</p>
                   </div>
                 </div>
 
@@ -68,6 +68,18 @@ function Contact() {
                     <h3 className="font-semibold text-gray-900 mb-1">Digital Service</h3>
                     <p className="text-gray-700">We operate 100% digitally</p>
                     <p className="text-sm text-gray-600 mt-1">Electronic delivery worldwide</p>
+                  </div>
+                </div>
+
+                <div className="flex items-start">
+                  <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-teal-500 rounded-lg flex items-center justify-center flex-shrink-0 mr-4">
+                    <FaEnvelope className="text-white text-xl" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900 mb-1">Portal Communication</h3>
+                    <p className="text-gray-700">
+                      All project communication, document exchange, delivery tracking, and status updates are handled inside the secure client portal.
+                    </p>
                   </div>
                 </div>
               </div>
@@ -115,7 +127,7 @@ function Contact() {
                   <span className="font-semibold">Closed</span>
                 </div>
                 <p className="text-sm text-gray-600 mt-4">
-                  * Support available via email 24/7. We respond within 24 hours.
+                  * Email is used only in exceptional situations when portal communication is temporarily unavailable or when a technical issue prevents normal portal interaction.
                 </p>
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <p className="text-xs text-gray-500">

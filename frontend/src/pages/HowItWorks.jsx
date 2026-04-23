@@ -89,23 +89,23 @@ function HowItWorks() {
                       <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
                         1
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">Submit Your Request</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">Submit Your Project in the Portal</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Fill out our <strong>quick request form</strong> with basic information (takes under 2 minutes) or create a full account for detailed project submission.
+                      Create a project inside the secure client portal. A short idea or a single-sentence description is enough to open the workspace — <strong>no complete brief or finished script is required</strong>.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Describe your video project and objectives</span>
+                        <span>Describe the idea briefly — the project chat opens immediately.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Upload reference materials, scripts, or existing footage</span>
+                        <span>Scripts, references, mood boards, or footage can be uploaded later, any time before the invoice is signed.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Specify your timeline and budget preferences</span>
+                        <span>No payment is required to open the workspace and start the conversation.</span>
                       </li>
                     </ul>
                   </div>
@@ -129,23 +129,23 @@ function HowItWorks() {
                       <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
                         2
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">Receive Custom Quote</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">Order Activation and Invoice Issuance</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Our team reviews your request and prepares a <strong>detailed quote</strong> within 24 hours, including scope, timeline, and pricing.
+                      Once enough information is collected inside the portal chat, the order is <strong>activated</strong>. Our team then issues the project invoice, which is stored inside the portal and accessible at any time.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Personalized quote based on your specific needs</span>
+                        <span>The invoice contains scope, timeline, deliverables, and payment details.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Clear breakdown of deliverables and timeline</span>
+                        <span>All project documents are issued and stored inside the portal — no email delivery.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Receive via email or client portal</span>
+                        <span>Issuing the invoice does not yet require payment — it locks the scope for signature.</span>
                       </li>
                     </ul>
                   </div>
@@ -169,23 +169,23 @@ function HowItWorks() {
                       <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
                         3
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">Confirm & Start Production</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">Invoice Signature and Production Start</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Accept the quote, confirm project terms, and make payment. Your project immediately enters our <strong>production queue</strong>.
+                      The client <strong>signs the invoice inside the portal</strong>, confirming acceptance of the scope. Once the invoice is signed, the project enters production.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>One-click quote acceptance in portal</span>
+                        <span>Signature is performed directly in the portal — no external signing tools.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Secure payment via PayPal or bank transfer</span>
+                        <span>Signing the invoice locks the scope but does not require payment at this stage.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Automatic project documents generated</span>
+                        <span>Payment is processed only after the client accepts the completed work — the Pay-After-Acceptance model.</span>
                       </li>
                     </ul>
                   </div>
@@ -209,23 +209,23 @@ function HowItWorks() {
                       <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
                         4
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">In-House Production</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">In-House Production and Portal Communication</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Our professional team works on your custom video. Track progress, communicate with your project manager, and stay updated via your portal.
+                      Our team works on the project internally. All communication about the project — status updates, drafts, feedback — happens <strong>inside the portal chat</strong>. Email is not used as a standard channel.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Real-time project status tracking</span>
+                        <span>Project status is tracked directly in the portal.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Direct messaging with production team</span>
+                        <span>Direct messaging with the production team via portal chat.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Preview drafts and provide feedback</span>
+                        <span>Email is used only as an emergency fallback if portal communication is temporarily unavailable.</span>
                       </li>
                     </ul>
                   </div>
@@ -249,23 +249,23 @@ function HowItWorks() {
                       <div className="w-12 h-12 bg-gradient-to-br from-sky-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
                         5
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">Review & Revisions</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">Electronic Delivery, File Access & Client Acceptance</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Review deliverables in your portal. Request revisions if needed (included in your package). Approve when satisfied.
+                      Once the work is complete, our team issues a <strong>Delivery Certificate</strong> in the portal and provides secure access to the final files. The client reviews the work, requests any included revisions, and then signs the <strong>Acceptance Act</strong> inside the portal.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>2-3 revision rounds included (varies by service)</span>
+                        <span>All deliverables are accessible through the secure portal — no external sharing services.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Easy feedback system in client portal</span>
+                        <span>Included revision rounds are requested and processed inside the portal.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Fast turnaround on revisions (3-5 days)</span>
+                        <span>Signing the Acceptance Act is the final confirmation before the payment stage.</span>
                       </li>
                     </ul>
                   </div>
@@ -291,27 +291,23 @@ function HowItWorks() {
                       <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl mr-4">
                         6
                       </div>
-                      <h3 className="text-2xl font-bold text-gray-900">Electronic Delivery & Completion</h3>
+                      <h3 className="text-2xl font-bold text-gray-900">Payment Reporting, Confirmation, and Completion</h3>
                     </div>
                     <p className="text-gray-600 mb-4">
-                      Download your <strong>final files electronically</strong> from the secure client portal. Receive completion documents. Project complete!
+                      After the client signs the Acceptance Act, payment becomes due. The client transfers payment through the selected channel (PayPal, SWIFT bank transfer, or USDT on the TRON network) and then <strong>reports the payment inside the portal</strong> by providing the transaction reference. Our team verifies the payment and records the confirmation — a <strong>Certificate of Completion</strong> is then issued to close the project.
                     </p>
                     <ul className="space-y-2 text-sm text-gray-600">
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span><strong>Electronic delivery only</strong> - no physical shipping</span>
+                        <span><strong>Payment Reported</strong>: the client submits the transaction reference inside the portal.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>High-quality files in agreed formats (MP4, MOV, etc.)</span>
+                        <span><strong>Payment Confirmed</strong>: our team verifies the transfer and records the confirmation in the portal.</span>
                       </li>
                       <li className="flex items-start">
                         <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Automatic completion certificate & invoice</span>
-                      </li>
-                      <li className="flex items-start">
-                        <FaCheckCircle className="text-teal-500 mt-1 mr-2 flex-shrink-0" />
-                        <span>Files accessible for 90 days (extended on request)</span>
+                        <span>The Certificate of Completion and all project documents remain available inside the portal.</span>
                       </li>
                     </ul>
                   </div>

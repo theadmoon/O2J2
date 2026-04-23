@@ -152,7 +152,7 @@ function Services() {
             All Services Delivered Electronically
           </h3>
           <p className="text-gray-700 max-w-2xl mx-auto mb-6">
-            Every project is custom-made by our in-house team and delivered digitally through our secure client portal. No physical shipment involved - just fast, professional electronic delivery.
+            Every project is handled through the secure client portal. Project communication, document exchange, delivery records, and final file access are managed inside the portal. No physical shipment is involved.
           </p>
           <Link to="/policies/digital_delivery" className="text-sky-600 hover:text-sky-700 font-semibold">
             Learn more about our digital delivery process →

@@ -14,8 +14,8 @@ const STAGES = [
   { n: 7, key: "files_accessed", name: "Files Accessed", field: "files_accessed_at", docs: ["certificate_delivery"] },
   { n: 8, key: "delivery_confirmed", name: "Delivery Confirmed", field: "delivery_confirmed_at", docs: [] },
   { n: 9, key: "work_accepted", name: "Work Accepted", field: "work_accepted_at", docs: ["acceptance_act", "payment_instructions"] },
-  { n: 10, key: "payment_sent", name: "Payment Sent", field: "payment_marked_by_client_at", docs: [] },
-  { n: 11, key: "payment_received", name: "Payment Received", field: "payment_confirmed_by_manager_at", docs: ["payment_confirmation"] },
+  { n: 10, key: "payment_sent", name: "Payment Reported", field: "payment_marked_by_client_at", docs: [] },
+  { n: 11, key: "payment_received", name: "Payment Confirmed", field: "payment_confirmed_by_manager_at", docs: ["payment_confirmation"] },
   { n: 12, key: "completed", name: "Completed", field: "completed_at", docs: ["certificate_completion"] },
 ];
 
@@ -190,7 +190,7 @@ export default function ChainTimeline({ project, user, onViewDoc, onUpdated }) {
                 </div>
               )}
 
-              {/* Client payment artifacts on stage 10 (Payment Sent) — always show both fields with Add/Edit */}
+              {/* Client payment artifacts on stage 10 (Payment Reported) — always show both fields with Add/Edit */}
               {stage.key === 'payment_sent' && project.payment_marked_by_client_at && (
                 <PaymentProofPanel project={project} user={user} onUpdated={onUpdated} />
               )}

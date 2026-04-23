@@ -375,24 +375,28 @@ export default function Homepage() {
             <div className="md:col-span-3">
               <p className="text-xs uppercase tracking-[0.2em] font-bold text-sky-600 mb-3">Have questions first?</p>
               <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-5 leading-tight">
-                Not sure yet? <span className="text-ocean">Talk to us</span> inside the project workspace.
+                Not sure yet? <span className="text-ocean">Chat with us</span> — get a quick answer.
               </h2>
               <p className="text-gray-600 text-base leading-relaxed mb-5">
-                You don't need a finished script or a polished brief to reach out.
-                <strong className="text-gray-900"> Start a project with a one-line idea</strong> — your personal project manager will appear in the project chat and answer every question before you commit to anything.
+                You do not need a finished script or a completed brief to begin.
+                <strong className="text-gray-900"> Start a project with a short request</strong>, and the project chat inside the portal will open immediately. You can ask preliminary questions there before moving deeper into the workflow.
               </p>
               <ul className="space-y-2.5 mb-7">
                 <li className="flex items-start gap-2.5 text-sm text-gray-700">
                   <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
-                  <span>Brief is optional — a single sentence is enough to get the conversation going.</span>
+                  <span>A short idea is enough to open the workspace.</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-sm text-gray-700">
                   <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
-                  <span>Attach script, references, mood-boards or screenshots any time before the quote is confirmed.</span>
+                  <span>Scripts, references, mood boards, and supporting files can be uploaded later inside the portal.</span>
                 </li>
                 <li className="flex items-start gap-2.5 text-sm text-gray-700">
                   <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
-                  <span>Zero commitment until you accept the quote. Projects can be discarded at any time.</span>
+                  <span>The portal chat is the primary channel for preliminary questions, project communication, and document workflow.</span>
+                </li>
+                <li className="flex items-start gap-2.5 text-sm text-gray-700">
+                  <FaCheckCircle className="text-emerald-500 mt-0.5 shrink-0" />
+                  <span>No payment is required to open the workspace and ask preliminary questions.</span>
                 </li>
               </ul>
               <div className="flex flex-wrap gap-3">
@@ -428,7 +432,7 @@ export default function Homepage() {
                   <div className="bg-sky-50 rounded-xl rounded-tl-sm px-3 py-2 text-xs text-gray-800 max-w-[85%]">
                     Great, here's a link to a similar vibe.
                   </div>
-                  <p className="text-[10px] text-gray-400 text-center italic pt-1">Example preview — real chat opens after you create a project.</p>
+                  <p className="text-[10px] text-gray-400 text-center italic pt-1">Example preview — the actual project chat opens after you create a project in the portal.</p>
                 </div>
               </div>
             </div>
@@ -444,8 +448,8 @@ export default function Homepage() {
               Payments
             </h2>
             <p className="text-lg text-gray-600 max-w-3xl mx-auto">
-              Payment systems are currently not integrated. Payments are processed in semi-manual mode.
-              Once you confirm your order, you'll receive payment details directly in your project portal.
+              Payment systems are currently not integrated into the portal. Payments are processed in semi-manual mode.
+              Payment details are made available inside the project portal as part of the formal project workflow.
             </p>
           </div>
           {paymentSettings ? (
@@ -497,9 +501,11 @@ export default function Homepage() {
               <div>
                 <h4 className="font-bold text-gray-900 mb-2">How Payment Works</h4>
                 <p className="text-gray-700 text-sm leading-relaxed">
-                  After you accept our quote, you'll receive complete payment details in your client dashboard.
-                  Simply copy the payment information, make the transfer using your preferred method, and mark it as paid in your portal.
-                  We'll verify the payment and immediately start production. You'll receive transaction documents (Invoice, Receipt, Certificate) at each stage.
+                  After your order is activated, payment details are made available inside your project portal.
+                  The project then proceeds through invoice signature, production, electronic delivery, and client acceptance inside the portal workflow.
+                  Once the client accepts the completed work, the client transfers payment using the selected payment channel and reports the payment inside the portal by providing the transaction reference.
+                  Our team then verifies the payment and records the confirmation in the system.
+                  Project documents are issued throughout the project lifecycle and remain available inside the portal.
                 </p>
               </div>
             </div>

@@ -569,7 +569,7 @@ def _build_payment_instructions_html(
         <li>You will receive a transaction confirmation (e.g. PayPal Transaction ID like <code>12ABC34567DEF890</code>)</li>
         <li>Screenshot your payment confirmation (optional but recommended)</li>
         <li>Return to this portal → open the project page</li>
-        <li>Click <strong>Mark Payment Sent</strong> and paste the transaction ID</li>
+        <li>Click <strong>Report Payment</strong> and paste the transaction ID</li>
         <li>Manager will confirm payment within 24 hours</li>
         <li>Project will be marked as <em>Completed</em></li>
     </ul>
@@ -729,7 +729,7 @@ def _build_payment_instructions_txt(p: dict, doc_number: str) -> str:
         "",
         "• Return to this portal:",
         "  → Open the project page",
-        "  → Click \"Mark Payment Sent\"",
+        "  → Click \"Report Payment\"",
         "  → Paste the transaction ID",
         "",
         "• Manager will confirm payment within 24 hours",
