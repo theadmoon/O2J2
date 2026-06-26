@@ -7,7 +7,7 @@ import { Label } from '../components/ui/label';
 import { Waves, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import useSeo from '../hooks/useSeo';
 
-const OCEAN_BG = "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1920&q=80";
+const OCEAN_BG = "/images/ocean-auth-bg.jpg";
 
 export default function Login() {
   useSeo({ title: 'Sign in | Ocean2Joy', description: 'Sign in to your Ocean2Joy client account.', path: '/login', noIndex: true });

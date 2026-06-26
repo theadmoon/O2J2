@@ -145,7 +145,7 @@ export default function Homepage() {
       <section
         className="relative min-h-[600px] flex items-center justify-center overflow-hidden"
         style={{
-          backgroundImage: `linear-gradient(rgba(14, 165, 233, 0.85), rgba(20, 184, 166, 0.85)), url('https://images.unsplash.com/photo-1599622465858-a0b63fdc9b80?auto=format&fit=crop&w=1920&q=80')`,
+          backgroundImage: `linear-gradient(rgba(14, 165, 233, 0.85), rgba(20, 184, 166, 0.85)), url('/images/hero-bg.jpg')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center'
         }}
@@ -314,14 +314,15 @@ export default function Homepage() {
                 {/* Demo Video 1 - Custom Production */}
                 <div className="card-ocean">
                   <div className="aspect-video bg-gray-900 relative overflow-hidden">
-                    <iframe
-                      src="https://player.vimeo.com/video/115098447?background=1&autoplay=0&loop=0&byline=0&title=0"
+                    <video
                       className="w-full h-full"
-                      frameBorder="0"
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
+                      controls
+                      poster="/posters/demo1.png"
                       title="Custom Video Production Demo"
-                    ></iframe>
+                    >
+                      <source src="/videos/Ocean2Joy_Demo1_720p.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">Professional Custom Video</h3>
@@ -336,14 +337,15 @@ export default function Homepage() {
                 {/* Demo Video 2 - AI Generated / Tech Demo */}
                 <div className="card-ocean">
                   <div className="aspect-video bg-gray-900 relative overflow-hidden">
-                    <iframe
-                      src="https://player.vimeo.com/video/342333493?background=1&autoplay=0&loop=0&byline=0&title=0"
+                    <video
                       className="w-full h-full"
-                      frameBorder="0"
-                      allow="autoplay; fullscreen; picture-in-picture"
-                      allowFullScreen
+                      controls
+                      poster="/posters/demo2.png"
                       title="AI-Generated Video Demo"
-                    ></iframe>
+                    >
+                      <source src="/videos/Ocean2Joy_Demo2_720p.mp4" type="video/mp4" />
+                      Your browser does not support the video tag.
+                    </video>
                   </div>
                   <div className="p-6">
                     <h3 className="text-xl font-bold text-gray-900 mb-2">AI-Powered Creation</h3>
