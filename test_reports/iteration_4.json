@@ -1,0 +1,70 @@
+{
+  "summary": "Ocean2Joy v2.0 — Demo Videos feature (JSON-LD SEO + Admin CRUD). All backend (16/16) and frontend flows PASS. Public list, streaming endpoints, admin auth guard, create/update/replace/reorder/delete, size & extension validation all verified. Homepage emits valid VideoObject JSON-LD with 2 entries and absolute https URLs. Admin UI: create modal, edit-in-place, delete with public list sync all work.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_demo_videos.py",
+    "/app/test_reports/pytest/pytest_demo_videos_iter4.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Clean implementation: size cap enforced while streaming upload chunk-by-chunk (no whole-file buffering).",
+    "_safe_ext validates by extension only; a .mp4 file containing non-video bytes would still pass. Acceptable for admin-only surface but worth noting.",
+    "Reorder endpoint iterates update_one in a loop — fine for small demo reel size but would benefit from bulk_write if the list ever grows.",
+    "Static seeded records (demo-1, demo-2) correctly return 404 on /api/public/demo-media/{id}/{video|poster} as designed.",
+    "JSON-LD uploadDate is set to current day on render; for SEO it's typically better to use the DB created_at timestamp to keep it stable. Minor enhancement only.",
+    "Admin endpoints correctly 401 when unauthenticated and 403 for role=client."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_demo_videos.py"
+  ],
+  "success_rate": {
+    "backend": "100% (16/16 tests passed)",
+    "frontend": "100% (JSON-LD, create, edit, delete flows all verified end-to-end)"
+  },
+  "test_credentials": {
+    "admin": "admin@ocean2joy.com / admin123",
+    "client": "client@test.com / client123"
+  },
+  "seed_data_creation": "Tests auto-create TEST_ prefixed demo videos and clean up via DELETE in fixtures.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Demo Videos feature fully verified. Backend endpoints in /app/backend/routes/admin.py (admin CRUD) and /app/backend/routes/public.py (list + streaming). Admin UI at /app/frontend/src/components/admin/DemoVideosManager.jsx integrated in AdminPanel. JSON-LD emitted in Homepage.jsx useEffect on demoVideos load. Static seeded records (demo-1, demo-2) serve files via frontend nginx from /videos/* and /posters/*; uploaded records stream via /api/public/demo-media/{id}/{video|poster}. Test file /app/backend/tests/test_demo_videos.py serves as regression suite.",
+  "features_tested": {
+    "backend": {
+      "public_list_sorted_by_order": "PASS",
+      "static_records_streaming_404": "PASS",
+      "admin_auth_401_unauth": "PASS",
+      "admin_auth_403_client": "PASS",
+      "admin_auth_200_admin": "PASS",
+      "create_multipart_returns_uploaded_doc": "PASS",
+      "created_record_in_public_list_with_api_urls": "PASS",
+      "stream_video_200_mp4": "PASS",
+      "stream_poster_200_image": "PASS",
+      "update_metadata_persists": "PASS",
+      "replace_video_new_bytes_served": "PASS",
+      "replace_poster_new_bytes_served": "PASS",
+      "reorder_updates_order_field": "PASS",
+      "poster_size_cap_413": "PASS",
+      "bad_video_extension_400": "PASS",
+      "delete_nonexistent_404": "PASS",
+      "delete_removes_from_list_and_disk": "PASS"
+    },
+    "frontend": {
+      "homepage_jsonld_videoobject_present": "PASS - 2 entries, required fields, absolute https URLs",
+      "homepage_video_tags_rendered": "PASS - 2 <video> elements with MP4 sources",
+      "admin_demo_videos_manager_section": "PASS - data-testid present, below Payment Reference",
+      "admin_rows_for_seeded": "PASS - demo-1 and demo-2 rows with all action buttons",
+      "admin_create_new_video": "PASS - modal opens, accepts title+video+poster, closes on submit, new row appears",
+      "admin_edit_title_inplace": "PASS - edit title, save, UI reflects immediately",
+      "admin_delete_row": "PASS - confirm dialog accepted, row removed, public list no longer contains id"
+    }
+  }
+}

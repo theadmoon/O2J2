@@ -1,0 +1,120 @@
+import React, { useEffect, useState, useRef } from 'react';
+import api from '../../utils/api';
+import { useAuth } from '../../context/AuthContext';
+import { Send } from 'lucide-react';
+import { Input } from '../ui/input';
+
+export default function ChatContainer({ projectId }) {
+  const { user } = useAuth();
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState('');
+  const [sending, setSending] = useState(false);
+  const listRef = useRef(null);
+  const prevCount = useRef(0);
+
+  useEffect(() => {
+    loadMessages();
+    const interval = setInterval(loadMessages, 5000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [projectId]);
+
+  useEffect(() => {
+    // Scroll only the chat list, never the window. Only when new messages arrived.
+    if (messages.length > prevCount.current && listRef.current) {
+      listRef.current.scrollTop = listRef.current.scrollHeight;
+    }
+    prevCount.current = messages.length;
+  }, [messages]);
+
+  const loadMessages = async () => {
+    try {
+      const { data } = await api.get(`/projects/${projectId}/messages`);
+      setMessages(data);
+    } catch {}
+  };
+
+  const sendMessage = async (e) => {
+    e.preventDefault();
+    if (!text.trim() || sending) return;
+    setSending(true);
+    try {
+      await api.post(`/projects/${projectId}/messages`, { message: text.trim() });
+      setText('');
+      await loadMessages();
+    } catch {}
+    setSending(false);
+  };
+
+  return (
+    <div className="flex flex-col h-[400px] border border-gray-200 bg-white rounded-lg shadow-sm" data-testid="chat-container">
+      <div className="px-4 py-3 border-b border-gray-200 flex items-center justify-between gap-2">
+        <h3 className="text-sm text-gray-900 font-semibold">Project Chat</h3>
+        <p className="text-[10px] text-gray-400 font-mono" data-testid="chat-timezone-hint">
+          Times shown in your local timezone
+          {(() => {
+            try {
+              const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+              return tz ? ` (${tz})` : '';
+            } catch {
+              return '';
+            }
+          })()}
+        </p>
+      </div>
+      <div ref={listRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-3">
+        {messages.length === 0 && (
+          <p className="text-xs text-gray-400 text-center py-8">No messages yet. Start the conversation.</p>
+        )}
+        {messages.map((m) => {
+          const isOwn = m.sender_id === user?.id;
+          const d = m.created_at ? new Date(m.created_at) : null;
+          const time = d ? d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '';
+          const fullTooltip = d
+            ? `${d.toLocaleString()} (local) · ${d.toISOString().replace('T', ' ').slice(0, 19)} UTC`
+            : '';
+          const displayName = m.sender_role === 'admin' ? 'Ocean2Joy Team' : m.sender_name;
+          return (
+            <div key={m.id} className={`flex ${isOwn ? 'justify-end' : 'justify-start'}`} data-testid={`message-${m.id}`}>
+              <div className={`max-w-[75%] px-3 py-2 text-sm rounded-lg ${
+                isOwn
+                  ? 'bg-sky-50 border border-sky-200 text-gray-800'
+                  : 'bg-gray-50 border border-gray-200 text-gray-700'
+              }`}>
+                <div className="flex items-baseline justify-between gap-2 mb-1">
+                  <p className="text-xs text-gray-400 font-mono">{displayName}</p>
+                  {time && (
+                    <p
+                      className="text-[10px] text-gray-400 font-mono tabular-nums shrink-0 cursor-help"
+                      title={fullTooltip}
+                    >
+                      {time}
+                    </p>
+                  )}
+                </div>
+                <p className="whitespace-pre-wrap break-words">{m.message}</p>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      <form onSubmit={sendMessage} className="px-4 py-3 border-t border-gray-200 flex gap-2">
+        <Input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type a message..."
+          className="flex-1 text-sm"
+          data-testid="chat-message-input"
+        />
+        <button
+          type="submit"
+          disabled={sending || !text.trim()}
+          className="bg-sky-500 hover:bg-sky-600 text-white p-2.5 rounded-lg transition-colors disabled:opacity-50"
+          data-testid="chat-send-button"
+        >
+          <Send className="w-4 h-4" />
+        </button>
+      </form>
+    </div>
+  );
+}

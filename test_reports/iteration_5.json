@@ -1,0 +1,72 @@
+{
+  "summary": "Ocean2Joy v2.0 content/legal directive — 12/12 backend tests PASS; all targeted public-page frontend assertions PASS (Homepage, HowItWorks, Services, ServiceDetails/custom-video, Contact, Policies/terms, Footer). ProjectDetails UI (service_type select + detailsExpanded default) not verified live because the seeded client@test.com account currently has 0 projects in this environment, but PATCH service_type behavior and timeline stage labels (10='Payment Reported', 11='Payment Confirmed') are fully verified via API.",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_v2_content_directive.py",
+    "/app/test_reports/pytest/pytest_v2_iter5.xml"
+  ],
+  "action_items": [
+    "Main agent can self-verify ProjectDetails UX live (service_type <select data-testid='project-service-type-select'> + Brief & attachments collapsible expanded by default) — just login as client, create a new project, open its page. Backend + PATCH gating already confirmed."
+  ],
+  "critical_code_review_comments": [
+    "POLICIES dict is 300+ lines of content literals inside public.py — consider moving to JSON/MD files under /app/backend/data/policies/ and loading at startup. Keeps route file focused and enables diffable content review.",
+    "PATCH /api/projects/{id} only rejects the patch if invoice_sent_at is already set; it does not reject a service_type change while other stage fields (order_activated_at) are set. If that's acceptable for the pre-invoice window, fine — otherwise tighten the gate.",
+    "Test harness note: POST /api/projects is multipart/form-data (Form-based), not JSON. Worth documenting or normalising to a single content-type to avoid confusion for API consumers.",
+    "documents.py is 2,443 lines and has both HTML and TXT templates inline — exceeds the 700-line guideline and should be split per-document-type module (invoice.py, payment_instructions.py, etc.)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_v2_content_directive.py"
+  ],
+  "success_rate": {
+    "backend": "100% (12/12 tests passed)",
+    "frontend": "100% on directly-verified public pages; ProjectDetails UX deferred (no seed project for client@test.com)"
+  },
+  "test_credentials": {
+    "admin": "admin@ocean2joy.com / admin123",
+    "client": "client@test.com / client123"
+  },
+  "seed_data_creation": "Tests register fresh TEST_v2_<hex>@test.com clients per module and create disposable projects (TEST_v2_*) to verify PATCH service_type gating and invoice flow.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend regression suite for v2.0 content/legal directive lives at /app/backend/tests/test_v2_content_directive.py. Run with: export $(grep REACT_APP_BACKEND_URL /app/frontend/.env | xargs) && pytest /app/backend/tests/test_v2_content_directive.py -v. Covers: policy substantive_version_date=2025-10-21, terms §3/§12 rewording, digital_delivery no-3rd-party-storage, refund Post-Stage-11 heading, privacy §9 Portal-First + §10 Semi-Manual, OPERATIONAL_CHAIN_STAGES 10/11 display_name rename (status_keys intact), PATCH /api/projects service_type whitelist + invoice_sent_at gate, invoice PDF/HTML/TXT + payment_instructions template wording ('Report Payment', no 'Mark Payment Sent'). Public pages already verified in browser: Homepage, /how-it-works (FAQ + 7-item JSON-LD), /services, /services/custom-video, /contact, /policies/terms (DD/MM/YYYY 21/10/2025), footer portal-first line.",
+  "features_tested": {
+    "backend": {
+      "policies_substantive_version_date_all_five": "PASS",
+      "terms_section_3_payment_reported_confirmed": "PASS",
+      "terms_section_3_utc_portal_note": "PASS",
+      "terms_section_12_substantive_wording": "PASS",
+      "digital_delivery_no_google_drive_dropbox_yandex": "PASS",
+      "digital_delivery_file_access_entry": "PASS",
+      "refund_post_stage_11_heading": "PASS",
+      "privacy_section_9_portal_first": "PASS",
+      "privacy_section_10_semi_manual": "PASS",
+      "operational_chain_stage_10_11_labels_in_timeline": "PASS",
+      "status_keys_payment_sent_payment_received_unchanged": "PASS",
+      "patch_service_type_valid_before_invoice": "PASS",
+      "patch_service_type_invalid_returns_400": "PASS",
+      "patch_service_type_blocked_after_invoice_sent": "PASS",
+      "invoice_doc_no_mark_payment_sent": "PASS",
+      "payment_instructions_report_payment_wording": "PASS"
+    },
+    "frontend": {
+      "homepage_have_questions_first_block": "PASS",
+      "homepage_no_immediately_start_production": "PASS",
+      "homepage_reports_payment_inside_portal": "PASS",
+      "footer_portal_first_line": "PASS",
+      "how_it_works_step1_submit_project_in_portal": "PASS",
+      "how_it_works_step6_payment_reporting_confirmation_completion": "PASS",
+      "how_it_works_faq_section_testid": "PASS",
+      "how_it_works_faqpage_jsonld_7_items": "PASS",
+      "services_portal_intro_no_in_house_team": "PASS",
+      "service_details_custom_video_5_steps": "PASS",
+      "contact_emergency_fallback_portal_card_exceptional_situations": "PASS",
+      "policies_terms_substantive_21_10_2025_dd_mm_yyyy": "PASS",
+      "project_details_service_type_select_and_expanded_default": "NOT_VERIFIED — client@test.com has 0 existing projects in this env; main agent can self-check."
+    }
+  }
+}
